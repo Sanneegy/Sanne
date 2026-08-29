@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ask Sanné | Your AI Beauty Advisor</title>
+  <meta name="description" content="Chat with Sanné's AI beauty advisor. Get personalized skincare and fragrance recommendations based on your skin type, mood, and preferences.">
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .ask-page {
+      min-height: 100vh;
+      padding-top: 100px;
+      background: var(--color-off-white);
+    }
+
+    .ask-container {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 0 5% 4rem;
+    }
+
+    .ask-header {
+      text-align: center;
+      padding: 2rem 0 3rem;
+    }
+
+    .ask-header h1 {
+      font-family: var(--font-serif);
+      font-size: clamp(2rem, 4vw, 3rem);
+      color: var(--color-dark-brown);
+      margin-bottom: 1rem;
+    }
+
+    .ask-header p {
+      font-size: 1rem;
+      color: var(--color-text-light);
+      max-width: 480px;
+      margin: 0 auto;
+      line-height: 1.7;
+    }
+
+    /* Chat Window */
+    .chat-window {
+      background: var(--color-white);
+      border: 1px solid var(--color-border);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: var(--shadow-soft);
+    }
+
+    .chat-messages {
+      min-height: 400px;
+      max-height: 520px;
+      overflow-y: auto;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .chat-messages::-webkit-scrollbar {
+      width: 4px;
+    }
+    .chat-messages::-webkit-scrollbar-thumb {
+      background: var(--color-border);
+      border-radius: 4px;
+    }
+
+    .message {
+      display: flex;
+      gap: 1rem;
+      align-items: flex-start;
+      animation: fadeUp 0.3s ease;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .message.user-msg {
+      flex-direction: row-reverse;
+    }
+
+    .msg-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--color-cream);
+      border: 1px solid var(--color-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      flex-shrink: 0;
+    }
+
+    .message.user-msg .msg-avatar {
+      background: var(--color-dark-brown);
+      color: var(--color-white);
+      font-size: 0.7rem;
+    }
+
+    .msg-bubble {
+      max-width: 80%;
+      padding: 1rem 1.25rem;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      line-height: 1.7;
+    }
+
+    .message.ai-msg .msg-bubble {
+      background: var(--color-cream);
+      color: var(--color-text);
+      border-bottom-left-radius: 4px;
+    }
+
+    .message.user-msg .msg-bubble {
+      background: var(--color-dark-brown);
+      color: var(--color-white);
+      border-bottom-right-radius: 4px;
+    }
+
+    /* Product cards in AI response */
+    .ai-product-cards {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    .ai-product-card {
+      background: var(--color-white);
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      padding: 1rem;
+      display: flex;
+      gap: 0.75rem;
+      align-items: center;
+      flex: 1;
+      min-width: 200px;
+      transition: box-shadow 0.2s ease;
+    }
+
+    .ai-product-card:hover {
+      box-shadow: var(--shadow-hover);
+    }
+
+    .ai-product-card img {
+      width: 60px;
+      height: 60px;
+      object-fit: cover;
+      border-radius: 6px;
+    }
+
+    .ai-product-card-info h4 {
+      font-family: var(--font-serif);
+      font-size: 0.95rem;
+      color: var(--color-dark-brown);
+      margin: 0 0 0.2rem;
+    }
+
+    .ai-product-card-info p {
+      font-size: 0.8rem;
+      color: var(--color-text-light);
+      margin: 0 0 0.4rem;
+    }
+
+    .ai-product-card-actions {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+    }
+
+    .ai-product-card-actions button {
+      font-size: 0.75rem;
+      padding: 0.3rem 0.7rem;
+      border-radius: 4px;
+      border: 1px solid var(--color-dark-brown);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      background: none;
+      color: var(--color-dark-brown);
+      font-family: var(--font-sans);
+    }
+
+    .ai-product-card-actions button.add-btn {
+      background: var(--color-dark-brown);
+      color: var(--color-white);
+    }
+
+    .ai-product-card-actions button:hover {
+      opacity: 0.8;
+    }
+
+    /* Typing indicator */
+    .typing-indicator {
+      display: flex;
+      gap: 5px;
+      align-items: center;
+      padding: 0.75rem 1rem;
+    }
+
+    .typing-dot {
+      width: 8px;
+      height: 8px;
+      background: var(--color-soft-brown);
+      border-radius: 50%;
+      animation: typingBounce 1.2s infinite;
+    }
+
+    .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes typingBounce {
+      0%, 60%, 100% { transform: translateY(0); }
+      30% { transform: translateY(-6px); }
+    }
+
+    /* Input area */
+    .chat-input-area {
+      display: flex;
+      gap: 0.75rem;
+      padding: 1.25rem 1.5rem;
+      border-top: 1px solid var(--color-border);
+      background: var(--color-white);
+      align-items: flex-end;
+    }
+
+    .chat-input {
+      flex: 1;
+      padding: 0.8rem 1rem;
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      font-family: var(--font-sans);
+      font-size: 0.95rem;
+      resize: none;
+      background: var(--color-off-white);
+      color: var(--color-text);
+      min-height: 48px;
+      max-height: 120px;
+      transition: border-color 0.2s;
+    }
+
+    .chat-input:focus {
+      outline: none;
+      border-color: var(--color-soft-gold);
+    }
+
+    .chat-send-btn {
+      background: var(--color-dark-brown);
+      color: var(--color-white);
+      border: none;
+      border-radius: 8px;
+      width: 48px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background 0.2s;
+      flex-shrink: 0;
+    }
+
+    .chat-send-btn:hover {
+      background: var(--color-soft-brown);
+    }
+
+    .chat-send-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    /* Quick prompts */
+    .quick-prompts {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      padding: 1rem 1.5rem 0;
+    }
+
+    .quick-prompt-btn {
+      background: none;
+      border: 1px solid var(--color-border);
+      border-radius: 20px;
+      padding: 0.4rem 1rem;
+      font-size: 0.82rem;
+      color: var(--color-text-light);
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: var(--font-sans);
+    }
+
+    .quick-prompt-btn:hover {
+      border-color: var(--color-soft-gold);
+      color: var(--color-dark-brown);
+      background: var(--color-cream);
+    }
+
+    /* Status notice */
+    .ai-status-notice {
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--color-text-light);
+      padding: 1rem;
+      border-top: 1px solid var(--color-border);
+    }
+
+    @media (max-width: 768px) {
+      .ai-product-cards { flex-direction: column; }
+      .ai-product-card { min-width: unset; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="header">
+    <nav class="nav-left">
+      <a href="shop.html" class="nav-link">SHOP</a>
+      <a href="about.html" class="nav-link">ABOUT</a>
+      <a href="futures.html" class="nav-link">FUTURES</a>
+      <a href="ask-sanne.html" class="nav-link" style="font-weight: 500;">ASK SANNÉ</a>
+    </nav>
+    <a href="index.html" class="logo">Sanné</a>
+    <nav class="nav-right">
+      <a href="#" class="nav-link" id="nav-search">SEARCH</a>
+      <a href="#" class="nav-link" id="nav-wishlist">MY LOVES ♡</a>
+      <a href="#" class="nav-link" id="nav-cart">CART <span id="cart-count-badge">(0)</span></a>
+    </nav>
+    <div class="hamburger">
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+  </header>
+
+  <!-- Mobile Menu -->
+  <div class="mobile-menu">
+    <a href="shop.html">SHOP</a>
+    <a href="about.html">ABOUT</a>
+    <a href="futures.html">FUTURES</a>
+    <a href="ask-sanne.html">ASK SANNÉ</a>
+    <a href="#" id="mobile-search">SEARCH</a>
+    <a href="#" id="mobile-cart">CART</a>
+  </div>
+
+  <!-- Search Overlay -->
+  <div class="search-overlay" id="search-overlay">
+    <div class="search-content">
+      <button class="close-btn" id="close-search">&times;</button>
+      <h2 class="section-title text-center mb-sm">Search Sanné</h2>
+      <input type="text" id="search-input" class="form-control" placeholder="Search products, keywords, or skin type..." autocomplete="off">
+      <div id="search-results" class="search-results-container mt-md"></div>
+    </div>
+  </div>
+
+  <!-- Cart Overlay -->
+  <div class="cart-overlay" id="cart-overlay">
+    <div class="cart-content">
+      <button class="close-btn" id="close-cart">&times;</button>
+      <h2 class="section-title mb-md">Your Cart</h2>
+      <div id="cart-items-container" class="cart-items-container">
+        <p class="empty-cart-msg text-center mt-md">Your cart is empty.</p>
+      </div>
+      <div class="cart-footer mt-md" id="cart-footer" style="display: none;">
+        <!-- Donation field -->
+        <div style="background:var(--color-cream);border-radius:8px;padding:1rem 1.2rem;margin-bottom:1rem;border:1px solid var(--color-border);">
+          <p style="font-family:var(--font-serif);font-size:1rem;color:var(--color-dark-brown);margin:0 0 0.2rem;">A little kindness goes a long way.</p>
+          <p style="font-size:0.78rem;color:var(--color-text-light);margin:0 0 0.8rem;line-height:1.5;">Add something small to your order and become part of what we are building together.</p>
+          <div style="display:flex;align-items:center;gap:0.5rem;">
+            <label style="font-size:0.75rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--color-dark-brown);font-weight:600;white-space:nowrap;">Donation amount</label>
+          </div>
+          <div style="display:flex;align-items:center;gap:0.5rem;margin-top:0.5rem;">
+            <input type="number" id="sidebar-donation-amount" min="0" step="1" placeholder="0" oninput="updateCartUI()" style="width:80px;padding:0.4rem 0.6rem;border:1px solid var(--color-border);border-radius:4px;font-family:var(--font-sans);font-size:0.95rem;background:#fff;">
+            <span style="font-size:0.9rem;color:var(--color-text-light);">EGP</span>
+          </div>
+        </div>
+        <div id="cart-breakdown"></div>
+        <div class="cart-total-row">
+          <span>Total:</span>
+          <span id="cart-total-price">0 EGP</span>
+        </div>
+        <h3 class="mt-md mb-sm" style="font-size: 1.2rem;">Checkout</h3>
+        <p class="mb-sm" style="font-size: 0.9rem; color: var(--color-text-light);">Payment method: Cash or Instapay</p>
+        <form id="checkout-form">
+          <div class="form-group"><input type="text" id="checkout-name" class="form-control" placeholder="Full Name" required></div>
+          <div class="form-group"><input type="tel" id="checkout-phone" class="form-control" placeholder="Phone Number" required></div>
+          <div class="form-group"><input type="tel" id="checkout-whatsapp" class="form-control" placeholder="WhatsApp Number (if different)"></div>
+          <div class="form-group">
+            <select id="checkout-city" class="form-control" required>
+              <option value="" disabled selected>City in Egypt</option>
+              <option value="Cairo">Cairo</option><option value="Giza">Giza</option><option value="Alex">Alexandria</option>
+              <option value="Belbeis">Belbeis</option><option value="Zagazig">Zagazig</option>
+            </select>
+          </div>
+          <div class="form-group"><textarea id="checkout-address" class="form-control" rows="2" placeholder="Full Address" required></textarea></div>
+          <div class="form-group"><textarea id="checkout-notes" class="form-control" rows="2" placeholder="Notes (Optional)"></textarea></div>
+          <button type="submit" class="btn btn-primary" style="width: 100%;">Complete Order</button>
+          <p id="checkout-success-msg" style="display: none; color: green; font-size: 0.9rem; text-align: center; margin-top: 1rem;">Your order is ready. Please complete it through WhatsApp.</p>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Page -->
+  <div class="ask-page">
+    <div class="ask-container">
+
+      <div class="ask-header">
+        <h1>Ask Sanné</h1>
+        <p>Tell me a little about you.<br><br>Your skin, what you love, what you are looking for, or even what you cannot quite describe yet. I’ll help you find the Sanné product that feels right for you.</p>
+      </div>
+
+      <div class="chat-window">
+        <div class="chat-messages" id="chat-messages">
+          <!-- Initial greeting -->
+          <div class="message ai-msg">
+            <div class="msg-avatar">✦</div>
+            <div class="msg-bubble">
+              Hello! I'm your Sanné beauty advisor. Tell me a little about your skin or what you're looking for, and I'll suggest the right product for you.
+            </div>
+          </div>
+        </div>
+
+        <div class="quick-prompts" id="quick-prompts">
+          <button class="quick-prompt-btn" onclick="sendQuickPrompt(this)">I have dry skin</button>
+          <button class="quick-prompt-btn" onclick="sendQuickPrompt(this)">I have oily skin</button>
+          <button class="quick-prompt-btn" onclick="sendQuickPrompt(this)">What's under 100 EGP?</button>
+          <button class="quick-prompt-btn" onclick="sendQuickPrompt(this)">I want a body fragrance</button>
+          <button class="quick-prompt-btn" onclick="sendQuickPrompt(this)">What's your best seller?</button>
+        </div>
+
+        <div class="chat-input-area">
+          <textarea class="chat-input" id="chat-input" placeholder="Tell me about your skin or what you're looking for..." rows="1"></textarea>
+          <button class="chat-send-btn" id="chat-send-btn" onclick="sendMessage()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+            </svg>
+          </button>
+        </div>
+
+        <div class="ai-status-notice" id="ai-status-notice">
+          Recommendations are based on real Sanné products only.
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer mt-xl">
+    <div class="footer-top">
+      <div>
+        <h2 class="footer-brand">Sanné</h2>
+        <p>Soft care, made to stay.</p>
+      </div>
+      <div>
+        <h3 class="footer-title">Explore</h3>
+        <div class="footer-links">
+          <a href="shop.html">Shop All</a>
+          <a href="about.html">About Sanné</a>
+          <a href="futures.html">Sana's Light</a>
+          <a href="ask-sanne.html">Ask Sanné</a>
+        </div>
+      </div>
+      <div>
+        <h3 class="footer-title">Connect</h3>
+        <div class="footer-links">
+          <a href="mailto:Sanne.egy@gmail.com">Sanne.egy@gmail.com</a>
+          <a href="https://www.instagram.com/sanne.egy/" target="_blank">Instagram</a>
+          <a href="https://www.facebook.com/share/1Dsn9ZZotF/" target="_blank">Facebook</a>
+          <a href="https://www.tiktok.com/@sanne.eg?_r=1&_t=ZS-96NpIO4bs0N" target="_blank">TikTok</a>
+          <a href="https://wa.me/201032138278" target="_blank">WhatsApp: 01032138278</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+  <script src="donation-helpers.js"></script>
+  <script src="ai.js"></script>
+</body>
+</html>

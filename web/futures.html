@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sana's Light | Sanné Futures</title>
+  <meta name="description" content="From day one, Sanné dedicates 1% of every sale to cancer support organizations. Sana's light lives on in care.">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;600&family=Playfair+Display:ital,wght@0,400;0,600;1,400;1,600&display=swap" rel="stylesheet">
+  <style>
+    html { scroll-behavior: smooth; }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="header">
+    <nav class="nav-left">
+      <a href="shop.html" class="nav-link">SHOP</a>
+      <a href="about.html" class="nav-link">ABOUT</a>
+      <a href="futures.html" class="nav-link" style="font-weight: 500;">FUTURES</a>
+    </nav>
+    <a href="index.html" class="logo">Sanné</a>
+    <nav class="nav-right">
+      <a href="#" class="nav-link" id="nav-search">SEARCH</a>
+      <a href="#" class="nav-link" id="nav-cart">CART <span id="cart-count-badge">(0)</span></a>
+    </nav>
+    <div class="hamburger">
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+  </header>
+
+  <!-- Mobile Menu -->
+  <div class="mobile-menu">
+    <a href="shop.html">SHOP</a>
+    <a href="about.html">ABOUT</a>
+    <a href="futures.html">FUTURES</a>
+    <a href="#" id="mobile-search">SEARCH</a>
+    <a href="#" id="mobile-cart">CART</a>
+  </div>
+
+  <!-- Search Overlay -->
+  <div class="search-overlay" id="search-overlay">
+    <div class="search-content">
+      <button class="close-btn" id="close-search">&times;</button>
+      <h2 class="section-title text-center mb-sm">Search Sanné</h2>
+      <input type="text" id="search-input" class="form-control" placeholder="Search products, keywords, or skin type..." autocomplete="off">
+      <div id="search-results" class="search-results-container mt-md"></div>
+    </div>
+  </div>
+
+  <!-- Cart Overlay -->
+  <div class="cart-overlay" id="cart-overlay">
+    <div class="cart-content">
+      <button class="close-btn" id="close-cart">&times;</button>
+      <h2 class="section-title mb-md">Your Cart</h2>
+      
+      <div id="cart-items-container" class="cart-items-container">
+        <p class="empty-cart-msg text-center mt-md">Your cart is empty.</p>
+      </div>
+      
+      <div class="cart-footer mt-md" id="cart-footer" style="display: none;">
+        <!-- Donation field -->
+        <div style="background:var(--color-cream);border-radius:8px;padding:1rem 1.2rem;margin-bottom:1rem;border:1px solid var(--color-border);">
+          <p style="font-family:var(--font-serif);font-size:1rem;color:var(--color-dark-brown);margin:0 0 0.2rem;">A little kindness goes a long way.</p>
+          <p style="font-size:0.78rem;color:var(--color-text-light);margin:0 0 0.8rem;line-height:1.5;">Add something small to your order and become part of what we are building together.</p>
+          <div style="display:flex;align-items:center;gap:0.5rem;">
+            <label style="font-size:0.75rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--color-dark-brown);font-weight:600;white-space:nowrap;">Donation amount</label>
+          </div>
+          <div style="display:flex;align-items:center;gap:0.5rem;margin-top:0.5rem;">
+            <input type="number" id="sidebar-donation-amount" min="0" step="1" placeholder="0" oninput="updateCartUI()" style="width:80px;padding:0.4rem 0.6rem;border:1px solid var(--color-border);border-radius:4px;font-family:var(--font-sans);font-size:0.95rem;background:#fff;">
+            <span style="font-size:0.9rem;color:var(--color-text-light);">EGP</span>
+          </div>
+        </div>
+        <div id="cart-breakdown"></div>
+        <div class="cart-total-row">
+          <span>Total:</span>
+          <span id="cart-total-price">0 EGP</span>
+        </div>
+        
+        <h3 class="mt-md mb-sm" style="font-size: 1.2rem;">Checkout</h3>
+        <p class="mb-sm" style="font-size: 0.9rem; color: var(--color-text-light);">Payment method: Cash or Instapay</p>
+        
+        <form id="checkout-form">
+          <div class="form-group">
+            <input type="text" id="checkout-name" class="form-control" placeholder="Full Name" required>
+          </div>
+          <div class="form-group">
+            <input type="tel" id="checkout-phone" class="form-control" placeholder="Phone Number" required>
+          </div>
+          <div class="form-group">
+            <input type="tel" id="checkout-whatsapp" class="form-control" placeholder="WhatsApp Number (if different)">
+          </div>
+          <div class="form-group">
+            <select id="checkout-city" class="form-control" required>
+              <option value="" disabled selected>City in Egypt</option>
+              <option value="Cairo">Cairo</option>
+              <option value="Giza">Giza</option>
+              <option value="Alex">Alexandria</option>
+              <option value="Belbeis">Belbeis</option>
+              <option value="Zagazig">Zagazig</option>
+              <option value="10th of Ramadan">10th of Ramadan</option>
+              <option value="Ismailia">Ismailia</option>
+              <option value="Aswan">Aswan</option>
+              <option value="Assiut">Assiut</option>
+              <option value="Luxor">Luxor</option>
+              <option value="Red Sea">Red Sea</option>
+              <option value="Beheira">Beheira</option>
+              <option value="Dakahlia">Dakahlia</option>
+              <option value="Suez">Suez</option>
+              <option value="Gharbia">Gharbia</option>
+              <option value="Fayoum">Fayoum</option>
+              <option value="Menoufia">Menoufia</option>
+              <option value="Minya">Minya</option>
+              <option value="New Valley">New Valley</option>
+              <option value="Beni Suef">Beni Suef</option>
+              <option value="Port Said">Port Said</option>
+              <option value="South Sinai">South Sinai</option>
+              <option value="Damietta">Damietta</option>
+              <option value="Sohag">Sohag</option>
+              <option value="North Sinai">North Sinai</option>
+              <option value="Qena">Qena</option>
+              <option value="Kafr El Sheikh">Kafr El Sheikh</option>
+              <option value="Matrouh">Matrouh</option>
+              <option value="Sharqiyah">Sharqiyah</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <textarea id="checkout-address" class="form-control" rows="2" placeholder="Full Address" required></textarea>
+          </div>
+          <div class="form-group">
+            <textarea id="checkout-notes" class="form-control" rows="2" placeholder="Notes (Optional)"></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary" style="width: 100%;">Complete Order</button>
+          <p id="checkout-success-msg" class="success-msg mt-sm" style="display: none; color: green; font-size: 0.9rem; text-align: center;">Your order is ready. Please complete it through WhatsApp.</p>
+        </form>
+      </div>
+    </div>
+  </div>
+
+ <!-- Futures Hero -->
+<section class="futures-hero-section futures-hero-clean">
+  <div class="futures-hero-media">
+    <img src="images/new_3.jpg" alt="Sana's Light" class="futures-hero-img">
+  </div>
+
+  <div class="futures-hero-text container text-center">
+    <h1 class="section-title">Sana's Light</h1>
+    <p class="section-subtitle mt-sm">A promise to carry care further.</p>
+  </div>
+</section>
+
+  <!-- Main Sana's Light section -->
+<section class="editorial-split container sanas-light-section">
+  <div class="sanas-light-image-wrap">
+    <img src="images/new_2.jpg" alt="Sana's Light Fund" class="sanas-light-image">
+  </div>
+    <div class="editorial-content" style="flex: 1; padding: 10% 5%;">
+      <h2 class="editorial-title">Sana's Light Fund</h2>
+      <p class="mb-md">From day one, Sanné dedicates 1% of every sale to cancer support organizations. This promise is inspired by Sana's light, a light we carry forward through every product, every order, and every woman we hope to support.</p>
+      <div><a href="#sanas-light-details" class="btn btn-primary">Learn more</a></div>
+    </div>
+  </section>
+
+  <!-- Pillars Section -->
+  <section class="section container mt-xl mb-xl">
+    <div class="section-header text-center mb-lg">
+      <h2 class="section-title">Our pillars</h2>
+    </div>
+    
+    <div class="pillars-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem;">
+      <div class="pillar-card text-center" style="background-color: var(--color-cream); padding: 3rem 2rem; border-radius: 4px;">
+        <h3 class="mb-sm" style="font-family: var(--font-serif); font-size: 1.5rem; color: var(--color-dark-brown);">Care for women</h3>
+        <p>Supporting women affected by cancer with care, dignity, and emotional support.</p>
+      </div>
+      <div class="pillar-card text-center" style="background-color: var(--color-cream); padding: 3rem 2rem; border-radius: 4px;">
+        <h3 class="mb-sm" style="font-family: var(--font-serif); font-size: 1.5rem; color: var(--color-dark-brown);">Cancer support</h3>
+        <p>Helping organizations that provide relief, treatment support, awareness, and practical help.</p>
+      </div>
+      <div class="pillar-card text-center" style="background-color: var(--color-cream); padding: 3rem 2rem; border-radius: 4px;">
+        <h3 class="mb-sm" style="font-family: var(--font-serif); font-size: 1.5rem; color: var(--color-dark-brown);">Care that reaches further</h3>
+        <p>Turning every order into a small act of support beyond skincare.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Our Work in 2026 -->
+  <section class="editorial-split container mt-xl">
+    <div class="editorial-content" style="flex: 1; padding: 10% 5%;">
+      <h2 class="editorial-title">Our work in 2026</h2>
+      <p class="mb-sm" style="font-weight: 500; font-family: var(--font-serif); font-size: 1.2rem; color: var(--color-dark-brown);">Relief, care, and dignity for women and families affected by cancer.</p>
+      <p class="mb-md">In 2026, our giving will focus on supporting cancer related organizations and women centered care initiatives that provide direct relief, emotional support, and practical help for women and families carrying more than they should have to carry alone.</p>
+      <div><a href="#sanas-light-details" class="btn btn-primary">Learn more</a></div>
+    </div>
+    <div class="image-wrapper" style="flex: 1;">
+      <img src="images/Our work in 2026.png" alt="Our work in 2026" class="editorial-img" style="border-radius: 4px;">
+    </div>
+  </section>
+
+  <!-- Details & Donation Section — Editorial Journal Collage -->
+  <section id="sanas-light-details" class="futures-journal-section">
+    <div class="container journal-wrapper">
+      
+      <!-- LEFT / CENTER AREA: Collage elements -->
+      <div class="journal-left-column">
+        
+        <!-- Top Ribbon Label -->
+        <div class="journal-ribbon-tag">
+          <span class="ribbon-star">✦</span> COMMUNITY GIVING
+        </div>
+
+        <!-- Main Headline -->
+        <h2 class="journal-main-headline">
+          What your kindness<br>
+          <span class="headline-italic">has made possible</span> <span class="headline-heart">♡</span>
+        </h2>
+        <div class="headline-divider-star">✦</div>
+
+        <!-- Layered Donation Card -->
+        <div class="journal-donation-card-wrap">
+          <div class="donation-card-backing"></div>
+          <div class="donation-card-front">
+            <div class="card-eyebrow">Live donation total from Sanné orders</div>
+            <div class="card-hero-number" id="donation-total-display" data-donation-total>1,000 EGP</div>
+            <div class="card-hero-sub">and growing with every act of kindness.</div>
+            <div class="card-wax-seal" title="Sanné Giving Seal">
+              <svg viewBox="0 0 40 40" class="wax-seal-svg">
+                <circle cx="20" cy="20" r="18" fill="#8A333C" stroke="#722830" stroke-width="1.5"/>
+                <path d="M20 10 C18 15, 14 18, 14 24 C14 28, 17 30, 20 30 C23 30, 26 28, 26 24 C26 18, 22 15, 20 10 Z" fill="#F8F6F0" opacity="0.85"/>
+                <circle cx="20" cy="22" r="3" fill="#8A333C"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- Short Emotional Copy & Handwritten Note -->
+        <div class="journal-sub-row">
+          <div class="journal-emotional-text">
+            One order gives a little.<br>
+            Another does the same.<br>
+            Together, they become<br>
+            <span class="text-emphasis">much bigger.</span>
+          </div>
+
+          <div class="journal-handwritten-note">
+            <div class="note-paperclip"></div>
+            <p>Shared by every<br>customer who<br>chooses to give<br><span class="note-heart">♡</span></p>
+          </div>
+        </div>
+
+        <!-- Bottom Campaign Strip -->
+        <div class="journal-bottom-strip">
+          <span class="strip-star">✦</span> Your beauty ritual can carry care far beyond the bottle.
+        </div>
+
+      </div>
+
+      <!-- RIGHT AREA: Printed Photograph Frame -->
+      <div class="journal-right-column">
+        <div class="journal-photo-frame">
+          <img src="images/community_support.jpg" alt="Sanné Community Support" class="journal-photo-img">
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer mt-xl">
+    <div class="footer-top">
+      <div>
+        <h2 class="footer-brand">Sanné</h2>
+        <p>Soft care, made to stay.</p>
+      </div>
+      <div>
+        <h3 class="footer-title">Explore</h3>
+        <div class="footer-links">
+          <a href="shop.html">Shop All</a>
+          <a href="about.html">About Sanné</a>
+          <a href="futures.html">Sana's Light</a>
+        </div>
+      </div>
+      <div>
+        <h3 class="footer-title">Connect</h3>
+        <div class="footer-links">
+          <a href="mailto:Sanne.egy@gmail.com">Sanne.egy@gmail.com</a>
+          <a href="https://www.instagram.com/sanne.egy/" target="_blank">Instagram</a>
+          <a href="https://www.facebook.com/share/1Dsn9ZZotF/" target="_blank">Facebook</a>
+          <a href="https://www.tiktok.com/@sanne.eg?_r=1&_t=ZS-96NpIO4bs0N" target="_blank">TikTok</a>
+          <a href="https://wa.me/201032138278" target="_blank">WhatsApp: 01032138278</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+  <script src="donation-helpers.js"></script>
+</body>
+</html>

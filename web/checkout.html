@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Checkout, Sanné</title>
+  <meta name="description" content="Complete your Sanné order. Cash or Instapay across Egypt.">
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="donation-service.js"></script>
+</head>
+<body>
+
+  <!-- Announcement Bar -->
+  <div class="announcement-bar" id="announcement-bar">
+    <div class="marquee-track">
+      <span>Rooted in nature · Made for 20 years of you</span>
+      <span>Launch offers now live · Shop Sanné</span>
+      <span>Rooted in nature · Made for 20 years of you</span>
+      <span>Launch offers now live · Shop Sanné</span>
+      <span>Rooted in nature · Made for 20 years of you</span>
+      <span>Launch offers now live · Shop Sanné</span>
+    </div>
+  </div>
+
+  <!-- Navigation -->
+  <nav class="navbar solid has-announcement" id="navbar">
+    <div class="nav-inner">
+      <div class="nav-left">
+        <a href="shop.html">Shop</a>
+        <a href="futures.html">Futures</a>
+      </div>
+      <a href="index.html" class="brand-logo">Sanné</a>
+      <div class="nav-right">
+        <a href="https://www.instagram.com/sanne.egy/" target="_blank" style="display:flex;align-items:center;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg></a>
+        <div class="cart-icon" onclick="openCart()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+          <span class="cart-badge" style="display:none;">0</span>
+        </div>
+        <span class="cart-text" style="cursor:pointer;" onclick="openCart()">Cart (0)</span>
+        <div class="hamburger" id="hamburger"><span></span><span></span><span></span></div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Mobile Menu -->
+  <div class="mobile-menu" id="mobile-menu">
+    <a href="shop.html">Shop</a>
+    <a href="futures.html">Futures</a>
+    <a href="checkout.html">Cart</a>
+    <div class="mobile-socials">
+      <a href="https://www.instagram.com/sanne.egy/" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="22" height="22"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg></a>
+      <a href="https://www.facebook.com/share/1Dsn9ZZotF/" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="22" height="22"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg></a>
+      <a href="https://www.tiktok.com/@sanne.eg" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="22" height="22"><path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5"/></svg></a>
+    </div>
+  </div>
+
+  <!-- Checkout -->
+  <section class="checkout-page">
+    <div class="container">
+
+      <!-- Steps Indicator -->
+      <div class="checkout-steps" id="steps-indicator">
+        <div class="checkout-step active" data-step="1"><span class="step-num">1</span> Cart</div>
+        <div class="checkout-step" data-step="2"><span class="step-num">2</span> Details</div>
+        <div class="checkout-step" data-step="3"><span class="step-num">3</span> Review</div>
+      </div>
+
+      <!-- ═══ STEP 1: Cart ═══ -->
+      <div class="checkout-panel" id="step-1">
+        <h2 class="section-heading" style="margin-bottom:2rem;">Your Cart</h2>
+        <div id="checkout-cart-items"></div>
+
+        <div class="cart-discount-row" style="margin-top:2rem;">
+          <label style="font-weight:600;margin-bottom:0.4rem;display:block;text-transform:uppercase;font-size:0.75rem;">Discount Code</label>
+          <div class="discount-input-wrap">
+            <input type="text" id="checkout-discount-input" placeholder="Enter code">
+            <button id="checkout-discount-btn" style="background:var(--near-black);color:var(--cream);border:none;padding:0.6rem 1rem;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;font-size:0.75rem;">Apply</button>
+          </div>
+          <div class="discount-msg" id="checkout-discount-msg"></div>
+        </div>
+
+        <div class="cart-notes" style="margin-top:1rem;">
+          <label style="font-weight:600;margin-bottom:0.4rem;display:block;text-transform:uppercase;font-size:0.75rem;">Any notes for your order? <span style="font-weight:400;color:var(--text-muted);font-size:0.75rem;text-transform:none;">(e.g. leave at door, fragrance preference)</span></label>
+          <textarea id="checkout-notes" class="form-control" rows="2" placeholder="Optional notes..."></textarea>
+        </div>
+
+        <div class="cart-donation-row" style="margin-top:1.5rem; background: var(--color-cream, #F8F6F0); padding: 1.5rem; border-radius: 8px; border: 1px solid var(--color-border, #E0D7C8);">
+          <h3 style="font-family: var(--font-serif); font-size: 1.15rem; color: var(--color-dark-brown); margin: 0 0 0.4rem; font-weight: 500;">A little kindness goes a long way.</h3>
+          <p style="font-size: 0.85rem; color: var(--text-muted, #5A544C); margin: 0 0 1rem; line-height: 1.6;">Add something small to your order and become part of what we are building together.</p>
+          <div style="display: flex; flex-direction: column; gap: 0.4rem;">
+            <label style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600; color: var(--color-dark-brown);">Donation amount</label>
+            <div style="display: flex; align-items: center; gap: 0.6rem;">
+              <input type="number" id="checkout-donation-input" min="0" step="1" placeholder="50" oninput="applyDonation()" style="width: 110px; padding: 0.6rem 1rem; border: 1px solid var(--color-border, #E0D7C8); border-radius: 4px; font-family: inherit; font-size: 1rem; background: #fff; font-weight: 500;">
+              <span style="font-size: 0.95rem; font-weight: 500; color: var(--color-dark-brown);">EGP</span>
+            </div>
+          </div>
+          <div id="checkout-donation-msg" style="margin-top: 0.5rem; font-size: 0.85rem;"></div>
+        </div>
+
+        <div class="cart-subtotal" style="margin-top:1.5rem;">
+          <span>Total</span>
+          <span class="amount" id="checkout-total">0 EGP</span>
+        </div>
+
+        <button class="btn-primary" id="to-step-2" style="margin-top:1.5rem;">Proceed to Checkout</button>
+      </div>
+
+      <!-- ═══ STEP 2: Checkout Form ═══ -->
+      <div class="checkout-panel" id="step-2" style="display:none;">
+        <h2 class="section-heading" style="margin-bottom:2rem;">Shipping Details</h2>
+        <form id="checkout-form">
+          <div class="form-group">
+            <label for="fullName">Full Name *</label>
+            <input type="text" id="fullName" class="form-control" required placeholder="Your full name">
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="phone">Phone Number *</label>
+              <input type="tel" id="phone" class="form-control" required placeholder="01X XXXX XXXX">
+            </div>
+            <div class="form-group">
+              <label for="whatsappNum">WhatsApp Number <span class="optional">(if different from phone)</span></label>
+              <input type="tel" id="whatsappNum" class="form-control" placeholder="01X XXXX XXXX">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="governorate">City / Governorate *</label>
+            <select id="governorate" class="form-control" required style="font-family:var(--font-body);">
+              <option value="" disabled selected>Select your governorate</option>
+              <option value="Cairo">Cairo</option>
+              <option value="Giza">Giza</option>
+              <option value="Alex">Alexandria</option>
+              <option value="Belbeis">Belbeis</option>
+              <option value="Zagazig">Zagazig</option>
+              <option value="10th of Ramadan">10th of Ramadan</option>
+              <option value="Ismailia">Ismailia</option>
+              <option value="Aswan">Aswan</option>
+              <option value="Assiut">Assiut</option>
+              <option value="Luxor">Luxor</option>
+              <option value="Red Sea">Red Sea</option>
+              <option value="Beheira">Beheira</option>
+              <option value="Dakahlia">Dakahlia</option>
+              <option value="Suez">Suez</option>
+              <option value="Gharbia">Gharbia</option>
+              <option value="Fayoum">Fayoum</option>
+              <option value="Menoufia">Menoufia</option>
+              <option value="Minya">Minya</option>
+              <option value="New Valley">New Valley</option>
+              <option value="Beni Suef">Beni Suef</option>
+              <option value="Port Said">Port Said</option>
+              <option value="South Sinai">South Sinai</option>
+              <option value="Damietta">Damietta</option>
+              <option value="Sohag">Sohag</option>
+              <option value="North Sinai">North Sinai</option>
+              <option value="Qena">Qena</option>
+              <option value="Kafr El Sheikh">Kafr El Sheikh</option>
+              <option value="Matrouh">Matrouh</option>
+              <option value="Sharqiyah">Sharqiyah</option>
+            </select>
+            <div id="delivery-fee-display" style="margin-top: 0.5rem; font-size: 0.85rem; color: var(--gold); font-weight: 500;"></div>
+          </div>
+
+          <div class="form-group">
+            <label for="address">Detailed Address *</label>
+            <textarea id="address" class="form-control" rows="3" required placeholder="Street name, building, apartment, floor"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="formNotes">Notes <span class="optional">(pre-filled from cart)</span></label>
+            <textarea id="formNotes" class="form-control" rows="2" placeholder="Any special instructions"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label>Discount Code <span class="optional">(pre-filled from cart)</span></label>
+            <input type="text" id="formDiscount" class="form-control" readonly style="background:var(--cream-dark);cursor:default;">
+          </div>
+
+          <h3 style="font-family:var(--font-heading);margin:2rem 0 1rem;font-size:1.5rem;">Payment Method</h3>
+          <div class="payment-card">
+            <div class="payment-radio"></div>
+            <div>
+              <div class="payment-label">Cash or Instapay</div>
+              <div class="payment-sub">Pay with cash upon delivery or Instapay.</div>
+            </div>
+          </div>
+
+          <button type="submit" class="btn-primary">Review Order</button>
+          <button type="button" class="btn-secondary" onclick="showStep(1)">← Back to Cart</button>
+        </form>
+      </div>
+
+      <!-- ═══ STEP 3: Order Review ═══ -->
+      <div class="checkout-panel" id="step-3" style="display:none;">
+        <h2 class="section-heading" style="margin-bottom:2rem;">Order Review</h2>
+        <div class="review-card" id="review-summary"></div>
+        <button class="btn-primary" id="confirm-whatsapp" style="background:var(--gold);">
+          Confirm & Send via WhatsApp
+        </button>
+        <button type="button" class="btn-secondary" onclick="showStep(2)">← Back to Details</button>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-inner">
+        <div class="footer-col">
+          <h4>Sanné</h4>
+          <a href="shop.html">Shop</a>
+          <a href="futures.html">Sana's Light</a>
+        </div>
+        <div class="footer-col">
+          <h4>Help</h4>
+          <a href="https://wa.me/201032138278" target="_blank">Contact Us</a>
+          <a href="checkout.html">Track Order</a>
+        </div>
+        <div class="footer-col">
+          <h4>Follow</h4>
+          <div class="footer-socials">
+            <a href="https://www.instagram.com/sanne.egy/" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg></a>
+            <a href="https://www.facebook.com/share/1Dsn9ZZotF/" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg></a>
+            <a href="https://www.tiktok.com/@sanne.eg" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5"/></svg></a>
+          </div>
+        </div>
+        <div class="footer-col">
+          <h4>Legal</h4>
+          <a href="#">Privacy Policy</a>
+          <a href="#">Shipping Info</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>© 2025 Sanné. Made with care in Egypt.</p>
+        <div class="footer-bottom-nav">
+          <a href="shop.html">Shop</a>
+          <a href="futures.html">Sana's Light</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Cart Sidebar -->
+  <div class="cart-overlay" id="cart-overlay"></div>
+  <div class="cart-sidebar" id="cart-sidebar">
+    <div class="cart-header">
+      <h3>Your Cart</h3>
+      <button class="cart-close" id="cart-close-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="cart-items" id="cart-items-list"></div>
+    <div class="cart-footer">
+      <div class="cart-subtotal">
+        <span>Subtotal</span>
+        <span class="amount" id="cart-subtotal-amount">0 EGP</span>
+      </div>
+      <button class="proceed-btn" id="proceed-btn" disabled onclick="closeCart()">Continue</button>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    let formData = {};
+    let appliedDiscount = JSON.parse(localStorage.getItem('sanne_discount')) || null;
+    let cartNotes = localStorage.getItem('sanne_notes') || '';
+    let currentDonation = 0;
+    
+    let supabase = null;
+    try {
+      // REPLACE WITH YOUR ACTUAL SUPABASE CREDENTIALS
+      supabase = window.supabase.createClient('https://YOUR_SUPABASE_URL.supabase.co', 'YOUR_SUPABASE_ANON_KEY');
+    } catch(e) {
+      console.warn('Supabase not fully configured yet. Waiting for API keys.');
+    }
+    
+    const deliveryFees = {
+      "Belbeis": 15, "Zagazig": 25, "10th of Ramadan": 30, "Cairo": 45, "Alex": 50,
+      "Ismailia": 45, "Aswan": 95, "Assiut": 80, "Luxor": 95, "Red Sea": 90,
+      "Beheira": 50, "Giza": 45, "Dakahlia": 45, "Suez": 50, "Gharbia": 45,
+      "Fayoum": 50, "Menoufia": 45, "Minya": 75, "New Valley": 95, "Beni Suef": 55,
+      "Port Said": 50, "South Sinai": 70, "Damietta": 50, "Sohag": 90, "North Sinai": 55,
+      "Qena": 95, "Kafr El Sheikh": 50, "Matrouh": 80, "Sharqiyah": 40
+    };
+    let currentDeliveryFee = 0;
+
+    function getSubtotal() {
+      return cart.reduce((sum, item) => sum + item.price * item.qty, 0);
+    }
+
+    function getDiscountAmount() {
+      if (!appliedDiscount) return 0;
+      const subtotal = getSubtotal();
+      if (appliedDiscount.type === 'percent') {
+        return Math.round(subtotal * (appliedDiscount.value / 100));
+      } else {
+        return appliedDiscount.value;
+      }
+    }
+
+    function getTotal() {
+      return Math.max(0, getSubtotal() - getDiscountAmount()) + currentDeliveryFee + currentDonation;
+    }
+
+    function updateAllBadges() {
+      if (typeof updateCartUI === 'function') {
+        updateCartUI();
+      }
+    }
+
+    function showStep(n) {
+      document.querySelectorAll('.checkout-panel').forEach(p => p.style.display = 'none');
+      document.getElementById('step-' + n).style.display = 'block';
+      document.querySelectorAll('.checkout-step').forEach(s => {
+        const sn = parseInt(s.dataset.step);
+        s.classList.remove('active', 'done');
+        if (sn < n) s.classList.add('done');
+        if (sn === n) s.classList.add('active');
+      });
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function renderCheckoutCart() {
+      const container = document.getElementById('checkout-cart-items');
+      const totalEl = document.getElementById('checkout-total');
+      const toStep2 = document.getElementById('to-step-2');
+
+      if (cart.length === 0) {
+        container.innerHTML = '<p style="text-align:center;color:var(--text-muted);padding:3rem 0;font-style:italic;">Your cart is empty. <a href="shop.html" style="color:var(--gold);text-decoration:underline;font-style:normal;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;margin-left:0.5rem;">Browse products</a></p>';
+        totalEl.textContent = '0 EGP';
+        toStep2.disabled = true;
+        return;
+      }
+
+      let html = '';
+      cart.forEach((item, i) => {
+        html += `
+          <div class="cart-item">
+            <img src="${item.image || item.img}" alt="${item.name}" class="cart-item-img">
+            <div class="cart-item-info">
+              <div class="cart-item-name">${item.name}</div>
+              <div class="cart-item-variant">${item.variant}</div>
+              <div class="cart-item-price">${item.price} EGP</div>
+              <div class="cart-item-qty">
+                <button onclick="changeQtyCheckout(${i}, -1)">−</button>
+                <span>${item.qty}</span>
+                <button onclick="changeQtyCheckout(${i}, 1)">+</button>
+              </div>
+              <button class="cart-item-remove" onclick="removeCheckout(${i})">Remove</button>
+            </div>
+          </div>`;
+      });
+      container.innerHTML = html;
+
+      const discountAmt = getDiscountAmount();
+      if (discountAmt > 0) {
+        totalEl.innerHTML = `<span style="text-decoration:line-through;color:var(--color-text-light);font-size:0.9em;margin-right:0.5rem;">${getSubtotal() + currentDonation} EGP</span> ${getTotal()} EGP`;
+      } else {
+        totalEl.textContent = getTotal() + ' EGP';
+      }
+      toStep2.disabled = false;
+    }
+
+    function applyDonation() {
+      const input = document.getElementById('checkout-donation-input');
+      const msgEl = document.getElementById('checkout-donation-msg');
+      const val = parseInt(input.value);
+      if (!isNaN(val) && val > 0) {
+        currentDonation = val;
+        msgEl.textContent = `✓ Added ${val} EGP donation`;
+        msgEl.className = 'discount-msg valid';
+      } else {
+        currentDonation = 0;
+        msgEl.textContent = '';
+      }
+      renderCheckoutCart();
+    }
+
+    function changeQtyCheckout(i, delta) {
+      cart[i].qty = Math.max(1, cart[i].qty + delta);
+      saveCart(); updateAllBadges(); renderCheckoutCart();
+    }
+    function removeCheckout(i) {
+      cart.splice(i, 1); saveCart(); updateAllBadges(); renderCheckoutCart();
+    }
+
+    async function applyCheckoutDiscount() {
+      const input = document.getElementById('checkout-discount-input');
+      const msgEl = document.getElementById('checkout-discount-msg');
+      const code = input.value.trim().toUpperCase();
+      if (!code) return;
+      msgEl.textContent = 'Checking...'; msgEl.className = 'discount-msg';
+      try {
+        const url = `https://firestore.googleapis.com/v1/projects/sanne-egy/databases/(default)/documents/discountCodes/${code}`;
+        const res = await fetch(url);
+        if (!res.ok) { 
+          msgEl.textContent = "This code isn't valid."; 
+          msgEl.className = 'discount-msg invalid'; 
+          appliedDiscount = null; 
+          localStorage.removeItem('sanne_discount'); 
+          saveCart(); 
+          renderCheckoutCart(); 
+          return; 
+        }
+        const doc = await res.json();
+        const f = doc.fields;
+        if (!f.active?.booleanValue) { 
+          msgEl.textContent = "This code isn't valid."; 
+          msgEl.className = 'discount-msg invalid'; 
+          appliedDiscount = null; 
+          localStorage.removeItem('sanne_discount');
+        } else {
+          const type = f.type?.stringValue; const value = parseInt(f.value?.integerValue || '0');
+          const label = type === 'percent' ? `${value}%` : `${value} EGP`;
+          msgEl.textContent = `✓ Code applied, ${label} off`; msgEl.className = 'discount-msg valid';
+          appliedDiscount = { code, type, value };
+          localStorage.setItem('sanne_discount', JSON.stringify(appliedDiscount));
+        }
+      } catch(e) { 
+        msgEl.textContent = "This code isn't valid."; 
+        msgEl.className = 'discount-msg invalid'; 
+        appliedDiscount = null; 
+        localStorage.removeItem('sanne_discount');
+      }
+      saveCart(); renderCheckoutCart();
+    }
+
+    function buildReview() {
+      let html = '';
+      cart.forEach(item => {
+        html += `<div class="review-item"><span>${item.name} (${item.variant}) × ${item.qty}</span><span>${item.price * item.qty} EGP</span></div>`;
+      });
+      if (appliedDiscount) {
+        const label = appliedDiscount.type === 'percent' ? `${appliedDiscount.value}%` : `${appliedDiscount.value} EGP`;
+        html += `<div class="review-item" style="color:var(--gold);"><span>Discount (${appliedDiscount.code})</span><span>-${getDiscountAmount()} EGP</span></div>`;
+      }
+      html += `<div class="review-item" style="color:var(--color-soft-gold);"><span>Delivery Fee</span><span>${currentDeliveryFee} EGP</span></div>`;
+      if (currentDonation > 0) {
+        html += `<div class="review-item" style="color:var(--color-soft-gold);"><span>Donation (Sana's Light)</span><span>${currentDonation} EGP</span></div>`;
+      }
+      html += `<div class="review-total"><span>Total</span><span class="amount">${getTotal()} EGP</span></div>`;
+      html += `<div style="margin-top:1.5rem;font-size:0.85rem;color:var(--text-muted);line-height:1.8;">
+        <strong>Name:</strong> ${formData.name}<br>
+        <strong>Phone:</strong> ${formData.phone}<br>
+        <strong>WhatsApp:</strong> ${formData.whatsapp}<br>
+        <strong>City:</strong> ${formData.city}<br>
+        <strong>Address:</strong> ${formData.address}<br>
+        <strong>Notes:</strong> ${formData.notes || 'None'}<br>
+        <strong>Payment:</strong> Cash or Instapay
+      </div>`;
+      document.getElementById('review-summary').innerHTML = html;
+    }
+
+    async function sendWhatsApp() {
+      const confirmBtn = document.getElementById('confirm-whatsapp');
+      if (confirmBtn) {
+        confirmBtn.disabled = true;
+        confirmBtn.textContent = 'Processing Order...';
+      }
+
+      let orderLines = '';
+      cart.forEach(item => {
+        orderLines += `${item.name} (${item.variant}) × ${item.qty}, ${item.price} EGP\n`;
+      });
+
+      if (currentDonation > 0) {
+        orderLines += `Sana's Light Donation: ${currentDonation} EGP\n`;
+      }
+
+      const orderId = 'SANNE-' + Math.random().toString(36).substr(2, 6).toUpperCase();
+
+      // Update localStorage donation total BEFORE opening WhatsApp
+      if (typeof addDonationToTotal === 'function') {
+        addDonationToTotal(currentDonation);
+      }
+
+      const msg = `Hello Sanné 🌿 I'd like to place an order.
+      
+Order ID: ${orderId}
+
+👤 Name: ${formData.name}
+📞 Phone: ${formData.phone}
+💬 WhatsApp: ${formData.whatsapp}
+🏙️ City / Governorate: ${formData.city}
+📍 Address: ${formData.address}
+
+🛍️ Order:
+${orderLines.trim()}
+
+🏷️ Discount Code: ${appliedDiscount ? appliedDiscount.code : 'None'}
+🚚 Delivery Fee: ${currentDeliveryFee} EGP
+${currentDonation > 0 ? `✨ Donation: ${currentDonation} EGP\n` : ''}💰 Total: ${getTotal()} EGP
+
+📝 Notes: ${formData.notes || 'None'}
+
+💳 Payment: Cash or Instapay`;
+
+      const waUrl = `https://wa.me/201032138278?text=${encodeURIComponent(msg)}`;
+      window.open(waUrl, '_blank');
+
+      cart = []; appliedDiscount = null; cartNotes = ''; currentDonation = 0;
+      localStorage.removeItem('sanne_cart');
+      localStorage.removeItem('sanne_discount');
+      localStorage.removeItem('sanne_notes');
+      updateAllBadges();
+      setTimeout(() => window.location.href = 'index.html', 1000);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      renderCheckoutCart();
+
+      const notesEl = document.getElementById('checkout-notes');
+      if (cartNotes && notesEl) notesEl.value = cartNotes;
+      if (appliedDiscount) {
+        const inp = document.getElementById('checkout-discount-input');
+        const msg = document.getElementById('checkout-discount-msg');
+        if (inp) inp.value = appliedDiscount.code;
+        if (msg) {
+          const label = appliedDiscount.type === 'percent' ? `${appliedDiscount.value}%` : `${appliedDiscount.value} EGP`;
+          msg.textContent = `✓ Code applied, ${label} off`;
+          msg.className = 'discount-msg valid';
+        }
+      }
+
+      document.getElementById('to-step-2').addEventListener('click', () => {
+        if (cart.length === 0) return;
+        cartNotes = document.getElementById('checkout-notes')?.value || '';
+        localStorage.setItem('sanne_notes', cartNotes);
+        saveCart();
+        document.getElementById('formNotes').value = cartNotes;
+        document.getElementById('formDiscount').value = appliedDiscount ? appliedDiscount.code : '';
+        showStep(2);
+      });
+
+      document.getElementById('checkout-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        formData = {
+          name: document.getElementById('fullName').value,
+          phone: document.getElementById('phone').value,
+          whatsapp: document.getElementById('whatsappNum').value || document.getElementById('phone').value,
+          city: document.getElementById('governorate').value,
+          address: document.getElementById('address').value,
+          notes: document.getElementById('formNotes').value
+        };
+        buildReview();
+        showStep(3);
+      });
+
+      document.getElementById('confirm-whatsapp').addEventListener('click', sendWhatsApp);
+      document.getElementById('checkout-discount-btn').addEventListener('click', applyCheckoutDiscount);
+      document.getElementById('checkout-discount-input').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') { e.preventDefault(); applyCheckoutDiscount(); }
+      });
+      document.getElementById('checkout-donation-btn').addEventListener('click', applyDonation);
+      document.getElementById('checkout-donation-input').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') { e.preventDefault(); applyDonation(); }
+      });
+
+      document.getElementById('governorate').addEventListener('change', (e) => {
+        const city = e.target.value;
+        currentDeliveryFee = deliveryFees[city] || 0;
+        const display = document.getElementById('delivery-fee-display');
+        if (display) {
+          display.textContent = `Delivery Fee: ${currentDeliveryFee} EGP`;
+        }
+      });
+    });
+  </script>
+  <script src="donation-helpers.js"></script>
+</body>
+</html>
