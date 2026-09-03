@@ -372,9 +372,38 @@ if (checkoutForm) {
       orderLines += `- ${item.name} (${item.variant}) x ${item.qty} = ${item.price * item.qty} EGP\n`;
       subtotal += item.price * item.qty;
     });
-    const donationAmt = parseInt(document.getElementById('sidebar-donation-amount')?.value) || 0;
+    const donationAmt = Math.max(0, parseInt(document.getElementById('sidebar-donation-amount')?.value || document.getElementById('checkout-donation-amount')?.value, 10) || 0);
     const grandTotal = subtotal + deliveryFee + donationAmt;
     const orderId = 'SANNE-' + Math.random().toString(36).substr(2, 6).toUpperCase();
+
+    const orderItemsPayload = cart.map(item => ({
+      product_id: item.id,
+      product_name: `${item.name} (${item.variant || ''})`.trim(),
+      unit_price_egp: Number(item.price),
+      quantity: Number(item.qty),
+      line_total_egp: Number(item.price) * Number(item.qty)
+    }));
+
+    const donationPayload = {
+      amount_egp: donationAmt
+    };
+
+    const orderPayload = {
+      order_number: orderId,
+      customer: { name, phone, whatsapp, city, address, notes },
+      product_subtotal_egp: subtotal,
+      delivery_fee_egp: deliveryFee,
+      discount_egp: 0,
+      donation_egp: donationAmt,
+      final_total_egp: grandTotal,
+      items: orderItemsPayload
+    };
+
+    console.log("LIVE CART USED FOR CHECKOUT", cart);
+    console.log("DONATION INPUT VALUE", donationAmt);
+    console.log("ORDER PAYLOAD", orderPayload);
+    console.log("ORDER ITEMS PAYLOAD", orderItemsPayload);
+    console.log("DONATION PAYLOAD", donationPayload);
 
     const submitBtn = checkoutForm.querySelector('button[type="submit"]');
     if (submitBtn) {
@@ -405,26 +434,41 @@ ${notes ? `Notes: ${notes}` : ''}`;
     const whatsappUrl = `https://wa.me/201032138278?text=${encodedMsg}`;
 
     (async () => {
-      // Save donation to localStorage BEFORE opening WhatsApp
-      if (donationAmt > 0 && typeof addDonationToTotal === 'function') {
-        addDonationToTotal(donationAmt);
-      }
+      try {
+        console.log("BEFORE SUPABASE INSERT", orderPayload);
+        if (window.OrdersService && typeof window.OrdersService.submitOrder === 'function') {
+          await window.OrdersService.submitOrder(orderPayload);
+        }
 
-      // Show success message
-      const successEl = document.getElementById('checkout-success-msg');
-      if (successEl) successEl.style.display = 'block';
-      checkoutForm.reset();
-      cart = [];
-      saveCart();
+        // Show success message
+        const successEl = document.getElementById('checkout-success-msg');
+        if (successEl) {
+          successEl.style.display = 'block';
+          successEl.textContent = `Order ${orderId} submitted (pending confirmation)! Opening WhatsApp...`;
+        }
 
-      // Open WhatsApp
-      setTimeout(() => {
-        window.open(whatsappUrl, '_blank');
+        checkoutForm.reset();
+        cart = [];
+        saveCart();
+
+        // Open WhatsApp ONLY after database insert succeeds
+        setTimeout(() => {
+          console.log("BEFORE WHATSAPP REDIRECT", whatsappUrl);
+          window.open(whatsappUrl, '_blank');
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Complete Order';
+          }
+        }, 800);
+
+      } catch (err) {
+        console.error('Order submission failed:', err);
+        alert(`Order Submission Error: ${err.message || 'Could not save order to database.'}`);
         if (submitBtn) {
           submitBtn.disabled = false;
           submitBtn.textContent = 'Complete Order';
         }
-      }, 1000);
+      }
     })();
   });
 }

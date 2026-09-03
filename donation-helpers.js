@@ -1,40 +1,36 @@
 /**
- * donation-helpers.js — Shared localStorage donation counter for Sanné
- *
- * Key: sanneDonationTotal
- * Base: 1,000 EGP
- *
- * Load this file on every page that needs to read or update the donation total.
+ * donation-helpers.js — Authoritative Sanné Donation Renderer
+ * Base: 1,000 EGP + SUM(submitted customer donations in database)
  */
 
-const DONATION_TOTAL_KEY = 'sanneDonationTotal';
 const INITIAL_DONATION_TOTAL = 1000;
 
-function getDonationTotal() {
-  const stored = localStorage.getItem(DONATION_TOTAL_KEY);
-  const value = stored ? Number(stored) : INITIAL_DONATION_TOTAL;
-  return Number.isFinite(value) ? value : INITIAL_DONATION_TOTAL;
+async function getDonationTotal() {
+  if (window.OrdersService && typeof window.OrdersService.getPublicDonationTotal === 'function') {
+    return await window.OrdersService.getPublicDonationTotal();
+  }
+  if (window.DonationService && typeof window.DonationService.getPublicTotal === 'function') {
+    return await window.DonationService.getPublicTotal();
+  }
+  const stored = localStorage.getItem('sanneDonationTotal');
+  const val = stored ? Number(stored) : INITIAL_DONATION_TOTAL;
+  return Number.isFinite(val) ? val : INITIAL_DONATION_TOTAL;
 }
 
-function setDonationTotal(amount) {
-  localStorage.setItem(DONATION_TOTAL_KEY, String(amount));
-}
+async function renderDonationTotal() {
+  const donationTotalElements = document.querySelectorAll('[data-donation-total]');
+  if (!donationTotalElements.length) return;
 
-function addDonationToTotal(donationAmount) {
-  const cleanDonation = Number(donationAmount);
-  if (!Number.isFinite(cleanDonation) || cleanDonation <= 0) return;
-
-  const currentTotal = getDonationTotal();
-  const newTotal = currentTotal + cleanDonation;
-  setDonationTotal(newTotal);
-}
-
-function renderDonationTotal() {
-  const donationTotalElement = document.querySelector('[data-donation-total]');
-  if (!donationTotalElement) return;
-
-  const total = getDonationTotal();
-  donationTotalElement.textContent = total.toLocaleString('en-US') + ' EGP';
+  try {
+    const total = await getDonationTotal();
+    donationTotalElements.forEach(el => {
+      el.textContent = Number(total).toLocaleString('en-US') + ' EGP';
+    });
+  } catch (e) {
+    console.warn('Error rendering donation total:', e);
+  }
 }
 
 document.addEventListener('DOMContentLoaded', renderDonationTotal);
+window.renderDonationTotal = renderDonationTotal;
+

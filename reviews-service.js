@@ -9,10 +9,10 @@
 (function(window) {
   'use strict';
 
-  // Supabase Configuration
+  // Supabase Configuration — Live Production Environment
   const SUPABASE_CONFIG = {
-    url: 'https://YOUR_SUPABASE_URL.supabase.co',
-    anonKey: 'YOUR_SUPABASE_ANON_KEY'
+    url: 'https://kqvoediolbpyvwpvbhty.supabase.co',
+    anonKey: 'sb_publishable_Jmo112ZKxUE58oKXyCIOyg_KrSfiZst'
   };
 
   // Shared cross-device sync key for live reviews

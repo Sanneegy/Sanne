@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sanné Merchant Control — Confirm Orders</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    body {
+      background-color: var(--color-cream);
+      font-family: var(--font-sans);
+      color: var(--color-dark-brown);
+      padding: 2rem;
+    }
+    .admin-container {
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+    .admin-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      border-bottom: 1px solid var(--color-border);
+      padding-bottom: 1rem;
+    }
+    .admin-title {
+      font-family: var(--font-serif);
+      font-size: 2rem;
+      color: var(--color-dark-brown);
+      margin: 0;
+    }
+    .live-counter-card {
+      background: #fff;
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      padding: 1rem 1.5rem;
+      text-align: right;
+    }
+    .counter-label {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--color-text-light);
+    }
+    .counter-val {
+      font-family: var(--font-serif);
+      font-size: 1.6rem;
+      color: var(--color-soft-gold);
+      font-weight: bold;
+    }
+    .order-card {
+      background: #fff;
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    }
+    .order-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      border-bottom: 1px dashed var(--color-border);
+      padding-bottom: 0.8rem;
+    }
+    .order-num {
+      font-weight: bold;
+      font-size: 1.1rem;
+      color: var(--color-dark-brown);
+    }
+    .status-badge-pending {
+      background: #fff3cd;
+      color: #856404;
+      padding: 0.3rem 0.8rem;
+      border-radius: 12px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    .order-details-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      margin-bottom: 1rem;
+    }
+    .btn-confirm-order {
+      background-color: var(--color-soft-gold);
+      color: #fff;
+      border: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: 4px;
+      font-weight: bold;
+      cursor: pointer;
+      font-family: var(--font-sans);
+      transition: opacity 0.2s ease;
+    }
+    .btn-confirm-order:hover {
+      opacity: 0.9;
+    }
+    .btn-confirm-order:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
+    .empty-msg {
+      background: #fff;
+      padding: 3rem;
+      text-align: center;
+      border-radius: 8px;
+      color: var(--color-text-light);
+      border: 1px solid var(--color-border);
+    }
+  </style>
+</head>
+<body>
+  <div class="admin-container">
+    
+    <div class="admin-header">
+      <div>
+        <h1 class="admin-title">Sanné Merchant Control</h1>
+        <p style="margin:0.4rem 0 0; color: var(--color-text-light);">Confirm pending customer orders to update the live public donation total.</p>
+      </div>
+
+      <div class="live-counter-card">
+        <div class="counter-label">Futures Confirmed Total</div>
+        <div class="counter-val" id="admin-futures-total">1,000 EGP</div>
+      </div>
+    </div>
+
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 1rem;">
+      <h2 style="font-family:var(--font-serif); margin:0;">Pending Orders (<span id="pending-count">0</span>)</h2>
+      <button onclick="loadPendingOrders()" class="btn" style="padding:0.4rem 0.8rem; font-size:0.85rem;">Refresh Orders ↻</button>
+    </div>
+
+    <div id="pending-orders-container">
+      <div class="empty-msg">Loading pending orders...</div>
+    </div>
+
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="orders-service.js"></script>
+  <script src="donation-helpers.js"></script>
+  <script>
+    async function loadPendingOrders() {
+      const container = document.getElementById('pending-orders-container');
+      const countEl = document.getElementById('pending-count');
+
+      try {
+        const orders = await window.OrdersService.getPendingOrders();
+        countEl.textContent = orders.length;
+
+        if (!orders.length) {
+          container.innerHTML = `<div class="empty-msg">No pending orders waiting for confirmation.</div>`;
+          return;
+        }
+
+        container.innerHTML = orders.map(ord => `
+          <div class="order-card" id="card-${ord.order_number}">
+            <div class="order-header-row">
+              <div>
+                <span class="order-num">${escapeHtml(ord.order_number)}</span>
+                <span style="font-size:0.8rem; color:var(--color-text-light); margin-left:0.8rem;">
+                  Submitted ${new Date(ord.created_at).toLocaleString()}
+                </span>
+              </div>
+              <span class="status-badge-pending">${escapeHtml(ord.status)}</span>
+            </div>
+
+            <div class="order-details-grid">
+              <div>
+                <p style="margin:0 0 0.4rem; font-weight:600;">Customer Information</p>
+                <p style="margin:0; font-size:0.9rem;"><strong>Name:</strong> ${escapeHtml(ord.customer_name)}</p>
+                <p style="margin:0; font-size:0.9rem;"><strong>Phone:</strong> ${escapeHtml(ord.phone)}</p>
+                <p style="margin:0; font-size:0.9rem;"><strong>City:</strong> ${escapeHtml(ord.city)}</p>
+                <p style="margin:0; font-size:0.9rem;"><strong>Address:</strong> ${escapeHtml(ord.delivery_address)}</p>
+              </div>
+
+              <div>
+                <p style="margin:0 0 0.4rem; font-weight:600;">Order Totals</p>
+                <p style="margin:0; font-size:0.9rem;"><strong>Subtotal:</strong> ${ord.product_subtotal_egp} EGP</p>
+                <p style="margin:0; font-size:0.9rem;"><strong>Delivery Fee:</strong> ${ord.delivery_fee_egp} EGP</p>
+                <p style="margin:0; font-size:0.9rem; color:var(--color-soft-gold);"><strong>Donation:</strong> ${ord.donation_egp || 0} EGP</p>
+                <p style="margin:0.3rem 0 0; font-size:1.1rem; font-weight:bold; color:var(--color-dark-brown);">
+                  Final Total: ${ord.final_total_egp} EGP
+                </p>
+              </div>
+            </div>
+
+            <div style="text-align:right;">
+              <button class="btn-confirm-order" onclick="confirmOrder('${ord.order_number}')">
+                Confirm Order & Update Futures Counter ✓
+              </button>
+            </div>
+          </div>
+        `).join('');
+
+      } catch (err) {
+        console.error('Error loading pending orders:', err);
+        container.innerHTML = `<div class="empty-msg" style="color:red;">Error loading orders: ${err.message}</div>`;
+      }
+    }
+
+    async function confirmOrder(orderNumber) {
+      const btn = event.target;
+      btn.disabled = true;
+      btn.textContent = 'Confirming...';
+
+      try {
+        const res = await window.OrdersService.confirmOrder(orderNumber);
+        if (res && res.success) {
+          alert(`Order ${orderNumber} confirmed! Confirmed at: ${res.confirmed_at}`);
+          
+          // Refresh Futures live total on page
+          const newTotal = await window.OrdersService.getPublicDonationTotal();
+          document.getElementById('admin-futures-total').textContent = newTotal.toLocaleString('en-US') + ' EGP';
+
+          loadPendingOrders();
+        } else {
+          alert(`Failed to confirm order: ${res.error || 'Unknown error'}`);
+          btn.disabled = false;
+          btn.textContent = 'Confirm Order & Update Futures Counter ✓';
+        }
+      } catch (e) {
+        alert(`Error confirming order: ${e.message}`);
+        btn.disabled = false;
+        btn.textContent = 'Confirm Order & Update Futures Counter ✓';
+      }
+    }
+
+    async function refreshFuturesTotal() {
+      try {
+        const total = await window.OrdersService.getPublicDonationTotal();
+        document.getElementById('admin-futures-total').textContent = total.toLocaleString('en-US') + ' EGP';
+      } catch (e) {}
+    }
+
+    function escapeHtml(str) {
+      return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      refreshFuturesTotal();
+      loadPendingOrders();
+    });
+  </script>
+</body>
+</html>

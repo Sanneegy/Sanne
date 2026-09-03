@@ -260,6 +260,8 @@
     </div>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="orders-service.js"></script>
   <script src="app.js"></script>
   <script>
     let formData = {};
@@ -460,8 +462,10 @@
       }
 
       let orderLines = '';
+      let subtotal = 0;
       cart.forEach(item => {
         orderLines += `${item.name} (${item.variant}) × ${item.qty}, ${item.price} EGP\n`;
+        subtotal += item.price * item.qty;
       });
 
       if (currentDonation > 0) {
@@ -469,13 +473,51 @@
       }
 
       const orderId = 'SANNE-' + Math.random().toString(36).substr(2, 6).toUpperCase();
+      const finalTotal = getTotal();
 
-      // Update localStorage donation total BEFORE opening WhatsApp
-      if (typeof addDonationToTotal === 'function') {
-        addDonationToTotal(currentDonation);
-      }
+      const orderItemsPayload = cart.map(item => ({
+        product_id: item.id,
+        product_name: `${item.name} (${item.variant || ''})`.trim(),
+        unit_price_egp: Number(item.price),
+        quantity: Number(item.qty),
+        line_total_egp: Number(item.price) * Number(item.qty)
+      }));
 
-      const msg = `Hello Sanné 🌿 I'd like to place an order.
+      const donationPayload = {
+        amount_egp: Number(currentDonation) || 0
+      };
+
+      const orderPayload = {
+        order_number: orderId,
+        customer: {
+          name: formData.name,
+          phone: formData.phone,
+          whatsapp: formData.whatsapp,
+          city: formData.city,
+          address: formData.address,
+          notes: formData.notes
+        },
+        product_subtotal_egp: subtotal,
+        delivery_fee_egp: currentDeliveryFee,
+        discount_egp: appliedDiscount ? (appliedDiscount.type === 'percent' ? (subtotal * appliedDiscount.value / 100) : appliedDiscount.value) : 0,
+        donation_egp: Number(currentDonation) || 0,
+        final_total_egp: finalTotal,
+        items: orderItemsPayload
+      };
+
+      console.log("LIVE CART USED FOR CHECKOUT", cart);
+      console.log("DONATION INPUT VALUE", currentDonation);
+      console.log("ORDER PAYLOAD", orderPayload);
+      console.log("ORDER ITEMS PAYLOAD", orderItemsPayload);
+      console.log("DONATION PAYLOAD", donationPayload);
+
+      try {
+        console.log("BEFORE SUPABASE INSERT", orderPayload);
+        if (window.OrdersService && typeof window.OrdersService.submitOrder === 'function') {
+          await window.OrdersService.submitOrder(orderPayload);
+        }
+
+        const msg = `Hello Sanné 🌿 I'd like to place an order.
       
 Order ID: ${orderId}
 
@@ -490,21 +532,30 @@ ${orderLines.trim()}
 
 🏷️ Discount Code: ${appliedDiscount ? appliedDiscount.code : 'None'}
 🚚 Delivery Fee: ${currentDeliveryFee} EGP
-${currentDonation > 0 ? `✨ Donation: ${currentDonation} EGP\n` : ''}💰 Total: ${getTotal()} EGP
+${currentDonation > 0 ? `✨ Donation: ${currentDonation} EGP\n` : ''}💰 Total: ${finalTotal} EGP
 
 📝 Notes: ${formData.notes || 'None'}
 
 💳 Payment: Cash or Instapay`;
 
-      const waUrl = `https://wa.me/201032138278?text=${encodeURIComponent(msg)}`;
-      window.open(waUrl, '_blank');
+        const waUrl = `https://wa.me/201032138278?text=${encodeURIComponent(msg)}`;
+        console.log("BEFORE WHATSAPP REDIRECT", waUrl);
+        window.open(waUrl, '_blank');
 
-      cart = []; appliedDiscount = null; cartNotes = ''; currentDonation = 0;
-      localStorage.removeItem('sanne_cart');
-      localStorage.removeItem('sanne_discount');
-      localStorage.removeItem('sanne_notes');
-      updateAllBadges();
-      setTimeout(() => window.location.href = 'index.html', 1000);
+        cart = []; appliedDiscount = null; cartNotes = ''; currentDonation = 0;
+        localStorage.removeItem('sanne_cart');
+        localStorage.removeItem('sanne_discount');
+        localStorage.removeItem('sanne_notes');
+        updateAllBadges();
+        setTimeout(() => window.location.href = 'index.html', 1000);
+      } catch (err) {
+        console.error('Checkout error:', err);
+        alert(`Order Submission Error: ${err.message || 'Failed to submit order.'}`);
+        if (confirmBtn) {
+          confirmBtn.disabled = false;
+          confirmBtn.textContent = 'Confirm Order & Chat on WhatsApp';
+        }
+      }
     }
 
     document.addEventListener('DOMContentLoaded', () => {

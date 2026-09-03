@@ -15,10 +15,10 @@
 
   const BASE_DONATION_EGP = 1000;
 
-  // Supabase Configuration (replace with your production keys when deployed)
+  // Supabase Configuration — Live Production Environment
   const SUPABASE_CONFIG = {
-    url: 'https://YOUR_SUPABASE_URL.supabase.co',
-    anonKey: 'YOUR_SUPABASE_ANON_KEY'
+    url: 'https://kqvoediolbpyvwpvbhty.supabase.co',
+    anonKey: 'sb_publishable_Jmo112ZKxUE58oKXyCIOyg_KrSfiZst'
   };
 
   // Dedicated shared cloud sync key for local/staging testing so all browsers/devices stay synchronized
