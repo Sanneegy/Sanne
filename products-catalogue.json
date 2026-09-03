@@ -1,0 +1,38 @@
+[
+  {
+    "id": "p1",
+    "name": "Moisturizing Cream for Dry Skin",
+    "price": 229,
+    "size": "200 ml",
+    "category": "moisturizer",
+    "variant": "200 ml",
+    "image": "images/dry_skin.jpg"
+  },
+  {
+    "id": "p2",
+    "name": "Moisturizing Cream for Oily and Combination Skin",
+    "price": 229,
+    "size": "200 ml",
+    "category": "moisturizer",
+    "variant": "200 ml",
+    "image": "images/oily_skin.jpg"
+  },
+  {
+    "id": "p3",
+    "name": "Bosbos Body Fragrance",
+    "price": 79,
+    "size": "gel format",
+    "category": "body fragrance",
+    "variant": "Makhmarya",
+    "image": "images/bosbos.jpg"
+  },
+  {
+    "id": "p4",
+    "name": "Rose Vanille Body Splash",
+    "price": 229,
+    "size": "220 ml",
+    "category": "body fragrance",
+    "variant": "220 ml",
+    "image": "images/rose_vanille.jpg"
+  }
+]

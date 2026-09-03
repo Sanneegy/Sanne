@@ -1,22 +1,34 @@
 /**
  * ai.js — Sanné Conversational AI Advisor
  *
- * Source of Truth for Products: window.products array (from app.js)
- * State & Context: Retains conversation history and current_product_id across turns.
+ * Single Source of Truth for Product Identity & Cards: window.products (from app.js)
+ * Conversational State Model:
+ *   - state = { currentProductId, candidateProductIds, lastIntent, pendingIntent, pendingClarification, activeConstraints }
  * Dual-Engine Architecture:
- *   1. Remote Engine: Supabase Edge Function + OpenAI
- *   2. Local Engine: Stateful offline fallback & guardrail engine
+ *   - Remote Path: Supabase Edge Function (sanne-chat) + OpenAI GPT-4o-mini
+ *   - Fallback Path: Stateful local recommendation & guardrail engine
  */
 
 (function(window) {
   'use strict';
 
-  // Configuration — Live Production Environment
   const SUPABASE_EDGE_URL = 'https://kqvoediolbpyvwpvbhty.supabase.co/functions/v1/sanne-chat';
   const SUPABASE_ANON_KEY = 'sb_publishable_Jmo112ZKxUE58oKXyCIOyg_KrSfiZst';
 
   let chatHistory = [];
-  let currentProductId = null; // Tracks active product context ('p1', 'p2', 'p3', 'p4')
+  let state = {
+    currentProductId: null,
+    candidateProductIds: [],
+    lastIntent: null,
+    pendingIntent: null,
+    pendingClarification: null,
+    activeConstraints: {
+      skinType: null,
+      budgetMax: null,
+      category: null
+    }
+  };
+
   let isWaiting = false;
 
   document.addEventListener('DOMContentLoaded', () => {
@@ -48,7 +60,7 @@
   };
 
   /**
-   * Main Send Message Handler
+   * Main Send Message Function
    */
   window.sendMessage = async function() {
     if (isWaiting) return;
@@ -72,28 +84,28 @@
 
     try {
       let response = null;
-      const isEdgeConfigured = SUPABASE_EDGE_URL && !SUPABASE_EDGE_URL.includes('YOUR_SUPABASE_URL');
+      let engineType = 'remote';
 
-      if (isEdgeConfigured) {
-        try {
-          response = await callEdgeAI(chatHistory, currentProductId);
-        } catch (e) {
-          console.warn('Edge AI function fallback:', e);
-          response = localRecommendationEngine(text, chatHistory, currentProductId);
-        }
-      } else {
-        await new Promise(r => setTimeout(r, 400));
-        response = localRecommendationEngine(text, chatHistory, currentProductId);
+      try {
+        response = await callEdgeAI(chatHistory, state);
+        console.log("ASK_SANNE_ENGINE=remote", response);
+      } catch (e) {
+        engineType = 'local-fallback';
+        console.warn("ASK_SANNE_ENGINE=local-fallback", "Reason: " + e.message);
+        response = localRecommendationEngine(text, chatHistory, state);
       }
 
       removeTyping();
 
       if (response && response.reply) {
-        if (response.currentProductId) {
-          currentProductId = response.currentProductId;
+        // Update state
+        if (response.state) {
+          state = { ...state, ...response.state };
+        } else if (response.currentProductId) {
+          state.currentProductId = response.currentProductId;
         }
 
-        // Render product cards ONLY for recommendations / catalog / comparisons
+        // Determine card rendering
         const showCards = shouldRenderCards(response.intent, response.productIds);
         const productCards = showCards ? renderProductCards(response.productIds || []) : null;
 
@@ -114,9 +126,9 @@
   };
 
   /**
-   * Calls remote Supabase Edge Function with full context
+   * Call Remote Edge Function
    */
-  async function callEdgeAI(history, activeProductId) {
+  async function callEdgeAI(history, currentState) {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 8000);
 
@@ -128,296 +140,295 @@
       },
       body: JSON.stringify({
         messages: history,
-        current_product_id: activeProductId
+        state: currentState
       }),
       signal: controller.signal
     });
     clearTimeout(timeoutId);
 
     if (!res.ok) {
-      throw new Error(`Edge Function status ${res.status}`);
+      throw new Error(`Edge Function HTTP ${res.status}`);
     }
 
-    return await res.json();
+    const data = await res.json();
+    if (data.error) {
+      throw new Error(data.error);
+    }
+    return data;
   }
 
   function shouldRenderCards(intent, productIds) {
     if (!productIds || !productIds.length) return false;
-    const cardIntents = ['recommendation', 'catalogue', 'comparison', 'product_discovery'];
-    return intent ? cardIntents.includes(intent) : true;
+    const noCardIntents = ['ingredient_question', 'size_question', 'purpose_question', 'follow_up', 'disclaimer'];
+    if (intent && noCardIntents.includes(intent)) return false;
+    return true;
   }
 
   /**
-   * Stateful Local Recommendation & Guardrail Engine
+   * Stateful Local Engine (Fallback & Guardrails)
    */
-  function localRecommendationEngine(query, history, activeProductId) {
+  function localRecommendationEngine(query, history, currentState) {
     const q = query.toLowerCase().trim();
-    let activeId = activeProductId;
-
-    // Detect explicit product switches or mentions
-    if (/(makhmarya|makhmaria|bosbos)/i.test(q)) {
-      activeId = 'p3';
-    } else if (/(body splash|rose vanille|rose vanilla|splash|mist)/i.test(q)) {
-      activeId = 'p4';
-    } else if (/(dry skin moisturizer|moisturizer for dry skin|cream for dry skin)/i.test(q)) {
-      activeId = 'p1';
-    } else if (/(oily skin moisturizer|moisturizer for oily skin|oily and combination|cream for oily)/i.test(q)) {
-      activeId = 'p2';
-    }
+    let newState = JSON.parse(JSON.stringify(currentState || {
+      currentProductId: null,
+      candidateProductIds: [],
+      lastIntent: null,
+      pendingIntent: null,
+      pendingClarification: null,
+      activeConstraints: { skinType: null, budgetMax: null, category: null }
+    }));
 
     // 1. UNSUPPORTED MEDICAL / CURE CLAIMS
     if (/(cure|treat|heal|doctor|prescription|eczema|psoriasis|dermatitis|rosacea)/i.test(q)) {
+      newState.lastIntent = 'disclaimer';
       return {
         reply: "Sanné products provide gentle cosmetic daily care and moisture barrier support. For medical skin conditions or treatment, we recommend consulting a dermatologist ♡",
         intent: "disclaimer",
         productIds: [],
-        currentProductId: activeId
+        state: newState
       };
     }
 
-    // 2. EXPLICIT CATALOGUE REQUEST
+    // 2. RESOLVE PENDING CLARIFICATION & INTENT RESUMPTION
+    if (newState.pendingClarification === 'moisturizer_variant' || (q.includes('dry') || q.includes('oily'))) {
+      if (q.includes('dry') || q.includes('flaky') || q.includes('tight') || q.includes('ناشفة')) {
+        newState.currentProductId = 'p1';
+        newState.activeConstraints.skinType = 'dry';
+      } else if (q.includes('oily') || q.includes('shiny') || q.includes('greasy') || q.includes('بتزيت')) {
+        newState.currentProductId = 'p2';
+        newState.activeConstraints.skinType = 'oily';
+      }
+
+      if (newState.pendingIntent === 'ingredient_question' || newState.pendingIntent === 'formula') {
+        const activeName = newState.currentProductId === 'p1' ? 'Moisturizing Cream for Dry Skin' : 'Moisturizing Cream for Oily & Combination Skin';
+        newState.pendingIntent = null;
+        newState.pendingClarification = null;
+        newState.lastIntent = 'ingredient_question';
+        return {
+          reply: `The full ingredient details for our moisturizers are still being finalized for ASK SANNÉ and will be available soon ♡ I can still help you choose between the Dry Skin and Oily & Combination formulas based on what your skin needs.`,
+          intent: "ingredient_question",
+          productIds: [],
+          state: newState
+        };
+      }
+    }
+
+    // 3. PRODUCT SPECIFIC IDENTIFICATION & SWITCHING
+    if (/(makhmarya|makhmaria|bosbos|مخمرية)/i.test(q)) {
+      newState.currentProductId = 'p3';
+      newState.candidateProductIds = ['p3'];
+    } else if (/(body splash|rose vanille|rose vanilla|splash|mist)/i.test(q)) {
+      newState.currentProductId = 'p4';
+      newState.candidateProductIds = ['p4'];
+    } else if (/(dry skin moisturizer|cream for dry skin|dry moisturizer)/i.test(q)) {
+      newState.currentProductId = 'p1';
+      newState.candidateProductIds = ['p1'];
+    } else if (/(oily skin moisturizer|cream for oily skin|oily moisturizer)/i.test(q)) {
+      newState.currentProductId = 'p2';
+      newState.candidateProductIds = ['p2'];
+    }
+
+    // 4. EXPLICIT CATALOGUE REQUEST
     if (/(what products do you have|what do you have|show me all|show all products|all products|full catalogue|everything you have|all collection)/i.test(q)) {
+      newState.lastIntent = 'catalogue';
       return {
         reply: "Here is our complete Sanné collection — two targeted facial moisturizers (229 EGP each), our signature Bosbos Makhmarya body fragrance (79 EGP), and our Rose Vanille Body Splash (229 EGP, 220 ml).",
         intent: "catalogue",
         productIds: ['p1', 'p2', 'p3', 'p4'],
-        currentProductId: activeId
+        state: newState
       };
     }
 
-    // 3. COMPARISON (Makhmarya vs Body Splash)
-    if ((q.includes('difference') || q.includes('compare') || q.includes('versus') || q.includes('vs')) &&
-        (q.includes('makhmarya') || q.includes('bosbos') || q.includes('fragrance')) &&
-        (q.includes('splash') || q.includes('rose vanille') || q.includes('mist'))) {
+    // 5. CATEGORY DISCOVERY: "give me body fragrance" / "show me body fragrances"
+    if (/(body fragrance|body fragrances|body scent|scented for body|scent for body|برفان جسم|معطر جسم)/i.test(q) && !q.includes('what is') && !q.includes('ingredient')) {
+      newState.candidateProductIds = ['p3', 'p4'];
+      newState.lastIntent = 'discovery';
       return {
-        reply: "Bosbos Body Fragrance (Makhmarya) is 79 EGP in a gel format for pulse points. Rose Vanille Body Splash is 229 EGP (220 ml) as a refreshing fragrance mist.",
-        intent: "comparison",
+        reply: "We offer two body fragrances: Bosbos Body Fragrance (Makhmarya) at 79 EGP (gel format) and Rose Vanille Body Splash at 229 EGP (220 ml mist).",
+        intent: "discovery",
         productIds: ['p3', 'p4'],
-        currentProductId: 'p4'
+        state: newState
       };
     }
 
-    // 4. INGREDIENT INQUIRIES
-    const isIngredientQuery = /(ingredient|ingredients|contain|contains|alcohol|glycerin|carbopol|formula|what's inside|what is inside|gives it the scent|gives the scent|what gives|gives it the gel|what gives it|helps distribute|helps with the softer)/i.test(q);
-    
+    // 6. INGREDIENT / FORMULA SYNONYM NORMALIZATION
+    const isIngredientQuery = /(ingredient|ingredients|formula|formulation|what's inside|what is inside|what's in it|what does it contain|what is it made|ingrediants|ingredents|gel texture|softer feel|alcohol|glycerin|carbopol)/i.test(q);
+
     if (isIngredientQuery) {
-      // Moisturizer ingredients asked -> Always unavailable notice
-      if (activeId === 'p1' || activeId === 'p2' || q.includes('moisturizer') || q.includes('cream')) {
+      newState.lastIntent = 'ingredient_question';
+
+      if (newState.currentProductId === 'p1' || newState.currentProductId === 'p2' || (q.includes('moisturizer') && !newState.currentProductId)) {
+        if (!newState.currentProductId) {
+          newState.pendingIntent = 'ingredient_question';
+          newState.pendingClarification = 'moisturizer_variant';
+          newState.candidateProductIds = ['p1', 'p2'];
+          return {
+            reply: "Does your skin usually feel dry and tight, or does it become oily and shiny during the day?",
+            intent: "clarification",
+            productIds: [],
+            state: newState
+          };
+        }
         return {
           reply: "The full ingredient details for our moisturizers are still being finalized for ASK SANNÉ and will be available soon ♡ I can still help you choose between the Dry Skin and Oily & Combination formulas based on what your skin needs.",
           intent: "ingredient_question",
           productIds: [],
-          currentProductId: activeId || 'p1'
+          state: newState
         };
       }
 
-      // Makhmarya specific ingredient questions
-      if (activeId === 'p3' || q.includes('makhmarya') || q.includes('bosbos')) {
-        activeId = 'p3';
+      if (newState.currentProductId === 'p3' || q.includes('makhmarya')) {
+        newState.currentProductId = 'p3';
         if (q.includes('gel texture') || q.includes('texture')) {
-          return {
-            reply: "Carbopol 940 creates the gel texture and structure in our Makhmarya.",
-            intent: "ingredient_question",
-            productIds: [],
-            currentProductId: 'p3'
-          };
+          return { reply: "Carbopol 940 creates the gel texture and structure in our Makhmarya.", intent: "ingredient_question", productIds: [], state: newState };
         }
-        if (q.includes('moisturizing') || q.includes('softer') || q.includes('feel') || q.includes('glycerin')) {
-          return {
-            reply: "Glycerin acts as a humectant to attract moisture at the skin surface, while PEG-12 Dimethicone contributes to a smoother, softer feel.",
-            intent: "ingredient_question",
-            productIds: [],
-            currentProductId: 'p3'
-          };
+        if (q.includes('softer') || q.includes('moisturizing') || q.includes('glycerin')) {
+          return { reply: "Glycerin acts as a humectant to attract water at the skin surface, while PEG-12 Dimethicone contributes to a softer feel.", intent: "ingredient_question", productIds: [], state: newState };
         }
-        return {
-          reply: "Key ingredients in Makhmarya include glycerin to retain moisture, Carbopol 940 for its gel texture, PEG-12 Dimethicone for a soft feel, and fragrance oil for the scent.",
-          intent: "ingredient_question",
-          productIds: [],
-          currentProductId: 'p3'
-        };
+        return { reply: "Key ingredients in Makhmarya include glycerin for moisture, Carbopol 940 for its gel structure, PEG-12 Dimethicone for a soft feel, and fragrance oil.", intent: "ingredient_question", productIds: [], state: newState };
       }
 
-      // Body Splash specific ingredient questions
-      if (activeId === 'p4' || q.includes('splash') || q.includes('rose vanille') || q.includes('alcohol') || q.includes('scent')) {
-        activeId = 'p4';
+      if (newState.currentProductId === 'p4' || q.includes('splash') || q.includes('alcohol')) {
+        newState.currentProductId = 'p4';
         if (q.includes('alcohol')) {
-          return {
-            reply: "Yes. The Body Splash contains ethanol, which acts as the lightweight fragrance carrier so it spreads and dries quickly.",
-            intent: "ingredient_question",
-            productIds: [],
-            currentProductId: 'p4'
-          };
+          return { reply: "Yes. The Body Splash contains ethanol, which acts as the lightweight fragrance carrier so it spreads and dries quickly.", intent: "ingredient_question", productIds: [], state: newState };
         }
-        if (q.includes('scent')) {
-          return {
-            reply: "Fragrance oil provides the Rose Vanilla scent in the Body Splash.",
-            intent: "ingredient_question",
-            productIds: [],
-            currentProductId: 'p4'
-          };
+        if (q.includes('scent') || q.includes('smell')) {
+          return { reply: "Fragrance oil provides the Rose Vanilla scent in the Body Splash.", intent: "ingredient_question", productIds: [], state: newState };
         }
-        if (q.includes('distribute') || q.includes('disperse')) {
-          return {
-            reply: "DPG and PG help carry and distribute the fragrance evenly, while PEG-40 Hydrogenated Castor Oil keeps the fragrance oil dispersed in the base.",
-            intent: "ingredient_question",
-            productIds: [],
-            currentProductId: 'p4'
-          };
-        }
-        return {
-          reply: "Key ingredients include fragrance oil for the Rose Vanilla scent, ethanol as the lightweight fragrance carrier, and DPG and PG to help distribute the scent evenly.",
-          intent: "ingredient_question",
-          productIds: [],
-          currentProductId: 'p4'
-        };
+        return { reply: "Key ingredients in Body Splash include fragrance oil for the Rose Vanilla scent, ethanol as the lightweight carrier, and DPG & PG to distribute the scent evenly.", intent: "ingredient_question", productIds: [], state: newState };
       }
     }
 
-    // 5. BUDGET EXTRACTOR
+    // 7. PURPOSE & USAGE SYNONYM NORMALIZATION ("what is it for", "what does it do", "what's its purpose")
+    if (/(what is it for|what does it do|why would i use it|what's its purpose|how does it help|what is this used for)/i.test(q)) {
+      newState.lastIntent = 'purpose_question';
+      if (newState.currentProductId === 'p3') {
+        return { reply: "Bosbos Body Fragrance (Makhmarya) is a scented body gel format designed to melt into skin and pulse points for a warm, lasting scent ritual.", intent: "purpose_question", productIds: [], state: newState };
+      }
+      if (newState.currentProductId === 'p4') {
+        return { reply: "Rose Vanille Body Splash (220 ml) is a light, refreshing all-over fragrance mist with rose and vanilla notes for daily spraying.", intent: "purpose_question", productIds: [], state: newState };
+      }
+      if (newState.currentProductId === 'p1') {
+        return { reply: "The Dry Skin Moisturizer provides rich daily barrier moisture for dry, tight, or flaky skin.", intent: "purpose_question", productIds: [], state: newState };
+      }
+      if (newState.currentProductId === 'p2') {
+        return { reply: "The Oily & Combination Moisturizer provides balanced lightweight hydration and shine control.", intent: "purpose_question", productIds: [], state: newState };
+      }
+    }
+
+    // 8. PRICE & SIZE QUESTIONS
+    if (/(how much|price|cost|kam|بكام|سعره كام)/i.test(q)) {
+      newState.lastIntent = 'price_question';
+      if (newState.currentProductId === 'p3') return { reply: "Bosbos Body Fragrance (Makhmarya) is 79 EGP.", intent: "price_question", productIds: [], state: newState };
+      if (newState.currentProductId === 'p4') return { reply: "Rose Vanille Body Splash is 229 EGP (220 ml).", intent: "price_question", productIds: [], state: newState };
+      if (newState.currentProductId === 'p1' || newState.currentProductId === 'p2') return { reply: "Sanné Moisturizing Creams are 229 EGP each.", intent: "price_question", productIds: [], state: newState };
+    }
+
+    if (/(size|how big|how many ml|ml|الحجم|كام ملي)/i.test(q)) {
+      newState.lastIntent = 'size_question';
+      if (newState.currentProductId === 'p4') return { reply: "Rose Vanille Body Splash is 220 ml.", intent: "size_question", productIds: [], state: newState };
+      if (newState.currentProductId === 'p1' || newState.currentProductId === 'p2') return { reply: "Our Moisturizing Creams are 200 ml.", intent: "size_question", productIds: [], state: newState };
+    }
+
+    // 9. BUDGET EXTRACTOR & RELEVANCE
     let budget = null;
     const budgetMatch = q.match(/(?:under|less than|below|budget is|have|max|up to|for|around|at)\s*(\d+)/i) || q.match(/(\d+)\s*(?:egp|le|pounds)/i);
     if (budgetMatch) {
       budget = parseInt(budgetMatch[1], 10);
+      newState.activeConstraints.budgetMax = budget;
     }
 
-    // Category and Concern Detectors (English, Arabic, Arabizi)
-    const wantsOily = /(oily|greasy|shine|shiny|sebum|combination|combo|t-zone|t zone|بتزيت|بتلمع|بشرتي بتزيت|weshy byzayt)/i.test(q);
-    const wantsDry = /(dry|flaky|flake|rough|tight|dehydrated|peeling|ناشفة|بتقشر|بشرتي ناشفة|beshrety nashfa)/i.test(q);
-    const wantsMoisturizer = /(moisturizer|moisturizers|cream|creams|face cream|lotion|مرطب)/i.test(q);
-    const wantsFragrance = /(fragrance|perfume|scent|scented|smell|splash|makhmarya|bosbos|مخمرية|معطر)/i.test(q);
+    const wantsOily = /(oily|greasy|shine|shiny|sebum|combination|t-zone|بتزيت|بتلمع|weshy byzayt)/i.test(q);
+    const wantsDry = /(dry|flaky|rough|tight|dehydrated|ناشفة|بتقشر|beshrety nashfa)/i.test(q);
 
-    // 6. COMBINING CONSTRAINTS (Budget + Category)
     if (budget !== null) {
-      // Dry skin requested under 229 EGP -> DO NOT recommend Makhmarya!
       if (wantsDry && budget < 229) {
+        newState.currentProductId = 'p1';
         return {
           reply: `The Dry Skin Moisturizer is the right match for what you described, but it is 229 EGP, so I currently don't have a matching moisturizer under ${budget} EGP.`,
           intent: "recommendation",
           productIds: [],
-          currentProductId: 'p1'
+          state: newState
         };
       }
       if (wantsOily && budget < 229) {
+        newState.currentProductId = 'p2';
         return {
           reply: `The Oily & Combination Moisturizer is the right match for what you described, but it is 229 EGP, so I currently don't have a matching moisturizer under ${budget} EGP.`,
           intent: "recommendation",
           productIds: [],
-          currentProductId: 'p2'
-        };
-      }
-      if (budget < 79) {
-        return {
-          reply: `Our lowest priced product is the Bosbos Body Fragrance (Makhmarya) at 79 EGP. We currently don't have items below ${budget} EGP.`,
-          intent: "recommendation",
-          productIds: [],
-          currentProductId: activeId
+          state: newState
         };
       }
       if (budget < 229) {
-        activeId = 'p3';
+        newState.currentProductId = 'p3';
+        newState.candidateProductIds = ['p3'];
+        newState.lastIntent = 'recommendation';
         return {
           reply: `Under ${budget} EGP, we have our Bosbos Body Fragrance (Makhmarya) at 79 EGP.`,
           intent: "recommendation",
           productIds: ['p3'],
-          currentProductId: 'p3'
+          state: newState
         };
       }
     }
 
-    // 7. FOLLOW-UP PRONOUN RESOLUTION ("What is it?", "Why that one?", "How much is it?")
-    if (/(what is it|tell me more|how much is it|what's the price|why that one|why did you recommend|how do i use it)/i.test(q)) {
-      if (activeId === 'p3') {
-        return {
-          reply: "Bosbos Body Fragrance (Makhmarya) is 79 EGP. It is our signature scented body gel format.",
-          intent: "follow_up",
-          productIds: [],
-          currentProductId: 'p3'
-        };
+    // 10. PRONOUN / REFERENCE FOLLOW-UP RESOLUTION ("what is it", "why that one")
+    if (/(what is it|tell me more|why that one|why did you recommend)/i.test(q)) {
+      newState.lastIntent = 'follow_up';
+      if (newState.currentProductId === 'p3') {
+        return { reply: "Bosbos Body Fragrance (Makhmarya) is 79 EGP. It is our scented body gel format for pulse points.", intent: "follow_up", productIds: [], state: newState };
       }
-      if (activeId === 'p4') {
-        return {
-          reply: "Rose Vanille Body Splash is 229 EGP (220 ml). It is a fragrance mist with rose and vanilla notes.",
-          intent: "follow_up",
-          productIds: [],
-          currentProductId: 'p4'
-        };
+      if (newState.currentProductId === 'p4') {
+        return { reply: "Rose Vanille Body Splash is 229 EGP (220 ml). It is a body fragrance mist with rose and vanilla notes.", intent: "follow_up", productIds: [], state: newState };
       }
-      if (activeId === 'p1') {
-        return {
-          reply: "The Dry Skin Moisturizer is 229 EGP. We recommended it because you described dry, tight, or flaky skin.",
-          intent: "follow_up",
-          productIds: [],
-          currentProductId: 'p1'
-        };
+      if (newState.currentProductId === 'p1') {
+        return { reply: "The Dry Skin Moisturizer is 229 EGP. We recommended it because you described dry, tight, or flaky skin.", intent: "follow_up", productIds: [], state: newState };
       }
-      if (activeId === 'p2') {
-        return {
-          reply: "The Oily & Combination Moisturizer is 229 EGP. We recommended it because you described skin that gets oily or shiny during the day.",
-          intent: "follow_up",
-          productIds: [],
-          currentProductId: 'p2'
-        };
+      if (newState.currentProductId === 'p2') {
+        return { reply: "The Oily & Combination Moisturizer is 229 EGP. We recommended it because you described skin that gets oily or shiny during the day.", intent: "follow_up", productIds: [], state: newState };
       }
     }
 
-    // 8. SKIN CONCERN MATCHING
+    // 11. SKIN TYPE MATCHING
     if (wantsOily) {
-      activeId = 'p2';
+      newState.currentProductId = 'p2';
+      newState.candidateProductIds = ['p2'];
+      newState.lastIntent = 'recommendation';
       const isArabic = /[\u0600-\u06FF]/.test(query);
       const replyText = isArabic 
         ? "للبشرة التي تفرز زيوت وتلمع خلال اليوم، أنصحك بـ Moisturizing Cream for Oily and Combination Skin (229 EGP) لترطيب خفيف دون ملمس دهني."
         : "For skin that becomes oily or shiny during the day, our Moisturizing Cream for Oily & Combination Skin (229 EGP) provides lightweight barrier comfort.";
-      return {
-        reply: replyText,
-        intent: "recommendation",
-        productIds: ['p2'],
-        currentProductId: 'p2'
-      };
+      return { reply: replyText, intent: "recommendation", productIds: ['p2'], state: newState };
     }
 
     if (wantsDry) {
-      activeId = 'p1';
-      return {
-        reply: "For dry, tight, or flaky skin, our Moisturizing Cream for Dry Skin (229 EGP) provides deep, restorative moisture barrier care.",
-        intent: "recommendation",
-        productIds: ['p1'],
-        currentProductId: 'p1'
-      };
+      newState.currentProductId = 'p1';
+      newState.candidateProductIds = ['p1'];
+      newState.lastIntent = 'recommendation';
+      return { reply: "For dry, tight, or flaky skin, our Moisturizing Cream for Dry Skin (229 EGP) provides deep moisture barrier care.", intent: "recommendation", productIds: ['p1'], state: newState };
     }
 
-    // 9. AMBIGUOUS MOISTURIZER QUESTION
-    if (wantsMoisturizer || q.includes('which moisturizer') || q.includes('which cream')) {
-      return {
-        reply: "Does your skin usually feel dry and tight, or does it become oily and shiny during the day?",
-        intent: "clarification",
-        productIds: [],
-        currentProductId: activeId,
-        needsClarification: true
-      };
-    }
-
-    // 10. PRODUCT SPECIFIC LOOKUPS
-    if (activeId === 'p3' || wantsFragrance) {
-      return {
-        reply: "Bosbos Body Fragrance (Makhmarya) is 79 EGP, and Rose Vanille Body Splash (220 ml) is 229 EGP.",
-        intent: "product_discovery",
-        productIds: ['p3', 'p4'],
-        currentProductId: activeId || 'p3'
-      };
+    // 12. COMPARISON
+    if ((q.includes('difference') || q.includes('compare') || q.includes('versus') || q.includes('vs')) &&
+        (q.includes('makhmarya') || q.includes('bosbos')) && (q.includes('splash') || q.includes('mist'))) {
+      newState.lastIntent = 'comparison';
+      return { reply: "Bosbos Body Fragrance (Makhmarya) is 79 EGP in a gel format. Rose Vanille Body Splash is 229 EGP (220 ml) as a fragrance mist.", intent: "comparison", productIds: ['p3', 'p4'], state: newState };
     }
 
     // Default Fallback
+    newState.lastIntent = 'clarification';
     return {
-      reply: "I can help with Sanné moisturizers, body fragrance, skin-type guidance, ingredients, and prices. Tell me what your skin needs or what you're looking for ♡",
+      reply: "I can help with Sanné moisturizers, body fragrance, skin guidance, ingredients, and prices. Tell me what your skin needs or what you're looking for ♡",
       intent: "clarification",
       productIds: [],
-      currentProductId: activeId
+      state: newState
     };
   }
 
   /**
-   * Product Card Renderer — Uses shared window.products catalogue
+   * Product Card Renderer — Uses canonical window.products array
    */
   function renderProductCards(ids) {
     if (!ids || !ids.length || typeof window.products === 'undefined') return null;
