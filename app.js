@@ -265,9 +265,21 @@ function updateCartUI() {
     cartItemsContainer.innerHTML = '<p class="empty-cart-msg text-center mt-md" style="color: var(--color-text-light);">Your cart is empty.</p>';
     if (cartFooter) cartFooter.style.display = 'none';
   } else {
-    const donationVal = parseFloat(document.getElementById('sidebar-donation-amount')?.value || document.getElementById('checkout-donation-amount')?.value) || 0;
+    const citySelect = document.getElementById('checkout-city');
+    const city = citySelect ? citySelect.value.trim() : '';
+    
+    const deliveryFees = {
+      "Belbeis": 15, "Zagazig": 25, "10th of Ramadan": 30, "Cairo": 45, "Alexandria": 50, "Alex": 50,
+      "Ismailia": 45, "Aswan": 95, "Assiut": 80, "Luxor": 95, "Red Sea": 90,
+      "Beheira": 50, "Giza": 45, "Dakahlia": 45, "Suez": 50, "Gharbia": 45,
+      "Fayoum": 50, "Menoufia": 45, "Minya": 75, "New Valley": 95, "Beni Suef": 55,
+      "Port Said": 50, "South Sinai": 70, "Damietta": 50, "Sohag": 90, "North Sinai": 55,
+      "Qena": 95, "Kafr El Sheikh": 50, "Matrouh": 80, "Sharqiyah": 40, "Other": 75
+    };
+    const deliveryFee = (city && deliveryFees[city] !== undefined) ? deliveryFees[city] : 0;
+
     const totals = window.PricingEngine 
-      ? window.PricingEngine.calculateCartTotals(cart, donationVal, 50)
+      ? window.PricingEngine.calculateCartTotals(cart, donationVal, deliveryFee)
       : { subtotalEgp: '0 EGP', finalTotalEgp: '0 EGP', discountEgp: '0 EGP', shouldRecommendRitualBundle: false };
 
     cartItemsContainer.innerHTML = cart.map(item => {
@@ -313,6 +325,7 @@ function updateCartUI() {
       breakdownEl.innerHTML = `
         <div style="display:flex;justify-content:space-between;font-size:0.85rem;color:var(--color-text-light);margin-bottom:0.3rem;"><span>Subtotal</span><span>${totals.subtotalEgp}</span></div>
         ${totals.isLaunchEligible ? `<div style="display:flex;justify-content:space-between;font-size:0.85rem;color:var(--color-soft-gold);margin-bottom:0.3rem;"><span>Opening Offer (-10%)</span><span>-${totals.discountEgp}</span></div>` : ''}
+        <div style="display:flex;justify-content:space-between;font-size:0.85rem;color:var(--color-text-light);margin-bottom:0.3rem;"><span>Delivery</span><span>${city ? totals.deliveryEgp : 'Calculated at checkout'}</span></div>
         ${donationVal > 0 ? `<div style="display:flex;justify-content:space-between;font-size:0.85rem;color:var(--color-soft-gold);margin-bottom:0.3rem;"><span>Sana's Light Donation</span><span>${totals.donationEgp}</span></div>` : ''}
       `;
     }
@@ -334,11 +347,26 @@ function openCart(e) {
 
 function closeCartOverlay() {
   if (cartOverlay) cartOverlay.classList.remove('active');
+  const checkoutForm = document.getElementById('checkout-form');
+  if (checkoutForm) checkoutForm.reset();
+  updateCartUI();
 }
+
 
 if (cartNav) cartNav.addEventListener('click', openCart);
 if (mobileCart) mobileCart.addEventListener('click', openCart);
 if (closeCart) closeCart.addEventListener('click', closeCartOverlay);
+
+document.addEventListener('DOMContentLoaded', () => {
+  const citySelect = document.getElementById('checkout-city');
+  if (citySelect) {
+    citySelect.addEventListener('change', updateCartUI);
+  }
+  const donationInput = document.getElementById('sidebar-donation-amount');
+  if (donationInput) {
+    donationInput.addEventListener('input', updateCartUI);
+  }
+});
 
 addBtns.forEach(btn => {
   btn.addEventListener('click', (e) => {

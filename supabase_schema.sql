@@ -65,6 +65,24 @@ CREATE TABLE IF NOT EXISTS orders (
   confirmed_at TIMESTAMPTZ
 );
 
+-- Backward-compatible schema migration helper for pre-existing orders table
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS idempotency_key TEXT;
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS customer_name TEXT;
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS customer_phone TEXT;
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS customer_whatsapp TEXT;
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS city TEXT;
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS address TEXT;
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS payment_method TEXT DEFAULT 'cash';
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS base_subtotal NUMERIC(10, 2) DEFAULT 0.00;
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS discount_amount NUMERIC(10, 2) DEFAULT 0.00;
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS donation_amount NUMERIC(10, 2) DEFAULT 0.00;
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS delivery_fee NUMERIC(10, 2) DEFAULT 0.00;
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS final_total NUMERIC(10, 2) DEFAULT 0.00;
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS promo_code TEXT;
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS offer_type TEXT;
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS status TEXT DEFAULT 'placed';
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS confirmed_at TIMESTAMPTZ;
+
 CREATE TABLE IF NOT EXISTS order_items (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   order_id UUID REFERENCES orders(id) ON DELETE CASCADE,

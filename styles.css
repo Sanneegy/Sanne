@@ -131,9 +131,9 @@ img {
   }
 }
 
-/* Header — Global Transparent Layout */
+/* Header — Transparent Layout (Absolute at top, NOT fixed, NOT sticky) */
 .header {
-  position: fixed;
+  position: absolute;
   top: 0;
   left: 0;
   width: 100%;
@@ -142,15 +142,10 @@ img {
   justify-content: space-between;
   align-items: center;
   z-index: 1000;
-  background: transparent;
+  background: transparent !important;
   background-color: transparent !important;
   backdrop-filter: none !important;
   border-bottom: none !important;
-  transition: transform 0.3s ease;
-}
-
-.header.hidden {
-  transform: translateY(-100%);
 }
 
 /* Safe Top Spacing for Internal/Form Pages */

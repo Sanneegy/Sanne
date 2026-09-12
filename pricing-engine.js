@@ -146,7 +146,7 @@
         el.innerHTML = `
           <span style="text-decoration: line-through; color: var(--color-text-light); margin-right: 0.4rem; font-size: 0.9em;">${formatMoneyWhole(baseP)}</span>
           <span style="font-weight: 600; color: var(--color-dark-brown); font-size: 1.1em;">${formatMoney(finalP)}</span>
-          <span style="display: block; font-size: 0.75rem; color: var(--color-soft-gold); font-weight: 600; margin-top: 0.2rem;">10% Launch Offer</span>
+          <span style="display: block; font-size: 0.75rem; color: var(--color-soft-gold); font-weight: 600; margin-top: 0.2rem;">Opening Offer · 10% off</span>
         `;
       } else if (item.isBundle) {
         // The Sanné Ritual (299 EGP vs 318 EGP value)
