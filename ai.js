@@ -232,24 +232,25 @@
     if (/(what products do you have|what do you have|show me all|show all products|all products|full catalogue|everything you have|all collection)/i.test(q)) {
       newState.lastIntent = 'catalogue';
       return {
-        reply: "Here is our complete Sanné collection — two targeted facial moisturizers (229 EGP each), our signature Bosbos Makhmarya body fragrance (79 EGP), and our Rose Vanille Body Splash (229 EGP, 220 ml).",
+        reply: "Here is our complete Sanné collection — two targeted facial moisturizers (229 EGP each), our signature Bosbos Makhmarya body fragrance (89 EGP), Rose Vanille Body Splash (229 EGP, 220 ml), and The Sanné Ritual (299 EGP).",
         intent: "catalogue",
-        productIds: ['p1', 'p2', 'p3', 'p4'],
+        productIds: ['p1', 'p2', 'p3', 'p4', 'bundle_ritual'],
         state: newState
       };
     }
 
     // 5. CATEGORY DISCOVERY: "give me body fragrance" / "show me body fragrances"
     if (/(body fragrance|body fragrances|body scent|scented for body|scent for body|برفان جسم|معطر جسم)/i.test(q) && !q.includes('what is') && !q.includes('ingredient')) {
-      newState.candidateProductIds = ['p3', 'p4'];
+      newState.candidateProductIds = ['p3', 'p4', 'bundle_ritual'];
       newState.lastIntent = 'discovery';
       return {
-        reply: "We offer two body fragrances: Bosbos Body Fragrance (Makhmarya) at 79 EGP (gel format) and Rose Vanille Body Splash at 229 EGP (220 ml mist).",
+        reply: "We offer body fragrances: Bosbos Body Fragrance (Makhmarya) at 89 EGP (gel format), Rose Vanille Body Splash at 229 EGP (220 ml mist), and The Sanné Ritual set at 299 EGP.",
         intent: "discovery",
-        productIds: ['p3', 'p4'],
+        productIds: ['p3', 'p4', 'bundle_ritual'],
         state: newState
       };
     }
+
 
     // 6. INGREDIENT / FORMULA SYNONYM NORMALIZATION
     const isIngredientQuery = /(ingredient|ingredients|formula|formulation|what's inside|what is inside|what's in it|what does it contain|what is it made|ingrediants|ingredents|gel texture|softer feel|alcohol|glycerin|carbopol)/i.test(q);
@@ -320,10 +321,12 @@
     // 8. PRICE & SIZE QUESTIONS
     if (/(how much|price|cost|kam|بكام|سعره كام)/i.test(q)) {
       newState.lastIntent = 'price_question';
-      if (newState.currentProductId === 'p3') return { reply: "Bosbos Body Fragrance (Makhmarya) is 79 EGP.", intent: "price_question", productIds: [], state: newState };
+      if (newState.currentProductId === 'p3') return { reply: "Bosbos Body Fragrance (Makhmarya) is 89 EGP.", intent: "price_question", productIds: [], state: newState };
       if (newState.currentProductId === 'p4') return { reply: "Rose Vanille Body Splash is 229 EGP (220 ml).", intent: "price_question", productIds: [], state: newState };
+      if (newState.currentProductId === 'bundle_ritual') return { reply: "The Sanné Ritual is 299 EGP (318 EGP value).", intent: "price_question", productIds: [], state: newState };
       if (newState.currentProductId === 'p1' || newState.currentProductId === 'p2') return { reply: "Sanné Moisturizing Creams are 229 EGP each.", intent: "price_question", productIds: [], state: newState };
     }
+
 
     if (/(size|how big|how many ml|ml|الحجم|كام ملي)/i.test(q)) {
       newState.lastIntent = 'size_question';

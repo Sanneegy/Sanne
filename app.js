@@ -56,8 +56,8 @@ const products = [
     fullName: 'Bosbos Body Fragrance — Makhmarya',
     category: 'body fragrance',
     skinType: 'all',
-    price: 79,
-    oldPrice: 105,
+    price: 89,
+    oldPrice: 89,
     image: 'images/bosbos.jpg',
     hover_image: 'images/bosbos_hover.png',
     desc: 'A warm body fragrance made to leave the skin softly scented and beautifully cared for.',
@@ -75,7 +75,7 @@ const products = [
     category: 'body fragrance',
     skinType: 'all',
     price: 229,
-    oldPrice: 279,
+    oldPrice: 229,
     image: 'images/rose_vanille.jpg',
     hover_image: 'images/hover_rose_vanille.jpg',
     desc: 'A refreshing and long-lasting body fragrance mist with delicate rose and warm vanilla notes for your daily scent ritual.',
@@ -84,8 +84,40 @@ const products = [
     isMoisturizer: false,
     concerns: ['scent', 'fragrance', 'body splash', 'mist', 'rose', 'vanilla', 'refreshing', 'spray', '220 ml'],
     keywords: ['body splash', 'rose vanille', 'rose vanilla', 'fragrance mist', 'body fragrance', 'spray', 'scented', 'perfume', 'rose', 'vanilla', 'body scent', 'mist', '220 ml', 'splash']
+  },
+  {
+    id: 'bundle_ritual',
+    name: 'The Sanné Ritual',
+    variant: 'Rose Vanille Body Splash + Bosbos Makhmarya',
+    fullName: 'The Sanné Ritual — Body Splash + Makhmarya Set',
+    category: 'body fragrance',
+    skinType: 'all',
+    price: 299,
+    oldPrice: 318,
+    image: 'images/bosbos.jpg',
+    hover_image: 'images/rose_vanille.jpg',
+    desc: 'Two ways to wear Rose Vanille, made to be enjoyed together. Begin with Bosbos on your pulse points, then finish with Rose Vanille Body Splash for a fuller scent ritual. Already choosing the Body Splash? Complete the ritual for only 70 EGP more.',
+    isBestSeller: true,
+    isFragrance: true,
+    isMoisturizer: false,
+    isBundle: true,
+    concerns: ['scent', 'fragrance', 'bundle', 'ritual', 'set', 'gift', 'makhmarya', 'body splash'],
+    keywords: ['ritual', 'sanne ritual', 'bundle', 'set', 'gift set', 'rose vanille', 'makhmarya', 'bosbos', 'splash']
   }
 ];
+
+// Rhode-style Header Scroll Listener (Solid top -> Transparent scroll)
+window.addEventListener('scroll', () => {
+  const header = document.querySelector('.header');
+  if (header) {
+    if (window.scrollY > 25) {
+      header.classList.add('scrolled');
+    } else {
+      header.classList.remove('scrolled');
+    }
+  }
+});
+
 
 // Initialize product cards with data from the single source of truth and inject global UI elements
 document.addEventListener('DOMContentLoaded', () => {

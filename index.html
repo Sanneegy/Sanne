@@ -167,8 +167,7 @@
           <h3 class="product-title">Moisturizing Cream</h3>
           <p class="product-variant" style="font-size: 0.9rem; margin-bottom: 0.5rem; font-weight: 500;">For Dry Skin</p>
           <p class="product-desc">Rich moisture for healthy looking skin, with jojoba oil, sweet almond oil, ceramide NP, and hyaluronic acid.</p>
-          <div class="product-price-row">
-            <span class="price-old">279 EGP</span>
+          <div class="product-price-row" data-product-id="p1">
             <span class="price-new">229 EGP</span>
           </div>
           <button class="btn btn-primary btn-order add-to-cart-btn">Add to cart</button>
@@ -185,8 +184,7 @@
           <h3 class="product-title">Moisturizing Cream</h3>
           <p class="product-variant" style="font-size: 0.9rem; margin-bottom: 0.5rem; font-weight: 500;">For Oily and Combination Skin</p>
           <p class="product-desc">Lightweight daily moisture that supports skin barrier comfort, with naturally derived lipids and soothing extracts.</p>
-          <div class="product-price-row">
-            <span class="price-old">279 EGP</span>
+          <div class="product-price-row" data-product-id="p2">
             <span class="price-new">229 EGP</span>
           </div>
           <button class="btn btn-primary btn-order add-to-cart-btn">Add to cart</button>
@@ -194,7 +192,7 @@
       </div>
 
       <!-- Product 3 -->
-      <div class="product-card" data-id="p3" data-name="Bosbos Body Fragrance" data-variant="Makhmarya" data-price="79">
+      <div class="product-card" data-id="p3" data-name="Bosbos Body Fragrance" data-variant="Makhmarya" data-price="89">
         <div class="product-image-container">
           <img src="images/bosbos.jpg" alt="Bosbos Body Fragrance" class="product-image default-img">
           <img src="images/bosbos_hover.png" alt="Bosbos Body Fragrance Usage" class="product-image hover-img">
@@ -203,9 +201,8 @@
           <h3 class="product-title">Bosbos Body Fragrance</h3>
           <p class="product-variant" style="font-size: 0.9rem; margin-bottom: 0.5rem; font-weight: 500;">Makhmarya</p>
           <p class="product-desc">A warm body fragrance made to leave the skin softly scented and beautifully cared for.</p>
-          <div class="product-price-row">
-            <span class="price-old">105 EGP</span>
-            <span class="price-new">79 EGP</span>
+          <div class="product-price-row" data-product-id="p3">
+            <span class="price-new">89 EGP</span>
           </div>
           <button class="btn btn-primary btn-order add-to-cart-btn">Add to cart</button>
         </div>
@@ -221,13 +218,31 @@
           <h3 class="product-title">Rose Vanille Body Splash</h3>
           <p class="product-variant" style="font-size: 0.9rem; margin-bottom: 0.5rem; font-weight: 500;">220 ml</p>
           <p class="product-desc">A refreshing and long-lasting body fragrance mist with delicate rose and warm vanilla notes for your daily scent ritual.</p>
-          <div class="product-price-row">
-            <span class="price-old">279 EGP</span>
+          <div class="product-price-row" data-product-id="p4">
             <span class="price-new">229 EGP</span>
           </div>
           <button class="btn btn-primary btn-order add-to-cart-btn">Add to cart</button>
         </div>
       </div>
+
+      <!-- Product 5 (The Sanné Ritual Bundle) -->
+      <div class="product-card" data-id="bundle_ritual" data-name="The Sanné Ritual" data-variant="Rose Vanille Body Splash + Bosbos Makhmarya" data-price="299">
+        <div class="product-image-container">
+          <img src="images/bosbos.jpg" alt="The Sanné Ritual" class="product-image default-img">
+          <img src="images/rose_vanille.jpg" alt="The Sanné Ritual Set" class="product-image hover-img">
+        </div>
+        <div class="product-info">
+          <h3 class="product-title">The Sanné Ritual</h3>
+          <p class="product-variant" style="font-size: 0.9rem; margin-bottom: 0.5rem; font-weight: 500;">Rose Vanille Body Splash + Bosbos Makhmarya</p>
+          <p class="product-desc">Two ways to wear Rose Vanille, made to be enjoyed together. Begin with Bosbos on your pulse points, then finish with Rose Vanille Body Splash for a fuller scent ritual. Already choosing the Body Splash? Complete the ritual for only 70 EGP more.</p>
+          <div class="product-price-row" data-product-id="bundle_ritual">
+            <span class="price-old" style="text-decoration: line-through; font-size: 0.9rem; color: var(--color-text-light); margin-right: 0.4rem;">318 EGP</span>
+            <span class="price-new" style="font-weight: 600; color: var(--color-dark-brown); font-size: 1.1rem;">299 EGP</span>
+          </div>
+          <button class="btn btn-primary btn-order add-to-cart-btn">GET THE RITUAL</button>
+        </div>
+      </div>
+
     </div>
   </section>
 
@@ -300,8 +315,11 @@
     </div>
   </footer>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="pricing-engine.js"></script>
   <script src="orders-service.js"></script>
   <script src="app.js"></script>
   <script src="donation-helpers.js"></script>
 </body>
+
 </html>

@@ -1,7 +1,8 @@
 /**
- * pricing-engine.js — Sanné Commercial Pricing Preview & Template Renderer
+ * pricing-engine.js — Sanné Commercial Pricing Engine & Template Renderer
  *
  * Responsibilities:
+ * - Authoritative base prices: Makhmarya (89 EGP), Body Splash (229 EGP), Sanné Ritual (299 EGP).
  * - Integer minor unit financial arithmetic (piastres / cents) to eliminate floating-point artifacts.
  * - Dynamic UI price rendering (HTML data-product-id elements).
  * - Client-side launch eligibility checks for anti-286.20 bug warnings & bundle switch recommendations.
@@ -11,8 +12,8 @@
 (function(window) {
   'use strict';
 
-  // Configured Launch Window: Sept 14, 2026 11:00 AM to Sept 18, 2026 11:00 AM Cairo Time (UTC+3)
-  // Exclusive End: Thursday Sept 17, 2026 11:59:59 PM Cairo (UTC+3) -> 2026-09-17T21:00:00Z
+  // Configured Launch Window: Sept 14, 2026 11:00 AM to Sept 17, 2026 11:59:59 PM Cairo Time (UTC+3)
+  // Exclusive End: 2026-09-17T21:00:00Z
   const PROMO_CONFIG = {
     code: 'LAUNCH10',
     startsAt: '2026-09-14T08:00:00Z',
@@ -21,7 +22,7 @@
     eligibleProductIds: ['p3', 'p4']
   };
 
-  // Catalogue Cache (Updated dynamically from DB/app.js)
+  // Catalogue Cache (Base prices in piastres: 1 EGP = 100 piastres)
   let catalogueCache = {
     'p1': { id: 'p1', name: 'Moisturizing Cream for Dry Skin', basePricePiastres: 22900, isBundle: false },
     'p2': { id: 'p2', name: 'Moisturizing Cream for Oily and Combination Skin', basePricePiastres: 22900, isBundle: false },
@@ -60,7 +61,8 @@
     if (!cart || cart.length !== 1) return { eligible: false, discountPiastres: 0 };
     
     const line = cart[0];
-    if (line.quantity !== 1 || line.isBundle) return { eligible: false, discountPiastres: 0 };
+    const qty = parseInt(line.quantity || line.qty, 10) || 1;
+    if (qty !== 1 || line.isBundle || line.id === 'bundle_ritual') return { eligible: false, discountPiastres: 0 };
 
     if (!PROMO_CONFIG.eligibleProductIds.includes(line.id)) {
       return { eligible: false, discountPiastres: 0 };
@@ -97,7 +99,8 @@
 
     (cart || []).forEach(item => {
       const baseUnit = getBasePricePiastres(item.id);
-      subtotalPiastres += baseUnit * (parseInt(item.quantity, 10) || 1);
+      const qty = parseInt(item.quantity || item.qty, 10) || 1;
+      subtotalPiastres += baseUnit * qty;
     });
 
     const launchResult = checkLaunchEligibility(cart, nowDate);
@@ -148,7 +151,7 @@
           <span style="font-weight: 600; color: var(--color-dark-brown); font-size: 1.1em;">${formatMoney(finalP)}</span>
           <span style="display: block; font-size: 0.75rem; color: var(--color-soft-gold); font-weight: 600; margin-top: 0.2rem;">Opening Offer · 10% off</span>
         `;
-      } else if (item.isBundle) {
+      } else if (item.isBundle || id === 'bundle_ritual') {
         // The Sanné Ritual (299 EGP vs 318 EGP value)
         el.innerHTML = `
           <span style="text-decoration: line-through; color: var(--color-text-light); margin-right: 0.4rem; font-size: 0.9em;">318 EGP</span>

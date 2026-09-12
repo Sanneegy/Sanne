@@ -121,26 +121,28 @@ img {
   border-color: var(--color-soft-brown);
 }
 
-/* Header */
+/* Header — Rhode-style Navigation */
 .header {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
-  padding: 1.5rem 5%;
+  padding: 1.2rem 5%;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  z-index: 100;
-  background-color: rgba(250, 249, 246, 0.95);
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid rgba(224, 215, 200, 0.3);
-  transition: transform 0.3s ease;
+  z-index: 1000;
+  background-color: var(--color-cream);
+  border-bottom: 1px solid var(--color-border);
+  transition: background-color 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
 }
 
-.header.hidden {
-  transform: translateY(-100%);
+.header.scrolled {
+  background-color: transparent !important;
+  border-bottom-color: transparent !important;
+  backdrop-filter: none !important;
 }
+
 
 .nav-left, .nav-right {
   display: flex;
