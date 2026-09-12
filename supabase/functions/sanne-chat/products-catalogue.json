@@ -1,4 +1,4 @@
-[
+﻿[
   {
     "id": "p1",
     "name": "Moisturizing Cream for Dry Skin",
@@ -6,7 +6,11 @@
     "size": "200 ml",
     "category": "moisturizer",
     "variant": "200 ml",
-    "image": "images/dry_skin.jpg"
+    "image": "images/dry_skin.jpg",
+    "aliases": ["dry skin cream", "dry moisturizer", "cream for dry skin", "dry skin moisturizer", "moisturizer for dry", "كريم البشرة الجافة", "كريم للبشرة الجافة"],
+    "bestFor": "Dry, tight, flaky, rough, dehydrated, dull skin",
+    "ingredientsStatus": "UNAVAILABLE — never invent",
+    "launchDiscount": false
   },
   {
     "id": "p2",
@@ -15,33 +19,73 @@
     "size": "200 ml",
     "category": "moisturizer",
     "variant": "200 ml",
-    "image": "images/oily_skin.jpg"
+    "image": "images/oily_skin.jpg",
+    "aliases": ["oily skin cream", "combination cream", "oily moisturizer", "cream for oily skin", "كريم للبشرة الدهنية", "كريم البشرة المختلطة"],
+    "bestFor": "Oily, shiny, greasy, combination, T-zone oiliness",
+    "ingredientsStatus": "UNAVAILABLE — never invent",
+    "launchDiscount": false
   },
   {
     "id": "p3",
     "name": "Bosbos Body Fragrance",
     "price": 89,
-    "size": "gel format",
+    "size": "50 ml",
+    "format": "gel",
     "category": "body fragrance",
     "variant": "Makhmarya",
-    "image": "images/bosbos.jpg"
+    "image": "images/bosbos.jpg",
+    "aliases": ["bosbos", "makhmarya", "makhmaria", "مخمرية", "بصبص", "body gel", "fragrance gel", "50ml fragrance", "gel fragrance", "bosboss", "bosbuss", "makhmarya gel"],
+    "scent": "Warm, velvety, musky rose-vanilla with Middle-Eastern oud depth",
+    "keyIngredients": [
+      {"name": "Shea Butter", "role": "Deep nourishing emollient"},
+      {"name": "Sweet Almond Oil", "role": "Skin-softening carrier oil"},
+      {"name": "Jojoba Oil", "role": "Balancing, lightweight moisturizer"},
+      {"name": "Vitamin E", "role": "Antioxidant skin protection"},
+      {"name": "Rose Extract", "role": "Soothing floral note and skin benefit"},
+      {"name": "Vanilla Extract", "role": "Warm fragrance depth"},
+      {"name": "Glycerin", "role": "Humectant, attracts water to skin surface"},
+      {"name": "Carbopol 940", "role": "Creates the gel structure and texture"}
+    ],
+    "howToUse": "Apply to pulse points — wrists, neck, behind ears. Warm between fingers first for best diffusion.",
+    "layeringTip": "Layer under or over Rose Vanille Body Splash for a longer-lasting, intensified scent.",
+    "launchDiscount": true,
+    "discountedPrice": 80.10
   },
   {
     "id": "p4",
     "name": "Rose Vanille Body Splash",
     "price": 229,
     "size": "220 ml",
+    "format": "spray mist",
     "category": "body fragrance",
     "variant": "220 ml",
-    "image": "images/rose_vanille.jpg"
+    "image": "images/rose_vanille.jpg",
+    "aliases": ["body splash", "rose vanille", "rose vanilla", "splash", "mist", "body mist", "rose vanilla splash", "روز فانيل", "سبلاش", "بودي سبلاش", "220ml", "spray"],
+    "scent": "Fresh rose and vanilla mist — light and feminine, ideal for all-over daily wear",
+    "keyIngredients": [
+      {"name": "Fragrance Oil", "role": "Provides the rose-vanilla scent"},
+      {"name": "Ethyl Alcohol / Ethanol", "role": "Lightweight fragrance carrier, quick-drying. Body Splash DOES contain alcohol."},
+      {"name": "DPG (Dipropylene Glycol)", "role": "Fragrance distributor and carrier"},
+      {"name": "PG (Propylene Glycol)", "role": "Solvent/carrier with humectant properties"}
+    ],
+    "howToUse": "Spray all over body after shower. Can be sprayed on clothes, hair, and pulse points.",
+    "layeringTip": "Spray over Bosbos Makhmarya for an intensified, longer-lasting rose-vanilla scent ritual.",
+    "launchDiscount": true,
+    "discountedPrice": 206.10,
+    "note": "Contains ethanol — not alcohol-free. Do NOT claim alcohol-free."
   },
   {
     "id": "bundle_ritual",
     "name": "The Sanné Ritual",
     "price": 299,
-    "size": "Gift Set (Makhmarya + Body Splash)",
-    "category": "body fragrance",
+    "originalValue": 318,
+    "size": "Gift Set (Bosbos Makhmarya 50ml + Rose Vanille Body Splash 220ml)",
+    "category": "bundle",
     "variant": "Rose Vanille Body Splash + Bosbos Makhmarya",
-    "image": "images/bosbos.jpg"
+    "image": "images/bundle_ritual_default.jpg",
+    "aliases": ["ritual", "bundle", "set", "gift set", "sanne ritual", "sanné ritual", "the ritual", "both products", "كومبو", "مجموعة", "باندل"],
+    "description": "Both rose-vanilla body fragrances together at a bundled price. 299 EGP instead of 318 EGP when bought separately.",
+    "launchDiscount": false,
+    "note": "Bundle does NOT receive the 10% standalone launch discount. Fixed price 299 EGP."
   }
 ]
