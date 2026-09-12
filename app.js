@@ -106,17 +106,6 @@ const products = [
   }
 ];
 
-// Rhode-style Header Scroll Listener (Solid top -> Transparent scroll)
-window.addEventListener('scroll', () => {
-  const header = document.querySelector('.header');
-  if (header) {
-    if (window.scrollY > 25) {
-      header.classList.add('scrolled');
-    } else {
-      header.classList.remove('scrolled');
-    }
-  }
-});
 
 
 // Initialize product cards with data from the single source of truth and inject global UI elements
@@ -249,7 +238,26 @@ if (searchInput) {
 }
 
 // 4. Cart Logic
-let cart = JSON.parse(localStorage.getItem('sanne_cart')) || [];
+
+// Normalize cart items from localStorage against the products catalogue
+// Fixes NaN/undefined from legacy entries that only stored { id, quantity, isBundle }
+function getNormalizedCart(rawCart) {
+  return (rawCart || []).reduce((acc, item) => {
+    const product = products.find(p => p.id === item.id);
+    if (!product) return acc; // drop unresolvable entries
+    const qty = parseInt(item.qty || item.quantity, 10) || 1;
+    // Merge: product data wins for name/image/price; keep qty from stored entry
+    const existing = acc.find(a => a.id === product.id);
+    if (existing) {
+      existing.qty += qty;
+    } else {
+      acc.push({ ...product, qty });
+    }
+    return acc;
+  }, []);
+}
+
+let cart = getNormalizedCart(JSON.parse(localStorage.getItem('sanne_cart')) || []);
 const cartNav = document.getElementById('nav-cart');
 const mobileCart = document.getElementById('mobile-cart');
 const cartOverlay = document.getElementById('cart-overlay');
@@ -350,6 +358,13 @@ function openCart(e) {
 
 function closeCartOverlay() {
   cartOverlay.classList.remove('active');
+  // Clear customer form inputs but keep cart products
+  const checkoutFormEl = document.getElementById('checkout-form');
+  if (checkoutFormEl) checkoutFormEl.reset();
+  const successEl = document.getElementById('checkout-success-msg');
+  if (successEl) successEl.style.display = 'none';
+  const donationInput = document.getElementById('sidebar-donation-amount');
+  if (donationInput) donationInput.value = '';
 }
 
 if (cartNav) cartNav.addEventListener('click', openCart);

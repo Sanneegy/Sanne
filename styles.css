@@ -121,9 +121,9 @@ img {
   border-color: var(--color-soft-brown);
 }
 
-/* Header — Rhode-style Navigation */
+/* Header — Rhode-style Navigation (non-sticky, scrolls away with page) */
 .header {
-  position: fixed;
+  position: absolute;
   top: 0;
   left: 0;
   width: 100%;
@@ -134,13 +134,6 @@ img {
   z-index: 1000;
   background-color: var(--color-cream);
   border-bottom: 1px solid var(--color-border);
-  transition: background-color 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
-}
-
-.header.scrolled {
-  background-color: transparent !important;
-  border-bottom-color: transparent !important;
-  backdrop-filter: none !important;
 }
 
 
@@ -2362,5 +2355,17 @@ select.form-control {
   .journal-handwritten-note {
     transform: none;
     width: 100%;
+  }
+}
+
+/* Homepage Sana's Light collage grid — mobile responsive */
+@media (max-width: 700px) {
+  .futures-collage-grid {
+    grid-template-columns: 1fr !important;
+    grid-template-rows: auto !important;
+  }
+  .futures-collage-grid > div {
+    grid-column: 1 !important;
+    grid-row: auto !important;
   }
 }
