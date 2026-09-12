@@ -20,7 +20,7 @@
   {
     "id": "p3",
     "name": "Bosbos Body Fragrance",
-    "price": 89,
+    "price": 79,
     "size": "gel format",
     "category": "body fragrance",
     "variant": "Makhmarya",
@@ -34,15 +34,5 @@
     "category": "body fragrance",
     "variant": "220 ml",
     "image": "images/rose_vanille.jpg"
-  },
-  {
-    "id": "bundle_ritual",
-    "name": "The Sanné Ritual",
-    "price": 299,
-    "size": "Makhmarya + Body Splash",
-    "category": "bundle",
-    "variant": "Gift Set",
-    "image": "images/bosbos.jpg",
-    "is_bundle": true
   }
 ]
