@@ -104,34 +104,7 @@ const products = [
     concerns: ['scent', 'fragrance', 'bundle', 'ritual', 'set', 'gift', 'makhmarya', 'body splash'],
     keywords: ['ritual', 'sanne ritual', 'bundle', 'set', 'gift set', 'rose vanille', 'makhmarya', 'bosbos', 'splash']
   }
-// Smart Rhode-style Header Scroll Logic (hide on scroll down, show on scroll up)
-let lastScrollY = window.scrollY;
-const header = document.querySelector('.header');
-
-if (header) {
-  window.addEventListener('scroll', () => {
-    const currentScrollY = window.scrollY;
-    const delta = currentScrollY - lastScrollY;
-
-    if (currentScrollY < 30) {
-      header.classList.remove('header-hidden');
-      header.classList.add('header-visible');
-      header.classList.remove('scrolled-bg');
-    } else {
-      header.classList.add('scrolled-bg');
-      if (delta > 8) {
-        // Scrolling down -> hide header
-        header.classList.add('header-hidden');
-        header.classList.remove('header-visible');
-      } else if (delta < -8) {
-        // Scrolling up -> reveal header
-        header.classList.remove('header-hidden');
-        header.classList.add('header-visible');
-      }
-    }
-    lastScrollY = currentScrollY;
-  }, { passive: true });
-}
+];
 
 document.addEventListener('DOMContentLoaded', () => {
   // 1. Inject ASK SANNÉ and My Loves into navigation
@@ -408,17 +381,17 @@ addBtns.forEach(btn => {
 
 updateCartUI(); // Init cart UI
 
-// 5. Checkout Logic
-const checkoutForm = document.getElementById('checkout-form');
-if (checkoutForm) {
-  checkoutForm.addEventListener('submit', (e) => {
-    // Only run this handler if the drawer checkout fields are present
-    const nameEl = document.getElementById('checkout-name');
-    if (!nameEl) return;
+// 5. Checkout Logic (Document-level event delegation for guaranteed listener binding)
+document.addEventListener('submit', (e) => {
+  const checkoutFormEl = e.target.closest('#checkout-form');
+  if (!checkoutFormEl) return;
 
-    e.preventDefault();
-    
-    if (cart.length === 0) return;
+  const nameEl = document.getElementById('checkout-name');
+  if (!nameEl) return;
+
+  e.preventDefault();
+  
+  if (cart.length === 0) return;
     
     const name = nameEl.value;
     const phone = document.getElementById('checkout-phone').value;
@@ -542,7 +515,6 @@ ${notes ? `Notes: ${notes}` : ''}`;
       }
     })();
   });
-}
 
 // Make functions global for inline onclick handlers
 window.updateQty = updateQty;

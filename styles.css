@@ -121,35 +121,25 @@ img {
   border-color: var(--color-soft-brown);
 }
 
-/* Header — Rhode-style Transparent & Smart Scroll Navigation */
+/* Header — Restored Yesterday's Exact Version */
 .header {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
-  padding: 1.2rem 5%;
+  padding: 1.5rem 5%;
   display: flex;
   justify-content: space-between;
   align-items: center;
   z-index: 1000;
-  background-color: transparent;
-  border-bottom: 1px solid rgba(224, 215, 200, 0.3);
-  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.3s ease;
-  will-change: transform;
-}
-
-.header.header-hidden {
-  transform: translateY(-100%);
-}
-
-.header.header-visible {
-  transform: translateY(0);
-}
-
-.header.scrolled-bg {
-  background-color: rgba(248, 246, 240, 0.92);
+  background-color: rgba(250, 249, 246, 0.95);
   backdrop-filter: blur(10px);
-  border-bottom: 1px solid var(--color-border);
+  border-bottom: 1px solid rgba(224, 215, 200, 0.3);
+  transition: transform 0.3s ease;
+}
+
+.header.hidden {
+  transform: translateY(-100%);
 }
 
 .nav-left, .nav-right {
@@ -163,13 +153,12 @@ img {
 }
 
 .nav-link {
-  font-size: 0.82rem;
+  font-size: 0.9rem;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
-  font-weight: 500;
-  color: #3A3228;
+  letter-spacing: 0.05em;
+  font-weight: 400;
+  color: var(--color-text);
   position: relative;
-  transition: color 0.2s ease;
 }
 
 .nav-link::after {
