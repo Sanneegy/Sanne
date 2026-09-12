@@ -6,6 +6,8 @@
   <title>Sanné | Premium Skincare and Body Care</title>
   <meta name="description" content="Sanné is a premium Egyptian skincare brand focused on natural inspired, intentional care. We are here for 20 years of glowing you.">
   <link rel="stylesheet" href="styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;600&family=Playfair+Display:ital,wght@0,400;0,600;1,400;1,600&display=swap" rel="stylesheet">
 </head>
 <body>
 
@@ -275,37 +277,63 @@
     </div>
   </section>
 
-  <!-- Sana's Light — Community Giving (moved from Futures) -->
-  <section id="sanas-light" class="futures-journal-section section container">
-    <div class="section-header text-center mb-lg">
-      <p class="section-subtitle" style="text-transform: uppercase; letter-spacing: 0.1em; font-size: 0.8rem; color: var(--color-soft-gold); font-weight: 600; margin-bottom: 0.5rem;">COMMUNITY GIVING</p>
-      <h2 class="section-title">What your kindness has made possible</h2>
-    </div>
+  <!-- Sana's Light — Community Giving Editorial Section (exact design) -->
+  <section id="sanas-light" class="futures-journal-section">
+    <div class="container">
+      <div class="journal-wrapper">
+        <!-- Left Column -->
+        <div class="journal-left-column">
+          <div class="journal-ribbon-tag">
+            <span class="ribbon-star">★</span> COMMUNITY GIVING
+          </div>
+          <h2 class="journal-main-headline">
+            What your kindness <br><span class="headline-italic">has made possible</span> <span class="headline-heart">♥</span>
+          </h2>
+          <div class="headline-divider-star">✦ ✦ ✦</div>
 
-    <!-- Collage Grid -->
-    <div class="futures-collage-grid" style="display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: auto auto; gap: 1rem; margin-bottom: 2.5rem;">
-      <div style="grid-column: 1; grid-row: 1 / 3;">
-        <img src="images/new_3.jpg" alt="Sana's Light" style="width: 100%; height: 100%; object-fit: cover; border-radius: 4px; display: block;">
-      </div>
-      <div style="grid-column: 2; grid-row: 1;">
-        <img src="images/new_2.jpg" alt="Sana's Light Fund" style="width: 100%; aspect-ratio: 4/3; object-fit: cover; border-radius: 4px; display: block;">
-      </div>
-      <div style="grid-column: 2; grid-row: 2; background-color: var(--color-cream); border-radius: 4px; padding: 1.5rem 2rem; display: flex; flex-direction: column; justify-content: center;">
-        <p style="font-family: var(--font-serif); font-size: 1.1rem; color: var(--color-dark-brown); margin-bottom: 0.5rem; font-style: italic;">"From day one, Sanné dedicates 1% of every sale to cancer support organizations."</p>
-        <p style="font-size: 0.85rem; color: var(--color-text-light);">This promise is inspired by Sana's light, a light we carry forward through every product and every order.</p>
-      </div>
-    </div>
+          <!-- Layered Donation Card -->
+          <div class="journal-donation-card-wrap">
+            <div class="donation-card-backing"></div>
+            <div class="donation-card-front">
+              <p class="card-eyebrow">Live donation total from Sanné orders</p>
+              <div class="card-hero-number" id="homepage-donation-total" data-donation-total>1,300 EGP</div>
+              <p class="card-hero-sub">and growing with every act of kindness.</p>
+              <div class="card-wax-seal">
+                <svg class="wax-seal-svg" viewBox="0 0 100 100">
+                  <circle cx="50" cy="50" r="45" fill="#8A333C" />
+                  <circle cx="50" cy="50" r="38" fill="none" stroke="#F8E6C8" stroke-width="2" stroke-dasharray="4 2" />
+                  <text x="50" y="58" font-family="'Playfair Display', serif" font-size="32" fill="#F8E6C8" text-anchor="middle">S</text>
+                </svg>
+              </div>
+            </div>
+          </div>
 
-    <!-- Donation Total Counter -->
-    <div style="text-align: center; background-color: var(--color-cream); border-radius: 8px; padding: 2.5rem 2rem; margin-bottom: 2rem;">
-      <p style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--color-soft-brown); font-weight: 600; margin-bottom: 0.8rem;">Together we have raised</p>
-      <p id="homepage-donation-total" data-donation-total style="font-family: var(--font-serif); font-size: clamp(2.2rem, 5vw, 3.5rem); color: var(--color-dark-brown); font-weight: 400; margin-bottom: 0.5rem;">1,300 EGP</p>
-      <p style="font-size: 0.85rem; color: var(--color-text-light);">and growing with every order</p>
-    </div>
+          <!-- Sub-row: text + handwritten note -->
+          <div class="journal-sub-row">
+            <div class="journal-emotional-text">
+              One order gives a little.<br>
+              Another does the same.<br>
+              <span class="text-emphasis">Together, they become much bigger.</span>
+            </div>
+            <div class="journal-handwritten-note">
+              <div class="note-paperclip"></div>
+              <p>Shared by every customer who chooses to give <span class="note-heart">♥</span></p>
+            </div>
+          </div>
 
-    <!-- CTA -->
-    <div class="text-center">
-      <a href="futures.html" class="btn">Learn about Sana's Light</a>
+          <!-- Bottom Campaign Strip -->
+          <div class="journal-bottom-strip">
+            <span class="strip-star">✦</span> Your beauty ritual can carry care far beyond the bottle.
+          </div>
+        </div>
+
+        <!-- Right Column: Printed Photo Frame -->
+        <div class="journal-right-column">
+          <div class="journal-photo-frame">
+            <img src="images/new_3.jpg" alt="Sana's Light Community Giving" class="journal-photo-img">
+          </div>
+        </div>
+      </div>
     </div>
   </section>
 
