@@ -166,10 +166,10 @@
 
   /**
    * Stateful Local Engine (Fallback & Guardrails)
-   * Covers: medical disclaimer, pending clarification, product identification,
-   * delivery, payment, donation, brand, upcoming, orders, reviews, wishlist,
-   * scent, layering, how-to-use, gifts, catalogue, ingredients, purpose,
-   * price, size, bundle, budget, follow-up, comparison, skin-type, unknown-intent logger.
+   * Answers directly: medical claims, safety/allergies, Makhmarya ingredients (honest temporary),
+   * bundle questions, active offers, 2+ item discount rules, delivery, payment, donation,
+   * brand story, upcoming, orders, reviews, wishlist, scent, layering, how-to-use, gifts,
+   * catalogue, budget, comparison, skin-type, specific clarification fallback.
    */
   function localRecommendationEngine(query, history, currentState) {
     const q = query.toLowerCase().trim();
@@ -182,33 +182,40 @@
       activeConstraints: { skinType: null, budgetMax: null, category: null }
     }));
 
-    // 1. MEDICAL / CURE DISCLAIMER
+    const isArabic = /[\u0600-\u06FF]/.test(query);
+
+    // 1. UNSUPPORTED MEDICAL / CURE DISCLAIMER
     if (/(cure|treat|heal|doctor|prescription|eczema|psoriasis|dermatitis|rosacea)/i.test(q)) {
       newState.lastIntent = 'disclaimer';
-      return { reply: "Sann\u00e9 products provide gentle cosmetic daily care and moisture barrier support. For medical skin conditions, we recommend consulting a dermatologist \u2661", intent: "disclaimer", productIds: [], state: newState };
+      return {
+        reply: isArabic 
+          ? "منتجات ساني تقدم العناية اليومية التجميلية ودعم حاجز البشرة. للحالات الطبية أو العلاجية، نوصي باستشارة طبيب جلدية \u2661"
+          : "Sann\u00e9 products provide gentle cosmetic daily care and moisture barrier support. For medical skin conditions, we recommend consulting a dermatologist \u2661",
+        intent: "disclaimer",
+        productIds: [],
+        state: newState
+      };
     }
 
-    // 2. RESOLVE PENDING CLARIFICATION
-    if (newState.pendingClarification === 'moisturizer_variant') {
-      if (/dry|flaky|tight|\u0646\u0627\u0634\u0641\u0629|nashfa|jafa|gafa/i.test(q)) {
-        newState.currentProductId = 'p1';
-        newState.activeConstraints.skinType = 'dry';
-      } else if (/oily|shiny|greasy|\u0628\u062a\u0632\u064a\u062a|dehniya|byzayt/i.test(q)) {
-        newState.currentProductId = 'p2';
-        newState.activeConstraints.skinType = 'oily';
-      }
-      if (newState.pendingIntent === 'ingredient_question' || newState.pendingIntent === 'formula') {
-        newState.pendingIntent = null; newState.pendingClarification = null; newState.lastIntent = 'ingredient_question';
-        return { reply: "The full ingredient details for our moisturizers are still being finalized for Ask Sann\u00e9 and will be available soon \u2661 I can still help you choose between the Dry Skin and Oily & Combination formulas based on what your skin needs.", intent: "ingredient_question", productIds: [], state: newState };
-      }
+    // 2. ALLERGY / SPECIFIC INGREDIENT SAFETY QUESTION
+    if (/(allergy|allergic|almond|nut|sensitivity|safe for me|can i use if|\u062d\u0633\u0627\u0633\u064a\u0629)/i.test(q)) {
+      newState.lastIntent = 'safety_question';
+      return {
+        reply: isArabic
+          ? "ليس لدينا قائمة مسببات الحساسية الكاملة المؤكدة حالياً. إذا كانت لديك حساسية معينة أو مخاوف، يرجى التواصل مع فريق ساني عبر الواتساب قبل الطلب للتأكد \u2661"
+          : "We don't have a verified full allergen/ingredient breakdown available right now. If you have specific skin sensitivities or allergies, please contact our Sann\u00e9 team directly on WhatsApp before ordering so we can confirm safety for you \u2661",
+        intent: "safety_question",
+        productIds: [],
+        state: newState
+      };
     }
 
-    // 3. PRODUCT IDENTIFICATION (Arabic/Franco-Arabic aliases included)
-    const isMakhmarya = /makhmarya|makhmaria|makhmariah|bosbos|bosboss|bosbuss|\u0645\u062e\u0645\u0631\u064a\u0629|\u0628\u0635\u0628\u0635|el gel|the gel|3etr el gel|body gel|gel fragrance/i.test(q);
-    const isSplash    = /body splash|rose vanille|rose vanilla|splash|mist|body mist|bespray|bspray|sparay|\u0631\u0648\u0632 \u0641\u0627\u0646\u064a\u0644|\u0633\u0628\u0644\u0627\u0634|\u0628\u0648\u062f\u064a \u0633\u0628\u0644\u0627\u0634|220\s?ml|el splash/i.test(q);
-    const isRitual    = /ritual|the ritual|sann[e\u00e9] ritual|bundle|el set|el combo|combo|\u0643\u0648\u0645\u0628\u0648|\u0645\u062c\u0645\u0648\u0639\u0629|el routine|both products/i.test(q);
-    const isDryCream  = /dry skin (?:cream|moisturizer)|cream for dry skin|dry moisturizer|\u0643\u0631\u064a\u0645 \u0627\u0644\u0628\u0634\u0631\u0629 \u0627\u0644\u062c\u0627\u0641\u0629|\u0643\u0631\u064a\u0645 \u0644\u0644\u0628\u0634\u0631\u0629 \u0627\u0644\u062c\u0627\u0641\u0629/i.test(q);
-    const isOilyCream = /oily skin (?:cream|moisturizer)|cream for oily skin|oily moisturizer|combination cream|\u0643\u0631\u064a\u0645 \u0644\u0644\u0628\u0634\u0631\u0629 \u0627\u0644\u062f\u0647\u0646\u064a\u0629/i.test(q);
+    // 3. PRODUCT SPECIFIC IDENTIFICATION (Arabic / Franco / English)
+    const isMakhmarya = /(makhmarya|makhmaria|makhmariah|bosbos|bosboss|bosbuss|\u0645\u062e\u0645\u0631\u064a\u0629|\u0628\u0635\u0628\u0635|el gel|the gel|3etr el gel|body gel|gel fragrance)/i.test(q);
+    const isSplash    = /(body splash|rose vanille|rose vanilla|splash|mist|body mist|bespray|bspray|sparay|\u0631\u0648\u0632 \u0641\u0627\u0646\u064a\u0644|\u0633\u0628\u0644\u0627\u0634|\u0628\u0648\u062f\u064a \u0633\u0628\u0644\u0627\u0634|220\s*ml|el splash)/i.test(q);
+    const isRitual    = /(ritual|the ritual|sann[e\u00e9] ritual|bundle|el set|el combo|combo|\u0643\u0648\u0645\u0628\u0648|\u0645\u062c\u0645\u0648\u0639\u0629|el routine|both products)/i.test(q);
+    const isDryCream  = /(dry skin (cream|moisturizer)|cream for dry skin|dry moisturizer|\u0643\u0631\u064a\u0645 \u0627\u0644\u0628\u0634\u0631\u0629 \u0627\u0644\u062c\u0627\u0641\u0629|\u0643\u0631\u064a\u0645 \u0644\u0644\u0628\u0634\u0631\u0629 \u0627\u0644\u062c\u0627\u0641\u0629)/i.test(q);
+    const isOilyCream = /(oily skin (cream|moisturizer)|cream for oily skin|oily moisturizer|combination cream|\u0643\u0631\u064a\u0645 \u0644\u0644\u0628\u0634\u0631\u0629 \u0627\u0644\u062f\u0647\u0646\u064a\u0629|\u0643\u0631\u064a\u0645 \u0627\u0644\u0628\u0634\u0631\u0629 \u0627\u0644\u0645\u062e\u062a\u0644\u0637\u0629)/i.test(q);
 
     if (isMakhmarya)      { newState.currentProductId = 'p3'; newState.candidateProductIds = ['p3']; }
     else if (isSplash)    { newState.currentProductId = 'p4'; newState.candidateProductIds = ['p4']; }
@@ -216,7 +223,126 @@
     else if (isDryCream)  { newState.currentProductId = 'p1'; newState.candidateProductIds = ['p1']; }
     else if (isOilyCream) { newState.currentProductId = 'p2'; newState.candidateProductIds = ['p2']; }
 
-    // 4. DELIVERY
+    // 4. MAKHMARYA INGREDIENTS QUERY (Temporary honest statement until owner provides approved text)
+    const isMakhmaryaIngredient = (isMakhmarya && /(ingredient|ingredients|formula|made of|contain|\u0645\u0643\u0648\u0646\u0627\u062a|\u0645\u0645\u0627 \u062a\u062a\u0643\u0648\u0646)/i.test(q)) || /(ingredient|ingredients|formula|made of|contain|\u0645\u0643\u0648\u0646\u0627\u062a).*(makhmarya|makhmaria|bosbos|\u0645\u062e\u0645\u0631\u064a\u0629|\u0628\u0635\u0628\u0635)/i.test(q);
+    if (isMakhmaryaIngredient) {
+      newState.lastIntent = 'ingredient_question';
+      return {
+        reply: isArabic
+          ? "ليس لدي قائمة مكونات مؤكدة حالياً للمخمرية. يرجى التواصل مع فريق ساني للحصول على التفاصيل المؤكدة \u2661"
+          : "I don\u2019t have a verified ingredient list to share right now. Please contact the Sann\u00e9 team for the confirmed details \u2661",
+        intent: "ingredient_question",
+        productIds: [],
+        state: newState
+      };
+    }
+
+    // 5. 2+ UNITS DISCOUNT QUERY (e.g. "Can I get 10% off two Makhmaryas?")
+    const hasMultipleUnits = /(2|two|multiple|more than one|two makhmaryas|two splashes|\u0642\u0637\u0639\u062a\u064a\u0646|\u0627\u062b\u0646\u064a\u0646)/i.test(q);
+    const hasDiscountMention = /(10%|discount|offer|launch offer|\u062e\u0635\u0645)/i.test(q);
+    if (hasMultipleUnits && hasDiscountMention) {
+      newState.lastIntent = 'offers_question';
+      return {
+        reply: isArabic
+          ? "خصم الـ 10% ينطبق فقط عندما تحتوي السلة على قطعة واحدة منفردة فقط (1 \u00d7 مخمرية أو 1 \u00d7 بودي سبلاش). الطلبات التي تحتوي على قطعتين أو أكثر لا تحصل على خصم الـ 10% المنفرد \u2661"
+          : "The 10% launch discount applies ONLY when your cart contains exactly ONE single standalone eligible product (1 \u00d7 Makhmarya or 1 \u00d7 Body Splash). Orders with two or more items do not receive the standalone 10% discount \u2661",
+        intent: "offers_question",
+        productIds: ['p3', 'p4'],
+        state: newState
+      };
+    }
+
+    // 6. BUNDLE / COMBOS / SET INQUIRY
+    const isExplicitBundleQuery = /(bundle|set|combo|routine|ritual|both products|both|el set|el combo|\u0628\u0627\u0646\u062f\u0644|\u0643\u0648\u0645\u0628\u0648|\u0645\u062c\u0645\u0648\u0639\u0629|el etneen bkam|can i get both|is there a set|do you have a bundle|bundel price|set price)/i.test(q);
+
+    if (isExplicitBundleQuery) {
+      newState.currentProductId = 'bundle_ritual';
+      newState.candidateProductIds = ['bundle_ritual'];
+      newState.lastIntent = 'bundle_question';
+
+      if (/(10%|discount|apply to it|269|\u062e\u0635\u0645)/i.test(q)) {
+        return {
+          reply: isArabic
+            ? "مجموعة The Sann\u00e9 Ritual سعرها ثابت 299 جنيه (توفر 19 جنيه مقارنة بشرائهما منفصلين بسعر 318 جنيه). عرض الخصم 10% ينطبق فقط على المنتجات المنفردة، ولا ينطبق على المجموعات \u2661"
+            : "The Sann\u00e9 Ritual includes one Bosbos Makhmarya and one Rose Vanille Body Splash for 299 EGP instead of 318 EGP separately. The bundle already has its own price, so the standalone 10% offer doesn\u2019t apply to it \u2661",
+          intent: "bundle_question",
+          productIds: ['bundle_ritual'],
+          state: newState
+        };
+      }
+
+      return {
+        reply: isArabic
+          ? "نعم! تتضمن مجموعة The Sann\u00e9 Ritual عبوة واحدة من Bosbos Makhmarya وعبوة واحدة من Rose Vanille Body Splash بسعر 299 جنيه بدلاً من 318 جنيه منفصلين. الباندل له سعره الخاص بالفعل، لذلك لا ينطبق عليه عرض الـ 10% المنفرد \u2661"
+          : "Yes. The Sann\u00e9 Ritual includes one Bosbos Makhmarya and one Rose Vanille Body Splash for 299 EGP instead of 318 EGP separately. The bundle already has its own price, so the standalone 10% offer doesn\u2019t apply to it \u2661",
+        intent: "bundle_question",
+        productIds: ['bundle_ritual'],
+        state: newState
+      };
+    }
+
+    // 7. OFFERS / DISCOUNTS INQUIRY
+    const isOffersQuery = /(offer|offers|discount|discounts|promotion|promotions|deal|deals|\u0639\u0631\u0648\u0636|\u062e\u0635\u0645|\u062e\u0635\u0648\u0645\u0627\u062a|fe discount|fe offer|any offer|any discount|\u0639\u0646\u062f\u0643\u0645 \u0639\u0631\u0648\u0636)/i.test(q);
+
+    if (isOffersQuery) {
+      newState.lastIntent = 'offers_question';
+
+      if (newState.currentProductId === 'bundle_ritual' || /(it|bundle|ritual|\u0627\u0644\u0628\u0627\u0646\u062f\u0644)/i.test(q)) {
+        return {
+          reply: isArabic
+            ? "مجموعة The Sann\u00e9 Ritual سعرها 299 جنيه (توفر 19 جنيه عن الشراء المنفصل). خصم الـ 10% ينطبق فقط عند شراء قطعة واحدة منفردة من المخمرية (80.10 جنيه) أو البودي سبلاش (206.10 جنيه)، ولا ينطبق على الباندل \u2661"
+            : "The Sann\u00e9 Ritual is 299 EGP (saving 19 EGP vs 318 EGP separately). The standalone 10% launch offer applies only to single standalone items (1 \u00d7 Makhmarya at 80.10 EGP or 1 \u00d7 Body Splash at 206.10 EGP), so it does not apply to the bundle \u2661",
+          intent: "offers_question",
+          productIds: ['bundle_ritual', 'p3', 'p4'],
+          state: newState
+        };
+      }
+
+      return {
+        reply: isArabic
+          ? "لدينا حالياً عرضان مميزان \u2661\n\n1. **مجموعة The Sann\u00e9 Ritual**: احصلي على المخمرية والبودي سبلاش معاً بسعر 299 جنيه بدلاً من 318 جنيه.\n2. **عرض الإطلاق 10%**: خصم 10% عند شراء قطعة واحدة منفردة من المخمرية (80.10 جنيه بدلاً من 89) أو قطعة واحدة من البودي سبلاش (206.10 جنيه بدلاً من 229)."
+          : "We currently have two active offers \u2661\n\n1. **The Sann\u00e9 Ritual Bundle**: Get both Bosbos Makhmarya and Rose Vanille Body Splash together for 299 EGP (saves 19 EGP vs 318 EGP separately).\n2. **10% Launch Offer**: Get 10% off when ordering exactly ONE standalone Makhmarya (80.10 EGP instead of 89 EGP) or ONE standalone Body Splash (206.10 EGP instead of 229 EGP).",
+        intent: "offers_question",
+        productIds: ['bundle_ritual', 'p3', 'p4'],
+        state: newState
+      };
+    }
+
+    // 8. FOLLOW-UP CONTEXT ("does it apply to that?", "does 10% apply to it?")
+    if (/(does (it|10%|discount) apply|is it (discounted|269)|what about (it|the discount|10%))/i.test(q)) {
+      newState.lastIntent = 'offers_question';
+      if (newState.currentProductId === 'bundle_ritual') {
+        return {
+          reply: isArabic
+            ? "مجموعة The Sann\u00e9 Ritual سعرها 299 جنيه (توفر 19 جنيه مقارنة بالشراء المنفصل). خصم الـ 10% المنفرد ينطبق فقط على المنتجات المنفردة، ولا ينطبق على المجموعات \u2661"
+            : "The Sann\u00e9 Ritual is 299 EGP (saving 19 EGP vs 318 EGP separately). The standalone 10% launch offer applies only to single standalone items (1 \u00d7 Makhmarya or 1 \u00d7 Body Splash), so it does not apply to the bundle \u2661",
+          intent: "offers_question",
+          productIds: ['bundle_ritual'],
+          state: newState
+        };
+      }
+    }
+
+    // 9. OTHER INGREDIENT QUERIES
+    if (/(ingredient|ingredients|formula|formulation|what'?s inside|what is inside|what'?s in it|what does it contain|what is it made|\u0645\u0643\u0648\u0646\u0627\u062a)/i.test(q)) {
+      newState.lastIntent = 'ingredient_question';
+      if (newState.currentProductId === 'p1' || newState.currentProductId === 'p2' || (/moisturizer|\u0643\u0631\u064a\u0645/i.test(q))) {
+        return {
+          reply: "The full ingredient details for our moisturizers are still being finalized for Ask Sann\u00e9 and will be available soon \u2661 I can still help you choose between the Dry Skin and Oily & Combination formulas based on what your skin needs.",
+          intent: "ingredient_question",
+          productIds: [],
+          state: newState
+        };
+      }
+      return {
+        reply: "I don\u2019t have a verified ingredient list to share right now. Please contact the Sann\u00e9 team for the confirmed details \u2661",
+        intent: "ingredient_question",
+        productIds: [],
+        state: newState
+      };
+    }
+
+    // 10. DELIVERY
     if (/delivery|\u062a\u0648\u0635\u064a\u0644|tasleem|taysel|shipping|ship|dawwer|how long|how many days|\u0643\u0627\u0645 \u064a\u0648\u0645|\u0645\u062a\u0649 \u064a\u0648\u0635\u0644|when will|arrival|arrive/i.test(q)) {
       newState.lastIntent = 'delivery_question';
       if (/fee|cost|price|how much|\u0628\u0643\u0627\u0645|kam|\u0633\u0639\u0631 \u0627\u0644\u062a\u0648\u0635\u064a\u0644/i.test(q)) {
@@ -225,49 +351,49 @@
       return { reply: "We deliver across Egypt \u2661 Fees are shown at checkout based on your city, and delivery typically takes 2\u20135 business days depending on your governorate.", intent: "delivery_question", productIds: [], state: newState };
     }
 
-    // 5. PAYMENT
+    // 11. PAYMENT
     if (/pay|payment|cash|cod|instapay|inta ?pay|inta2pay|visa|mastercard|card|online pay|\u0627\u062f\u0641\u0639|\u0628\u064a\u062a\u0645 \u0627\u0644\u062f\u0641\u0639|\u0628\u0627\u062f\u0641\u0639/i.test(q)) {
       newState.lastIntent = 'payment_question';
       return { reply: "We accept Cash on Delivery (COD) and Instapay only. No credit cards or online gateways \u2014 simple and secure \u2661", intent: "payment_question", productIds: [], state: newState };
     }
 
-    // 6. SANA'S LIGHT / DONATION
+    // 12. SANA'S LIGHT / DONATION
     if (/sanas? light|donation|donate|charity|community giving|\u062a\u0628\u0631\u0639|\u062e\u064a\u0631/i.test(q)) {
       newState.lastIntent = 'donation_question';
       return { reply: "Sana\u2019s Light is Sann\u00e9\u2019s community giving initiative \u2661 A portion of every order goes toward causes we believe in \u2014 so every purchase does a little more.", intent: "donation_question", productIds: [], state: newState };
     }
 
-    // 7. BRAND STORY
+    // 13. BRAND STORY
     if (/who is sann[e\u00e9]|what is sann[e\u00e9]|about sann[e\u00e9]|brand story|20 years|egyptian brand|tell me about/i.test(q)) {
       newState.lastIntent = 'brand_story';
       return { reply: "Sann\u00e9 is an Egyptian beauty brand rooted in a 20-year legacy of skincare and fragrance. Our Rose Vanille collection is made to layer, designed to linger, and built around the belief that beauty is a daily ritual \u2661", intent: "brand_story", productIds: [], state: newState };
     }
 
-    // 8. UPCOMING PRODUCTS
+    // 14. UPCOMING PRODUCTS
     if (/upcoming|new product|coming soon|what.?s next|future release|\u0642\u0627\u062f\u0645|\u062c\u062f\u064a\u062f|\u0647\u064a\u0637\u0644\u0639/i.test(q)) {
       newState.lastIntent = 'upcoming_question';
       return { reply: "We have more exciting things in development \u2661 Stay tuned \u2014 follow us for the first look.", intent: "upcoming_question", productIds: [], state: newState };
     }
 
-    // 9. ORDER STATUS
+    // 15. ORDER STATUS
     if (/order status|where is my order|track my order|\u062a\u062a\u0628\u0639|\u0623\u0648\u0631\u062f\u0631|my order|\u0637\u0644\u0628\u064a|\u0644\u0633\u0647 \u062c\u0647/i.test(q)) {
       newState.lastIntent = 'order_question';
       return { reply: "I can\u2019t look up live order status here \u2014 for the fastest help, reach us on WhatsApp and we\u2019ll track it for you right away \u2661", intent: "order_question", productIds: [], state: newState };
     }
 
-    // 10. REVIEWS
+    // 16. REVIEWS
     if (/review|reviews|\u062a\u0642\u064a\u064a\u0645|\u062a\u0642\u064a\u064a\u0645\u0627\u062a|rating|leave a review/i.test(q)) {
       newState.lastIntent = 'review_question';
       return { reply: "You can leave a review on each product page \u2014 we love hearing from you \u2661", intent: "review_question", productIds: [], state: newState };
     }
 
-    // 11. MY LOVES / WISHLIST
+    // 17. MY LOVES / WISHLIST
     if (/my loves|wishlist|wish list|\u062d\u0628\u0627\u064a\u0628\u064a|saved items|favourite|favorite/i.test(q)) {
       newState.lastIntent = 'wishlist_question';
       return { reply: "Your My Loves \u2661 are saved on the website \u2014 tap the heart on any product to save it, and access your list from the nav bar.", intent: "wishlist_question", productIds: [], state: newState };
     }
 
-    // 12. SCENT
+    // 18. SCENT
     if (/scent|smell|how does it smell|\u0631\u064a\u062d\u062a\u0647|\u0628\u062a\u062a\u0639\u0637\u0631|perfume|\u0639\u0637\u0631|what does it smell|reeh|rih/i.test(q)) {
       newState.lastIntent = 'scent_question';
       if (newState.currentProductId === 'p3' || isMakhmarya) return { reply: "Makhmarya is warm, velvety, and intimate \u2014 a musky rose-vanilla with depth. Think of it as a skin-scent that lingers beautifully at pulse points \u2661", intent: "scent_question", productIds: [], state: newState };
@@ -275,13 +401,13 @@
       return { reply: "Both fragrances share a rose-vanilla DNA \u2661 Makhmarya (89 EGP) is the warmer concentrated gel; Rose Vanille Splash (229 EGP, 220ml) is the lighter everyday mist.", intent: "scent_question", productIds: ['p3','p4'], state: newState };
     }
 
-    // 13. LAYERING
+    // 19. LAYERING
     if (/layer|layering|together|combine|stack|routine|both|mix|\u0645\u0639 \u0628\u0639\u0636|\u062a\u0631\u062a\u064a\u0628/i.test(q) && !isRitual) {
       newState.lastIntent = 'layering_question';
       return { reply: "Apply Makhmarya gel first to your pulse points \u2014 wrists, neck, behind ears \u2014 then spray Rose Vanille Body Splash all over. The two were made to layer together for a richer, longer-lasting rose-vanilla ritual \u2661", intent: "layering_question", productIds: ['p3','p4'], state: newState };
     }
 
-    // 14. HOW TO USE
+    // 20. HOW TO USE
     if (/how (?:to use|do i use|should i use|to apply)|\u0637\u0631\u064a\u0642\u0629 \u0627\u0644\u0627\u0633\u062a\u062e\u062f\u0627\u0645|\u0628\u0633\u062a\u062e\u062f\u0645\u0647\u0627 \u0625\u0632\u0627\u064a/i.test(q)) {
       newState.lastIntent = 'how_to_use';
       if (newState.currentProductId === 'p3' || isMakhmarya) return { reply: "Warm a small amount of Makhmarya between your fingertips, then press gently onto pulse points \u2014 wrists, neck, behind the ears. Less is more \u2661", intent: "how_to_use", productIds: [], state: newState };
@@ -291,7 +417,7 @@
       return { reply: "Which product would you like guidance on? \u2661 I can walk you through how to use Makhmarya, the Body Splash, or our moisturizers.", intent: "how_to_use", productIds: [], state: newState };
     }
 
-    // 15. GIFT RECOMMENDATIONS
+    // 21. GIFT RECOMMENDATIONS
     if (/gift|\u0647\u062f\u064a\u0629|present|for (?:someone|a friend|my mom|my sister|my wife|her)/i.test(q)) {
       newState.lastIntent = 'gift_recommendation';
       const gm = q.match(/(\d+)/); const gb = gm ? parseInt(gm[1]) : null;
@@ -300,43 +426,19 @@
       return { reply: "The Sann\u00e9 Ritual gift set (299 EGP) is our most gifted choice \u2014 both fragrances in one set \u2661 For a smaller budget, Bosbos Makhmarya (89 EGP) is a standout gift on its own.", intent: "gift_recommendation", productIds: ['bundle_ritual','p3'], state: newState };
     }
 
-    // 16. FULL CATALOGUE
+    // 22. FULL CATALOGUE
     if (/what products do you have|show me all|all products|full catalogue|everything you have|\u0643\u0644 \u0627\u0644\u0645\u0646\u062a\u062c\u0627\u062a/i.test(q)) {
       newState.lastIntent = 'catalogue';
       return { reply: "Here\u2019s our full Sann\u00e9 collection: two facial moisturizers (229 EGP each \u00b7 200ml), Bosbos Makhmarya body fragrance gel (89 EGP \u00b7 50ml), Rose Vanille Body Splash (229 EGP \u00b7 220ml), and The Sann\u00e9 Ritual gift set (299 EGP) \u2661", intent: "catalogue", productIds: ['p1','p2','p3','p4','bundle_ritual'], state: newState };
     }
 
-    // 17. CATEGORY DISCOVERY — body fragrance
+    // 23. CATEGORY DISCOVERY
     if (/body fragrance|body fragrances|body scent|\u0628\u0631\u0641\u0627\u0646 \u062c\u0633\u0645|\u0645\u0639\u0637\u0631 \u062c\u0633\u0645/i.test(q) && !/what is|ingredient/.test(q)) {
       newState.candidateProductIds = ['p3','p4','bundle_ritual']; newState.lastIntent = 'discovery';
       return { reply: "We have two body fragrances in the Rose Vanille family: Makhmarya (89 EGP, 50ml gel) and Rose Vanille Splash (229 EGP, 220ml mist). The Sann\u00e9 Ritual (299 EGP) bundles both \u2661", intent: "discovery", productIds: ['p3','p4','bundle_ritual'], state: newState };
     }
 
-    // 18. INGREDIENTS / FORMULA
-    if (/ingredient|ingredients|formula|formulation|what.?s inside|what is inside|what.?s in it|what does it contain|what is it made|ingrediants|ingredents|gel texture|softer feel|alcohol|glycerin|carbopol|shea butter|vitamin e|jojoba|almond oil/i.test(q)) {
-      newState.lastIntent = 'ingredient_question';
-      if (newState.currentProductId === 'p1' || newState.currentProductId === 'p2' || (/moisturizer/i.test(q) && !newState.currentProductId)) {
-        if (!newState.currentProductId) {
-          newState.pendingIntent = 'ingredient_question'; newState.pendingClarification = 'moisturizer_variant'; newState.candidateProductIds = ['p1','p2'];
-          return { reply: "Does your skin usually feel dry and tight, or does it become oily and shiny during the day?", intent: "clarification", productIds: [], state: newState };
-        }
-        return { reply: "The full ingredient details for our moisturizers are still being finalized for Ask Sann\u00e9 and will be available soon \u2661 I can still help you choose between the Dry Skin and Oily & Combination formulas based on your skin needs.", intent: "ingredient_question", productIds: [], state: newState };
-      }
-      if (newState.currentProductId === 'p3' || isMakhmarya) {
-        newState.currentProductId = 'p3';
-        if (/gel texture|texture/.test(q)) return { reply: "Carbopol 940 creates the gel structure and texture in Makhmarya.", intent: "ingredient_question", productIds: [], state: newState };
-        if (/softer|glycerin/.test(q)) return { reply: "Glycerin attracts water to the skin surface; Jojoba Oil and Sweet Almond Oil add skin-softening nourishment \u2661", intent: "ingredient_question", productIds: [], state: newState };
-        if (/shea/.test(q)) return { reply: "Shea Butter in Makhmarya provides deep nourishing emolliency \u2014 it helps the gel melt into skin beautifully \u2661", intent: "ingredient_question", productIds: [], state: newState };
-        return { reply: "Makhmarya\u2019s key ingredients: Shea Butter, Sweet Almond Oil, Jojoba Oil, Vitamin E, Rose Extract, Vanilla Extract, Glycerin (humectant), and Carbopol 940 (gel structure) \u2661", intent: "ingredient_question", productIds: [], state: newState };
-      }
-      if (newState.currentProductId === 'p4' || isSplash) {
-        newState.currentProductId = 'p4';
-        if (/alcohol|ethanol/.test(q)) return { reply: "Yes \u2014 the Body Splash contains ethanol, which acts as the lightweight fragrance carrier so it spreads and dries quickly \u2661", intent: "ingredient_question", productIds: [], state: newState };
-        return { reply: "Rose Vanille Body Splash: Fragrance Oil (rose-vanilla scent), Ethanol (lightweight carrier), DPG and PG to distribute the scent evenly \u2661", intent: "ingredient_question", productIds: [], state: newState };
-      }
-    }
-
-    // 19. PURPOSE
+    // 24. PURPOSE
     if (/what is it for|what does it do|what.?s its purpose|how does it help|what is this used for/i.test(q)) {
       newState.lastIntent = 'purpose_question';
       if (newState.currentProductId === 'p3') return { reply: "Makhmarya is a concentrated fragrance gel \u2014 apply to pulse points for a warm, intimate, lingering scent ritual \u2661", intent: "purpose_question", productIds: [], state: newState };
@@ -345,7 +447,7 @@
       if (newState.currentProductId === 'p2') return { reply: "The Oily & Combination Moisturizer provides lightweight balanced hydration without greasiness \u2661", intent: "purpose_question", productIds: [], state: newState };
     }
 
-    // 20. PRICE
+    // 25. PRICE
     if (/how much|price|cost|kam|\u0628\u0643\u0627\u0645|\u0633\u0639\u0631\u0647 \u0643\u0627\u0645|el price|bi kam|3amla|3amlo/i.test(q)) {
       newState.lastIntent = 'price_question';
       if (newState.currentProductId === 'p3') return { reply: "Bosbos Makhmarya is 89 EGP \u2014 and 80.10 EGP with the current launch offer when ordered on its own \u2661", intent: "price_question", productIds: [], state: newState };
@@ -355,7 +457,7 @@
       return { reply: "Quick price guide: Makhmarya 89 EGP \u00b7 Body Splash 229 EGP \u00b7 Moisturizers 229 EGP each \u00b7 The Ritual set 299 EGP \u2661", intent: "price_question", productIds: [], state: newState };
     }
 
-    // 21. SIZE
+    // 26. SIZE
     if (/size|how big|how many ml|\bml\b|\u0627\u0644\u062d\u062c\u0645|\u0643\u0627\u0645 \u0645\u0644\u064a|volume/i.test(q)) {
       newState.lastIntent = 'size_question';
       if (newState.currentProductId === 'p3') return { reply: "Makhmarya is 50ml \u2014 a compact gel concentrated for pulse points \u2661", intent: "size_question", productIds: [], state: newState };
@@ -363,19 +465,13 @@
       if (newState.currentProductId === 'p1' || newState.currentProductId === 'p2') return { reply: "Our Moisturizing Creams are 200ml each \u2661", intent: "size_question", productIds: [], state: newState };
     }
 
-    // 22. BUNDLE + DISCOUNT QUESTION
-    if (isRitual && /discount|10%|offer|launch|10 percent/i.test(q)) {
-      newState.lastIntent = 'bundle_question';
-      return { reply: "The Sann\u00e9 Ritual is fixed at 299 EGP \u2014 it already saves you 19 EGP vs buying both separately. The standalone 10% launch offer doesn\u2019t apply to the bundle \u2661", intent: "bundle_question", productIds: ['bundle_ritual'], state: newState };
-    }
-
-    // 23. BUDGET EXTRACTOR
+    // 27. BUDGET EXTRACTOR
     let budget = null;
     const bm = q.match(/(?:under|less than|below|budget is|have|max|up to|for|around|at)\s*(\d+)/i) || q.match(/(\d+)\s*(?:egp|le|pounds)/i);
     if (bm) { budget = parseInt(bm[1], 10); newState.activeConstraints.budgetMax = budget; }
 
     const wantsOily = /oily|greasy|shine|shiny|sebum|combination|t-zone|\u0628\u062a\u0632\u064a\u062a|\u0628\u062a\u0644\u0645\u0639|dehniya|\u062f\u0647\u0646\u064a\u0629/i.test(q);
-    const wantsDry  = /dry|flaky|rough|tight|dehydrated|\u0646\u0627\u0634\u0641\u0629|\u0628\u062a\u0642\u0634\u0631|nashfa|jafa|gafa/i.test(q);
+    const wantsDry  = /dry|flaky|rough|tight|dehydrated|\u0646\u0627\u0634\u0641\u0629|\u0628\u062a\u0632\u0642\u0634\u0631|nashfa|jafa|gafa/i.test(q);
 
     if (budget !== null) {
       if (wantsDry  && budget < 229) return { reply: "The Dry Skin Moisturizer is 229 EGP \u2014 just over a " + budget + " EGP budget. For a fragrance treat in range, Makhmarya is 89 EGP \u2661", intent: "recommendation", productIds: ['p3'], state: newState };
@@ -386,7 +482,7 @@
       return { reply: "Our most affordable product is Makhmarya at 89 EGP (80.10 EGP with the current launch offer). Delivery is added at checkout \u2661", intent: "recommendation", productIds: [], state: newState };
     }
 
-    // 24. PRONOUN FOLLOW-UP
+    // 28. PRONOUN FOLLOW-UP
     if (/what is it|tell me more|why that one|why did you recommend|more about it|and this one/i.test(q)) {
       newState.lastIntent = 'follow_up';
       if (newState.currentProductId === 'p3') return { reply: "Bosbos Makhmarya is 89 EGP \u2014 a warm, concentrated fragrance gel for pulse points. Intimate and lingering \u2661", intent: "follow_up", productIds: [], state: newState };
@@ -396,27 +492,33 @@
       if (newState.currentProductId === 'bundle_ritual') return { reply: "The Sann\u00e9 Ritual is 299 EGP \u2014 Makhmarya (50ml gel) + Rose Vanille Body Splash (220ml) for the complete rose-vanilla routine \u2661", intent: "follow_up", productIds: [], state: newState };
     }
 
-    // 25. COMPARISON
+    // 29. COMPARISON
     if (/difference|compare|versus| vs |\u0623\u062d\u0633\u0646|\u0628\u0627\u0644\u0645\u0642\u0627\u0631\u0646\u0629/i.test(q) && (isMakhmarya || isSplash)) {
       newState.lastIntent = 'comparison';
       if (isMakhmarya && isSplash) return { reply: "Makhmarya (89 EGP, 50ml) is a warm concentrated gel for pulse points \u2014 intimate and lingering. Body Splash (229 EGP, 220ml) is a light fresh mist for all-over use. Both rose-vanilla, made to layer \u2661", intent: "comparison", productIds: ['p3','p4'], state: newState };
     }
 
-    // 26. SKIN TYPE MATCHING
+    // 30. SKIN TYPE MATCHING
     if (wantsOily) {
       newState.currentProductId = 'p2'; newState.candidateProductIds = ['p2']; newState.lastIntent = 'recommendation';
-      const isAr = /[\u0600-\u06FF]/.test(query);
-      return { reply: isAr ? "\u0644\u0644\u0628\u0634\u0631\u0629 \u0627\u0644\u062f\u0647\u0646\u064a\u0629 \u0648\u0627\u0644\u0645\u062e\u062a\u0644\u0637\u0629\u060c \u0623\u0646\u0635\u062d\u0643 \u0628\u0640 Moisturizing Cream for Oily & Combination Skin (229 EGP) \u2014 \u062a\u0631\u0637\u064a\u0628 \u062e\u0641\u064a\u0641 \u0628\u062f\u0648\u0646 \u0645\u0644\u0645\u0633 \u062f\u0647\u0646\u064a \u2661" : "For skin that becomes oily or shiny, our Moisturizing Cream for Oily & Combination Skin (229 EGP) provides lightweight hydration without greasiness \u2661", intent: "recommendation", productIds: ['p2'], state: newState };
+      return { reply: isArabic ? "\u0644\u0644\u0628\u0634\u0631\u0629 \u0627\u0644\u062f\u0647\u0646\u064a\u0629 \u0648\u0627\u0644\u0645\u062e\u062a\u0644\u0637\u0629\u060c \u0623\u0646\u0635\u062d\u0643 \u0628\u0640 Moisturizing Cream for Oily & Combination Skin (229 EGP) \u2014 \u062a\u0631\u0637\u064a\u0628 \u062e\u0641\u064a\u0641 \u0628\u062f\u0648\u0646 \u0645\u0644\u0645\u0633 \u062f\u0647\u0646\u064a \u2661" : "For skin that becomes oily or shiny, our Moisturizing Cream for Oily & Combination Skin (229 EGP) provides lightweight hydration without greasiness \u2661", intent: "recommendation", productIds: ['p2'], state: newState };
     }
     if (wantsDry) {
       newState.currentProductId = 'p1'; newState.candidateProductIds = ['p1']; newState.lastIntent = 'recommendation';
       return { reply: "For dry, tight, or flaky skin, our Moisturizing Cream for Dry Skin (229 EGP) provides deep moisture barrier care \u2661", intent: "recommendation", productIds: ['p1'], state: newState };
     }
 
-    // 27. DEFAULT FALLBACK \u2014 log unknown intent
+    // 31. SPECIFIC CLARIFICATION FALLBACK (Not generic welcome!)
     newState.lastIntent = 'clarification';
     logUnknownIntent(query);
-    return { reply: "I can help with Sann\u00e9 products, scent, layering, delivery, payment, or anything about the brand \u2661 What are you looking for?", intent: "clarification", productIds: [], state: newState };
+    return {
+      reply: isArabic
+        ? "\u0623\u0646\u0627 \u0647\u0646\u0627 \u0644\u0645\u0633\u0627\u0639\u062f\u062a\u0643 \u2661 \u0647\u0644 \u062a\u0648\u062f \u0645\u0639\u0631\u0641\u0629 \u0627\u0644\u0645\u0632\u064a\u062f \u0639\u0646 \u0627\u0644\u0645\u0631\u0637\u0628\u0627\u062a\u060c \u0639\u0637\u0648\u0631 \u0627\u0644\u062c\u0633\u0645\u060c \u0627\u0644\u0639\u0631\u0648\u0636 \u0627\u0644\u062d\u0627\u0644\u064a\u0629\u060c \u0623\u0648 \u0627\u0644\u062a\u0648\u0635\u064a\u0644\u061f"
+        : "I want to make sure I give you the exact right details \u2661 Could you clarify if you're asking about our moisturizers, body fragrances, active offers, or delivery?",
+      intent: "clarification",
+      productIds: [],
+      state: newState
+    };
   }
 
   /**
@@ -432,10 +534,6 @@
     } catch(e) { /* silent */ }
   }
 
-
-  /**
-   * Product Card Renderer — Uses canonical window.products array
-   */
   function renderProductCards(ids) {
     if (!ids || !ids.length || typeof window.products === 'undefined') return null;
 
