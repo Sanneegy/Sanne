@@ -16,7 +16,7 @@
   // Exclusive End: 2026-09-17T21:00:00Z
   const PROMO_CONFIG = {
     code: 'LAUNCH10',
-    startsAt: '2026-09-14T08:00:00Z',
+    startsAt: '2026-09-01T08:00:00Z',
     endsAt:   '2026-09-17T21:00:00Z',
     discountPercent: 10,
     eligibleProductIds: ['p3', 'p4']

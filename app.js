@@ -305,9 +305,22 @@ function updateCartUI() {
     cartItemsContainer.innerHTML = '<p class="empty-cart-msg text-center mt-md" style="color: var(--color-text-light);">Your cart is empty.</p>';
     if (cartFooter) cartFooter.style.display = 'none';
   } else {
-    let total = 0;
+    const donation = parseInt(document.getElementById('sidebar-donation-amount')?.value, 10) || 0;
+    const totals = window.PricingEngine ? window.PricingEngine.calculateCartTotals(cart, donation, 0) : null;
+    const isLaunchEligible = totals ? totals.isLaunchEligible : false;
+
+    let subtotal = 0;
     cartItemsContainer.innerHTML = cart.map(item => {
-      total += item.price * item.qty;
+      let unitPriceDisplay = `${item.price} EGP`;
+      let lineTotal = item.price * item.qty;
+
+      if (isLaunchEligible && cart.length === 1 && (item.id === 'p3' || item.id === 'p4')) {
+        const discUnit = item.id === 'p3' ? '80.10 EGP' : '206.10 EGP';
+        lineTotal = item.id === 'p3' ? 80.10 : 206.10;
+        unitPriceDisplay = `<span style="text-decoration:line-through;color:var(--color-text-light);margin-right:0.3rem;font-size:0.85em;">${item.price} EGP</span><span style="font-weight:600;color:var(--color-dark-brown);">${discUnit}</span>`;
+      }
+      subtotal += lineTotal;
+
       return `
         <div class="cart-item" style="display: flex; gap: 1rem; margin-bottom: 1.5rem; align-items: center;">
           <img src="${item.image}" alt="${item.name}" style="width: 80px; height: 80px; object-fit: cover; border-radius: 4px;">
@@ -315,7 +328,7 @@ function updateCartUI() {
             <h4 style="font-family: var(--font-serif); font-size: 1.1rem; margin: 0; color: var(--color-dark-brown);">${item.name}</h4>
             <p style="font-size: 0.85rem; color: var(--color-text-light); margin: 0 0 0.5rem 0;">${item.variant}</p>
             <div style="display: flex; justify-content: space-between; align-items: center;">
-              <span style="font-weight: 500;">${item.price} EGP</span>
+              <span style="font-weight: 500;">${unitPriceDisplay}</span>
               <div style="display: flex; align-items: center; border: 1px solid var(--color-border); border-radius: 4px;">
                 <button onclick="updateQty('${item.id}', -1)" style="background: none; border: none; padding: 0.2rem 0.6rem; cursor: pointer;">-</button>
                 <span style="font-size: 0.9rem; padding: 0 0.5rem;">${item.qty}</span>
@@ -329,15 +342,18 @@ function updateCartUI() {
     }).join('');
     
     if (cartFooter) cartFooter.style.display = 'block';
-    // donation
-    const donation = parseInt(document.getElementById('sidebar-donation-amount')?.value) || 0;
-    const grandTotal = total + donation;
-    if (cartTotalPrice) cartTotalPrice.textContent = `${grandTotal} EGP`;
-    // show breakdown
+    
+    const origSubtotal = cart.reduce((sum, i) => sum + (i.price * i.qty), 0);
+    const discountAmt = totals ? totals.discountPiastres / 100 : 0;
+    const grandTotal = (origSubtotal - discountAmt) + donation;
+
+    if (cartTotalPrice) cartTotalPrice.textContent = `${grandTotal.toFixed(2).replace(/\.00$/, '')} EGP`;
+    
     const breakdownEl = document.getElementById('cart-breakdown');
     if (breakdownEl) {
       breakdownEl.innerHTML = `
-        <div style="display:flex;justify-content:space-between;font-size:0.85rem;color:var(--color-text-light);margin-bottom:0.3rem;"><span>Subtotal</span><span>${total} EGP</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:0.85rem;color:var(--color-text-light);margin-bottom:0.3rem;"><span>Subtotal</span><span>${origSubtotal} EGP</span></div>
+        ${discountAmt > 0 ? `<div style="display:flex;justify-content:space-between;font-size:0.85rem;color:#8A333C;font-weight:600;margin-bottom:0.3rem;"><span>10% Launch Discount</span><span>-${discountAmt.toFixed(2)} EGP</span></div>` : ''}
         ${donation > 0 ? `<div style="display:flex;justify-content:space-between;font-size:0.85rem;color:var(--color-soft-gold);margin-bottom:0.3rem;"><span>Donation</span><span>${donation} EGP</span></div>` : ''}
       `;
     }
@@ -410,34 +426,43 @@ document.addEventListener('submit', (e) => {
     };
     const deliveryFee = deliveryFees[city] || 0;
     
-    let orderLines = '';
-    let subtotal = 0;
-    cart.forEach(item => {
-      orderLines += `- ${item.name} (${item.variant}) x ${item.qty} = ${item.price * item.qty} EGP\n`;
-      subtotal += item.price * item.qty;
-    });
     const donationAmt = Math.max(0, parseInt(document.getElementById('sidebar-donation-amount')?.value || document.getElementById('checkout-donation-amount')?.value, 10) || 0);
-    const grandTotal = subtotal + deliveryFee + donationAmt;
+    const totals = window.PricingEngine ? window.PricingEngine.calculateCartTotals(cart, donationAmt, deliveryFee) : null;
+    const isEligible = totals ? totals.isLaunchEligible : false;
+    const discountAmt = totals ? totals.discountPiastres / 100 : 0;
+    const baseSubtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+    const grandTotal = (baseSubtotal - discountAmt) + deliveryFee + donationAmt;
     const orderId = 'SANNE-' + Math.random().toString(36).substr(2, 6).toUpperCase();
 
-    const orderItemsPayload = cart.map(item => ({
-      product_id: item.id,
-      product_name: `${item.name} (${item.variant || ''})`.trim(),
-      unit_price_egp: Number(item.price),
-      quantity: Number(item.qty),
-      line_total_egp: Number(item.price) * Number(item.qty)
-    }));
+    let orderLines = '';
+    cart.forEach(item => {
+      if (isEligible && (item.id === 'p3' || item.id === 'p4')) {
+        const discUnit = item.id === 'p3' ? 80.10 : 206.10;
+        const discVal = item.id === 'p3' ? 8.90 : 22.90;
+        orderLines += `• ${item.name} (${item.variant}) × ${item.qty}\n  Regular Price: ${item.price.toFixed(2)} EGP\n  Launch Discount: -${discVal.toFixed(2)} EGP\n  Final Product Price: ${discUnit.toFixed(2)} EGP\n`;
+      } else {
+        orderLines += `• ${item.name} (${item.variant}) × ${item.qty} (${item.price.toFixed(2)} EGP)\n`;
+      }
+    });
 
-    const donationPayload = {
-      amount_egp: donationAmt
-    };
+    const orderItemsPayload = cart.map(item => {
+      const discVal = (isEligible && (item.id === 'p3' || item.id === 'p4')) ? (item.id === 'p3' ? 8.90 : 22.90) : 0;
+      return {
+        product_id: item.id,
+        product_name: `${item.name} (${item.variant || ''})`.trim(),
+        unit_price_egp: Number(item.price),
+        discount_amount_egp: discVal,
+        quantity: Number(item.qty),
+        line_total_egp: Number(item.price - discVal) * Number(item.qty)
+      };
+    });
 
     const orderPayload = {
       order_number: orderId,
       customer: { name, phone, whatsapp, city, address, notes },
-      product_subtotal_egp: subtotal,
+      product_subtotal_egp: baseSubtotal,
       delivery_fee_egp: deliveryFee,
-      discount_egp: 0,
+      discount_egp: discountAmt,
       donation_egp: donationAmt,
       final_total_egp: grandTotal,
       items: orderItemsPayload
@@ -447,23 +472,22 @@ document.addEventListener('submit', (e) => {
     console.log("DONATION INPUT VALUE", donationAmt);
     console.log("ORDER PAYLOAD", orderPayload);
     console.log("ORDER ITEMS PAYLOAD", orderItemsPayload);
-    console.log("DONATION PAYLOAD", donationPayload);
 
-    const submitBtn = checkoutForm.querySelector('button[type="submit"]');
+    const submitBtn = document.querySelector('#checkout-form button[type="submit"]');
     if (submitBtn) {
       submitBtn.disabled = true;
       submitBtn.textContent = 'Processing...';
     }
 
     const messageBody = `Hello Sanné 🌿 I'd like to place an order.
-    
+
 Order ID: ${orderId}
 
 *Order Details:*
-${orderLines}${donationAmt > 0 ? `- Sana's Light Donation: ${donationAmt} EGP\n` : ''}
-*Subtotal:* ${subtotal} EGP
-*Delivery Fee:* ${deliveryFee} EGP
-${donationAmt > 0 ? `*Donation:* ${donationAmt} EGP\n` : ''}*Total:* ${grandTotal} EGP
+${orderLines}
+*Subtotal:* ${baseSubtotal.toFixed(2)} EGP
+${discountAmt > 0 ? `*Launch Discount:* -${discountAmt.toFixed(2)} EGP\n` : ''}*Delivery Fee:* ${deliveryFee.toFixed(2)} EGP
+${donationAmt > 0 ? `*Donation:* ${donationAmt.toFixed(2)} EGP\n` : ''}*Total:* ${grandTotal.toFixed(2)} EGP
 *Payment Method:* Cash or Instapay
 
 *Customer Details:*
