@@ -94,9 +94,9 @@ const products = [
     skinType: 'all',
     price: 299,
     oldPrice: 318,
-    image: 'images/bosbos.jpg',
-    hover_image: 'images/rose_vanille.jpg',
-    desc: 'Two ways to wear Rose Vanille, made to be enjoyed together. Begin with Bosbos on your pulse points, then finish with Rose Vanille Body Splash for a fuller scent ritual. Already choosing the Body Splash? Complete the ritual for only 70 EGP more.',
+    image: 'images/bundle_ritual_default.jpg',
+    hover_image: 'images/bundle_ritual_hover.jpg',
+    desc: 'Two Rose Vanille essentials. One bundle price. Get both for 299 EGP instead of 318 EGP. Made to layer. Better together.',
     isBestSeller: true,
     isFragrance: true,
     isMoisturizer: false,
@@ -104,11 +104,35 @@ const products = [
     concerns: ['scent', 'fragrance', 'bundle', 'ritual', 'set', 'gift', 'makhmarya', 'body splash'],
     keywords: ['ritual', 'sanne ritual', 'bundle', 'set', 'gift set', 'rose vanille', 'makhmarya', 'bosbos', 'splash']
   }
-];
+// Smart Rhode-style Header Scroll Logic (hide on scroll down, show on scroll up)
+let lastScrollY = window.scrollY;
+const header = document.querySelector('.header');
 
+if (header) {
+  window.addEventListener('scroll', () => {
+    const currentScrollY = window.scrollY;
+    const delta = currentScrollY - lastScrollY;
 
+    if (currentScrollY < 30) {
+      header.classList.remove('header-hidden');
+      header.classList.add('header-visible');
+      header.classList.remove('scrolled-bg');
+    } else {
+      header.classList.add('scrolled-bg');
+      if (delta > 8) {
+        // Scrolling down -> hide header
+        header.classList.add('header-hidden');
+        header.classList.remove('header-visible');
+      } else if (delta < -8) {
+        // Scrolling up -> reveal header
+        header.classList.remove('header-hidden');
+        header.classList.add('header-visible');
+      }
+    }
+    lastScrollY = currentScrollY;
+  }, { passive: true });
+}
 
-// Initialize product cards with data from the single source of truth and inject global UI elements
 document.addEventListener('DOMContentLoaded', () => {
   // 1. Inject ASK SANNÉ and My Loves into navigation
   const navLeft = document.querySelector('.nav-left');

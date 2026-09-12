@@ -143,24 +143,37 @@
       const baseP = item.basePricePiastres;
       const isEligibleProd = PROMO_CONFIG.eligibleProductIds.includes(id);
 
-      if (active && isEligibleProd && !item.isBundle) {
-        const discP = Math.round(baseP * (PROMO_CONFIG.discountPercent / 100));
-        const finalP = baseP - discP;
+      if (item.isBundle || id === 'bundle_ritual') {
+        // The Sanné Ritual (299 EGP vs 318 EGP value) — BUNDLE & SAVE badge
         el.innerHTML = `
-          <span style="text-decoration: line-through; color: var(--color-text-light); margin-right: 0.4rem; font-size: 0.9em;">${formatMoneyWhole(baseP)}</span>
-          <span style="font-weight: 600; color: var(--color-dark-brown); font-size: 1.1em;">${formatMoney(finalP)}</span>
-          <span style="display: block; font-size: 0.75rem; color: var(--color-soft-gold); font-weight: 600; margin-top: 0.2rem;">Opening Offer · 10% off</span>
+          <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.2rem;">
+            <span style="text-decoration: line-through; color: var(--color-text-light); font-size: 0.9em; white-space: nowrap;">318 EGP</span>
+            <span style="font-weight: 700; color: var(--color-dark-brown); font-size: 1.15em; white-space: nowrap;">299 EGP</span>
+            <span style="display: inline-block; background: #EADDCB; color: #4A3C2B; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; padding: 0.2rem 0.5rem; border-radius: 3px; white-space: nowrap;">BUNDLE & SAVE</span>
+          </div>
         `;
-      } else if (item.isBundle || id === 'bundle_ritual') {
-        // The Sanné Ritual (299 EGP vs 318 EGP value)
-        el.innerHTML = `
-          <span style="text-decoration: line-through; color: var(--color-text-light); margin-right: 0.4rem; font-size: 0.9em;">318 EGP</span>
-          <span style="font-weight: 600; color: var(--color-dark-brown); font-size: 1.1em;">299 EGP</span>
-          <span style="display: block; font-size: 0.78rem; color: var(--color-soft-gold); font-weight: 600; margin-top: 0.2rem;">Complete the ritual for only 70 EGP more</span>
-        `;
+      } else if (isEligibleProd) {
+        if (active) {
+          const discP = Math.round(baseP * (PROMO_CONFIG.discountPercent / 100));
+          const finalP = baseP - discP;
+          el.innerHTML = `
+            <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.2rem;">
+              <span style="text-decoration: line-through; color: var(--color-text-light); font-size: 0.9em; white-space: nowrap;">${formatMoneyWhole(baseP)}</span>
+              <span style="font-weight: 700; color: var(--color-dark-brown); font-size: 1.15em; white-space: nowrap;">${formatMoney(finalP)}</span>
+              <span style="display: inline-block; background: #8A333C; color: #FFFFFF; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; padding: 0.2rem 0.5rem; border-radius: 3px; white-space: nowrap;">10% LAUNCH OFFER</span>
+            </div>
+          `;
+        } else {
+          el.innerHTML = `
+            <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.2rem;">
+              <span style="font-weight: 700; color: var(--color-dark-brown); font-size: 1.1em; white-space: nowrap;">${formatMoneyWhole(baseP)}</span>
+              <span style="display: inline-block; background: #F8F6F0; border: 1px solid #CBAA77; color: #8C7355; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; padding: 0.2rem 0.5rem; border-radius: 3px; white-space: nowrap;">10% LAUNCH OFFER FROM MONDAY</span>
+            </div>
+          `;
+        }
       } else {
-        // Base Price (Moisturizers, or Post-Launch)
-        el.innerHTML = `<span style="font-weight: 600; color: var(--color-dark-brown);">${formatMoneyWhole(baseP)}</span>`;
+        // Base Price (Moisturizers, etc.)
+        el.innerHTML = `<span style="font-weight: 600; color: var(--color-dark-brown); white-space: nowrap;">${formatMoneyWhole(baseP)}</span>`;
       }
     });
   }
