@@ -8,20 +8,22 @@
   <link rel="stylesheet" href="styles.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;600&family=Playfair+Display:ital,wght@0,400;0,600;1,400;1,600&display=swap" rel="stylesheet">
+  <script src="pricing-engine.js"></script>
 </head>
 <body>
 
-  <!-- Header -->
+  <!-- Header (Global Transparent Layout) -->
   <header class="header">
     <nav class="nav-left">
       <a href="shop.html" class="nav-link" style="font-weight: 500;">SHOP</a>
       <a href="about.html" class="nav-link">ABOUT</a>
       <a href="futures.html" class="nav-link">FUTURES</a>
+      <a href="ask-sanne.html" class="nav-link">ASK SANNÉ</a>
     </nav>
     <a href="index.html" class="logo">Sanné</a>
     <nav class="nav-right">
       <a href="#" class="nav-link" id="nav-search">SEARCH</a>
-      <a href="#" class="nav-link" id="nav-cart">CART <span id="cart-count-badge">(0)</span></a>
+      <a href="#" class="nav-link" id="nav-cart">CART <span id="cart-badge">(0)</span></a>
     </nav>
     <div class="hamburger">
       <span></span>
@@ -35,6 +37,7 @@
     <a href="shop.html">SHOP</a>
     <a href="about.html">ABOUT</a>
     <a href="futures.html">FUTURES</a>
+    <a href="ask-sanne.html">ASK SANNÉ</a>
     <a href="#" id="mobile-search">SEARCH</a>
     <a href="#" id="mobile-cart">CART</a>
   </div>
@@ -96,7 +99,7 @@
               <option value="" disabled selected>City in Egypt</option>
               <option value="Cairo">Cairo</option>
               <option value="Giza">Giza</option>
-              <option value="Alex">Alexandria</option>
+              <option value="Alexandria">Alexandria</option>
               <option value="Belbeis">Belbeis</option>
               <option value="Zagazig">Zagazig</option>
               <option value="10th of Ramadan">10th of Ramadan</option>
@@ -122,357 +125,133 @@
               <option value="Qena">Qena</option>
               <option value="Kafr El Sheikh">Kafr El Sheikh</option>
               <option value="Matrouh">Matrouh</option>
-              <option value="Sharqiyah">Sharqiyah</option>
+              <option value="Other">Other</option>
             </select>
           </div>
           <div class="form-group">
             <textarea id="checkout-address" class="form-control" rows="2" placeholder="Full Address" required></textarea>
           </div>
-          <div class="form-group">
-            <textarea id="checkout-notes" class="form-control" rows="2" placeholder="Notes (Optional)"></textarea>
-          </div>
           <button type="submit" class="btn btn-primary" style="width: 100%;">Complete Order</button>
-          <p id="checkout-success-msg" class="success-msg mt-sm" style="display: none; color: green; font-size: 0.9rem; text-align: center;">Your order is ready. Please complete it through WhatsApp.</p>
+          <p id="checkout-success-msg" class="success-msg mt-sm" style="display: none; color: green; font-size: 0.9rem; text-align: center;"></p>
         </form>
       </div>
     </div>
   </div>
 
-<!-- Shop Hero -->
-<section class="shop-hero-section shop-hero-clean">
-  <div class="shop-hero-media">
-    <img src="images/new_5.jpg" alt="Sanné shop" class="shop-hero-img">
-  </div>
-
-  <div class="shop-hero-text container text-center">
-    <h1 class="section-title">Shop Sanné</h1>
-    <p class="section-subtitle">Soft care, made to stay.</p>
-  </div>
-</section>
-
-  <!-- Main Content -->
-  <section class="section container">
-    <div class="category-pills">
-      <button class="pill active">Shop All</button>
-      <button class="pill">Moisturizers</button>
-      <button class="pill">Body Fragrance</button>
-      <button class="pill">Best Sellers</button>
-    </div>
-
-    <div class="products-grid">
-      <!-- Product 1 -->
-      <div class="product-card" data-id="p1" data-name="Moisturizing Cream" data-variant="For Dry Skin" data-price="229">
-        <div class="product-image-container">
-          <img src="images/dry_skin.jpg" alt="Moisturizing Cream For Dry Skin" class="product-image default-img">
-          <img src="images/hover_dry_skin_1778922108728.png" alt="Applying Moisturizing Cream For Dry Skin" class="product-image hover-img">
-        </div>
-        <div class="product-info">
-          <h3 class="product-title">Moisturizing Cream</h3>
-          <p class="product-variant" style="font-size: 0.9rem; margin-bottom: 0.5rem; font-weight: 500;">For Dry Skin</p>
-          <p class="product-desc">Rich moisture for healthy looking skin, with jojoba oil, sweet almond oil, ceramide NP, and hyaluronic acid.</p>
-          <div class="product-price-row">
-            <span class="price-old">279 EGP</span>
-            <span class="price-new">229 EGP</span>
-          </div>
-          <button class="btn btn-primary btn-order add-to-cart-btn">Add to cart</button>
-        </div>
+  <!-- Page Content Container with Safe Top Spacing -->
+  <div class="shop-container">
+    <!-- Shop Hero -->
+    <section class="shop-hero-section shop-hero-clean">
+      <div class="shop-hero-media">
+        <img src="images/new_5.jpg" alt="Sanné shop" class="shop-hero-img">
       </div>
 
-      <!-- Product 2 -->
-      <div class="product-card" data-id="p2" data-name="Moisturizing Cream" data-variant="For Oily and Combination Skin" data-price="229">
-        <div class="product-image-container">
-          <img src="images/oily_skin.jpg" alt="Moisturizing Cream For Oily and Combination Skin" class="product-image default-img">
-          <img src="images/hover_oily_skin_1778922300593.png" alt="Applying Moisturizing Cream For Oily and Combination Skin" class="product-image hover-img">
-        </div>
-        <div class="product-info">
-          <h3 class="product-title">Moisturizing Cream</h3>
-          <p class="product-variant" style="font-size: 0.9rem; margin-bottom: 0.5rem; font-weight: 500;">For Oily and Combination Skin</p>
-          <p class="product-desc">Lightweight daily moisture that supports skin barrier comfort, with naturally derived lipids and soothing extracts.</p>
-          <div class="product-price-row">
-            <span class="price-old">279 EGP</span>
-            <span class="price-new">229 EGP</span>
-          </div>
-          <button class="btn btn-primary btn-order add-to-cart-btn">Add to cart</button>
-        </div>
+      <div class="shop-hero-text container text-center">
+        <h1 class="section-title">Shop Sanné</h1>
+        <p class="section-subtitle">Soft care, made to stay.</p>
+      </div>
+    </section>
+
+    <!-- Main Content -->
+    <section class="section container">
+      <div class="category-pills">
+        <button class="pill active">Shop All</button>
+        <button class="pill">Moisturizers</button>
+        <button class="pill">Body Fragrance</button>
+        <button class="pill">Best Sellers</button>
       </div>
 
-      <!-- Product 3 -->
-      <div class="product-card" data-id="p3" data-name="Bosbos Body Fragrance" data-variant="Makhmarya" data-price="79">
-        <div class="product-image-container">
-          <img src="images/bosbos.jpg" alt="Bosbos Body Fragrance" class="product-image default-img">
-          <img src="images/bosbos_hover.png" alt="Bosbos Body Fragrance Usage" class="product-image hover-img">
-        </div>
-        <div class="product-info">
-          <h3 class="product-title">Bosbos Body Fragrance</h3>
-          <p class="product-variant" style="font-size: 0.9rem; margin-bottom: 0.5rem; font-weight: 500;">Makhmarya</p>
-          <p class="product-desc">A warm body fragrance made to leave the skin softly scented and beautifully cared for.</p>
-          <div class="product-price-row">
-            <span class="price-old">105 EGP</span>
-            <span class="price-new">79 EGP</span>
+      <div class="products-grid">
+        <!-- Product 1 -->
+        <div class="product-card" data-id="p1">
+          <div class="product-image-container">
+            <img src="images/dry_skin.jpg" alt="Moisturizing Cream For Dry Skin" class="product-image default-img">
+            <img src="images/hover_dry_skin_1778922108728.png" alt="Applying Moisturizing Cream For Dry Skin" class="product-image hover-img">
           </div>
-          <button class="btn btn-primary btn-order add-to-cart-btn">Add to cart</button>
-        </div>
-      </div>
-
-      <!-- Product 4 -->
-      <div class="product-card" data-id="p4" data-name="Rose Vanille Body Splash" data-variant="220 ml" data-price="229">
-        <div class="product-image-container">
-          <img src="images/rose_vanille.jpg" alt="Rose Vanille Body Splash" class="product-image default-img">
-          <img src="images/hover_rose_vanille.jpg" alt="Applying Rose Vanille Body Splash" class="product-image hover-img">
-        </div>
-        <div class="product-info">
-          <h3 class="product-title">Rose Vanille Body Splash</h3>
-          <p class="product-variant" style="font-size: 0.9rem; margin-bottom: 0.5rem; font-weight: 500;">220 ml</p>
-          <p class="product-desc">A refreshing and long-lasting body fragrance mist with delicate rose and warm vanilla notes for your daily scent ritual.</p>
-          <div class="product-price-row">
-            <span class="price-old">279 EGP</span>
-            <span class="price-new">229 EGP</span>
-          </div>
-          <button class="btn btn-primary btn-order add-to-cart-btn">Add to cart</button>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ═══════════════════════════════════════════════════════════ -->
-  <!-- 💖 CUSTOMER LOVE — Public Real Review System & Editorial 💖 -->
-  <!-- ═══════════════════════════════════════════════════════════ -->
-  <section class="customer-love-section" id="customer-love">
-    <div class="container">
-
-      <!-- 1. Editorial Hero Zone -->
-      <div class="cl-hero-zone">
-        
-        <!-- Left: Editorial Headline & Live Rating Scorecard -->
-        <div class="cl-hero-text">
-          <div class="cl-eyebrow">
-            <span class="cl-spark">✦</span>
-            <span>REAL STORIES · REAL WORDS</span>
-            <span class="cl-heart">♡</span>
-          </div>
-          <h2 class="cl-main-title">Customer Love</h2>
-          <p class="cl-subtitle">Real words from real Sanné girls. Softness, scent, skin, and everything they truly felt.</p>
-          
-          <!-- Dynamic Scorecard (Generated dynamically from real reviews) -->
-          <div class="cl-scorecard" id="cl-scorecard-wrap">
-            <div class="scorecard-empty-prompt">
-              <span class="prompt-spark">✦</span>
-              <span>Be the first to leave a Sanné note ♡</span>
-            </div>
+          <div class="product-info">
+            <h3 class="product-title">Moisturizing Cream</h3>
+            <p class="product-variant" style="font-size: 0.9rem; margin-bottom: 0.5rem; font-weight: 500;">For Dry Skin</p>
+            <p class="product-desc">Rich moisture for healthy looking skin, with jojoba oil, sweet almond oil, ceramide NP, and hyaluronic acid.</p>
+            <div class="product-price-row" data-product-id="p1"></div>
+            <button class="btn btn-primary btn-order add-to-cart-btn">Add to cart</button>
           </div>
         </div>
 
-        <!-- Center: Transparent Mascot + Scroll Cue + Direct Review CTA -->
-        <div class="cl-hero-mascot">
-          <div class="cl-mascot-img-wrap">
-            <img src="images/sanne_mascot_transparent.png" alt="Sanné guide character" class="cl-mascot-img">
+        <!-- Product 2 -->
+        <div class="product-card" data-id="p2">
+          <div class="product-image-container">
+            <img src="images/oily_skin.jpg" alt="Moisturizing Cream For Oily and Combination Skin" class="product-image default-img">
+            <img src="images/hover_oily_skin_1778922300593.png" alt="Applying Moisturizing Cream For Oily and Combination Skin" class="product-image hover-img">
           </div>
-          <div class="cl-scroll-cue">
-            <span class="cue-script">Scroll through the love</span>
-            <span class="cue-arrow">↓</span>
-          </div>
-          
-          <!-- Review CTA directly under mascot arrow -->
-          <div class="cl-center-cta">
-            <p class="cta-question">Have you tried Sanné?</p>
-            <button type="button" class="btn-write-review-compact" onclick="openReviewModal()">
-              <span class="btn-pen-icon">✦</span> Write your Sanné note <span class="btn-heart-icon">♡</span>
-            </button>
+          <div class="product-info">
+            <h3 class="product-title">Moisturizing Cream</h3>
+            <p class="product-variant" style="font-size: 0.9rem; margin-bottom: 0.5rem; font-weight: 500;">For Oily and Combination Skin</p>
+            <p class="product-desc">Lightweight daily moisture that supports skin barrier comfort, with naturally derived lipids and soothing extracts.</p>
+            <div class="product-price-row" data-product-id="p2"></div>
+            <button class="btn btn-primary btn-order add-to-cart-btn">Add to cart</button>
           </div>
         </div>
 
-        <!-- Right: Speech bubble & supporting statement (visually light) -->
-        <div class="cl-hero-right-editorial">
-          <div class="cl-speech-bubble">
-            <div class="bubble-tape"></div>
-            <p class="bubble-phrase">"Don't take our word for it… see what the girls are saying ♡"</p>
+        <!-- Product 3 -->
+        <div class="product-card" data-id="p3">
+          <div class="product-image-container">
+            <img src="images/bosbos.jpg" alt="Bosbos Body Fragrance" class="product-image default-img">
+            <img src="images/bosbos_hover.png" alt="Bosbos Body Fragrance Usage" class="product-image hover-img">
           </div>
-          <div class="cl-supporting-statement">
-            <p>Real stories from <strong>real women who chose to glow with Sanné.</strong></p>
+          <div class="product-info">
+            <h3 class="product-title">Bosbos Body Fragrance</h3>
+            <p class="product-variant" style="font-size: 0.9rem; margin-bottom: 0.5rem; font-weight: 500;">Makhmarya</p>
+            <p class="product-desc">A warm body fragrance made to leave the skin softly scented and beautifully cared for.</p>
+            <div class="product-price-row" data-product-id="p3"></div>
+            <button class="btn btn-primary btn-order add-to-cart-btn">Add to cart</button>
           </div>
         </div>
 
-      </div><!-- .cl-hero-zone -->
-
-
-      <!-- 2. Featured Real Customer Video -->
-      <div class="cl-featured-video-zone">
-        <div class="cl-video-header">
-          <span class="video-eyebrow">✦ REAL MOMENTS IN CARE ✦</span>
-          <h3 class="video-title">See Sanné in Real Life</h3>
-        </div>
-        <div class="cl-video-frame">
-          <video controls playsinline preload="metadata">
-            <source src="images/Reviews/AQPEeSCmfXNj_Sdxj-JK21cBQGO3Px8BHp8m0JZOUOb5CABzr4xhi1fPaIhm_8Wb5QU_xqWM82uCnG-xBpS9_MhFIMZ370jt8vc.mp4" type="video/mp4">
-            Your browser does not support the video tag.
-          </video>
-        </div>
-      </div>
-
-
-      <!-- 3. Reviews Feed Header & Filter Bar -->
-      <div class="cl-feed-header">
-        <div class="feed-title-wrap">
-          <span class="feed-eyebrow">✦ COMMUNITY VOICES ✦</span>
-          <h3 class="feed-main-title">What our Sanné girls are saying</h3>
+        <!-- Product 4 -->
+        <div class="product-card" data-id="p4">
+          <div class="product-image-container">
+            <img src="images/rose_vanille.jpg" alt="Rose Vanille Body Splash" class="product-image default-img">
+            <img src="images/hover_rose_vanille.jpg" alt="Applying Rose Vanille Body Splash" class="product-image hover-img">
+          </div>
+          <div class="product-info">
+            <h3 class="product-title">Rose Vanille Body Splash</h3>
+            <p class="product-variant" style="font-size: 0.9rem; margin-bottom: 0.5rem; font-weight: 500;">220 ml</p>
+            <p class="product-desc">A refreshing and long-lasting body fragrance mist with delicate rose and warm vanilla notes for your daily scent ritual.</p>
+            <div class="product-price-row" data-product-id="p4"></div>
+            <button class="btn btn-primary btn-order add-to-cart-btn">Add to cart</button>
+          </div>
         </div>
 
-        <!-- Filter Pills (Active when real reviews exist) -->
-        <div class="cl-filter-bar" id="reviews-filter-bar" style="display: none;">
-          <span class="filter-label">Filter notes:</span>
-          <div class="filter-pills-list">
-            <button type="button" class="reviews-filter-pill active" data-filter="all">All Notes</button>
-            <button type="button" class="reviews-filter-pill" data-filter="p1">Dry Skin</button>
-            <button type="button" class="reviews-filter-pill" data-filter="p2">Oily &amp; Combination</button>
-            <button type="button" class="reviews-filter-pill" data-filter="p3">Bosbos</button>
-            <button type="button" class="reviews-filter-pill" data-filter="p4">Rose Vanille</button>
-            <button type="button" class="reviews-filter-pill" data-filter="5stars">5 Stars ★</button>
+        <!-- Product 5 (Bundle) -->
+        <div class="product-card" data-id="bundle_ritual">
+          <div class="product-image-container">
+            <img src="images/bosbos.jpg" alt="The Sanné Ritual" class="product-image default-img">
+            <img src="images/rose_vanille.jpg" alt="The Sanné Ritual Set" class="product-image hover-img">
+          </div>
+          <div class="product-info">
+            <h3 class="product-title">The Sanné Ritual</h3>
+            <p class="product-variant" style="font-size: 0.9rem; margin-bottom: 0.5rem; font-weight: 500;">Gift Set (Makhmarya + Body Splash)</p>
+            <p class="product-desc">Complete your scent ritual. Pair Rose Vanille Body Splash with Makhmarya for a layered, soft scent that stays with you all day.</p>
+            <div class="product-price-row" data-product-id="bundle_ritual"></div>
+            <button class="btn btn-primary btn-order" onclick="addToCart(window.products.find(p=>p.id==='bundle_ritual'));">Add to cart</button>
           </div>
         </div>
       </div>
-
-
-      <!-- 4. Dynamic Reviews Cards Grid / Empty State -->
-      <div class="reviews-cards-grid" id="reviews-cards-container">
-        <!-- Dynamically populated from Supabase via reviews-ui.js -->
-      </div>
-
-    </div>
-  </section>
-
-  <!-- ═══════════════════════════════════════════════════════════ -->
-  <!-- 💌 WRITE YOUR SANNÉ NOTE — Soft Feminine Review Modal 💌 -->
-  <!-- ═══════════════════════════════════════════════════════════ -->
-  <div class="review-modal" id="review-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
-    <div class="review-modal-card">
-      
-      <!-- Close Button -->
-      <button type="button" class="modal-close-btn" onclick="closeReviewModal()" aria-label="Close modal">&times;</button>
-
-      <!-- Modal Header -->
-      <div class="review-modal-header">
-        <div class="modal-spark-tag">✦ SANNÉ RITUALS ♡</div>
-        <h3 class="modal-title" id="modal-title">Tell us how Sanné felt on you</h3>
-        <p class="modal-helper">Share your real experience in your own words.</p>
-      </div>
-
-      <!-- Success Box -->
-      <div class="review-success-box" id="review-success-box" style="display: none;">
-        <div class="success-heart-icon">♡</div>
-        <h4 class="success-title">Your review is live!</h4>
-        <p class="success-msg">Thank you for sharing your voice with Sanné. Your words mean the world to us.</p>
-      </div>
-
-      <!-- Error Box -->
-      <div class="review-error-box" id="review-error-box" style="display: none;"></div>
-
-      <!-- Submit Form -->
-      <form class="review-submit-form" id="review-submit-form">
-        
-        <!-- Name Field -->
-        <div class="form-row">
-          <label class="form-label" for="modal-name-input">Your Name <span class="req-star">*</span></label>
-          <input type="text" id="modal-name-input" class="form-input-soft" placeholder="e.g. Salma M." required>
-        </div>
-
-        <!-- Product Choose -->
-        <div class="form-row">
-          <label class="form-label" for="modal-product-select">Choose Product <span class="req-star">*</span></label>
-          <select id="modal-product-select" class="form-select-soft" required>
-            <option value="p1">Moisturizing Cream For Dry Skin</option>
-            <option value="p2">Moisturizing Cream For Oily & Combination Skin</option>
-            <option value="p3">Bosbos Body Fragrance — Makhmarya</option>
-            <option value="p4">Rose Vanille Body Splash — 220 ml</option>
-          </select>
-        </div>
-
-        <!-- Star Rating -->
-        <div class="form-row">
-          <label class="form-label">How would you rate it? <span class="req-star">*</span></label>
-          <div class="modal-stars-picker" id="modal-star-selector">
-            <!-- 5 clickable gold stars populated by JS -->
-          </div>
-          <div class="rating-descriptor" id="modal-rating-label">5 Stars — Pure magic on my skin ♡</div>
-        </div>
-
-        <!-- Review Textarea -->
-        <div class="form-row">
-          <label class="form-label" for="modal-text-input">Your Review <span class="req-star">*</span></label>
-          <textarea id="modal-text-input" class="form-textarea-soft" rows="4" placeholder="Tell us how it felt on you… the scent, the softness, the texture, or your little ritual with it." required></textarea>
-        </div>
-
-        <!-- Optional: Skin Type -->
-        <div class="form-row">
-          <label class="form-label" for="modal-skin-select">Your Skin Type <span class="opt-label">(optional)</span></label>
-          <select id="modal-skin-select" class="form-select-soft">
-            <option value="">Select skin type...</option>
-            <option value="Dry">Dry</option>
-            <option value="Oily & Combination">Oily &amp; Combination</option>
-            <option value="Sensitive">Sensitive</option>
-            <option value="Normal">Normal</option>
-          </select>
-        </div>
-
-        <!-- Optional: Would Recommend -->
-        <div class="form-row">
-          <label class="form-label">Would you recommend Sanné? <span class="opt-label">(optional)</span></label>
-          <div class="recommend-toggle-group">
-            <label class="rec-radio-label">
-              <input type="radio" name="modal-recommend" value="yes" checked>
-              <span class="rec-pill">♡ Yes, absolutely</span>
-            </label>
-            <label class="rec-radio-label">
-              <input type="radio" name="modal-recommend" value="no">
-              <span class="rec-pill">Not quite</span>
-            </label>
-          </div>
-        </div>
-
-        <!-- Submit Button -->
-        <div class="modal-submit-row">
-          <button type="submit" class="btn-share-review" id="btn-submit-review">
-            Share my review ✦
-          </button>
-        </div>
-
-      </form>
-
-    </div>
+    </section>
   </div>
 
   <!-- Footer -->
-  <footer class="footer mt-xl">
-    <div class="footer-top">
-      <div>
-        <h2 class="footer-brand">Sanné</h2>
-        <p>Soft care, made to stay.</p>
-      </div>
-      <div>
-        <h3 class="footer-title">Explore</h3>
-        <div class="footer-links">
-          <a href="shop.html">Shop All</a>
-          <a href="about.html">About Sanné</a>
-          <a href="futures.html">Sana's Light</a>
-        </div>
-      </div>
-      <div>
-        <h3 class="footer-title">Connect</h3>
-        <div class="footer-links">
-          <a href="mailto:Sanne.egy@gmail.com">Sanne.egy@gmail.com</a>
-          <a href="https://www.instagram.com/sanne.egy/" target="_blank">Instagram</a>
-          <a href="https://www.facebook.com/share/1Dsn9ZZotF/" target="_blank">Facebook</a>
-          <a href="https://www.tiktok.com/@sanne.eg?_r=1&_t=ZS-96NpIO4bs0N" target="_blank">TikTok</a>
-          <a href="https://wa.me/201032138278" target="_blank">WhatsApp: 01032138278</a>
-        </div>
-      </div>
+  <footer class="footer mt-lg">
+    <div class="container text-center">
+      <a href="index.html" class="logo mb-sm" style="display: block;">Sanné</a>
+      <p style="font-size: 0.85rem; color: var(--color-text-light);">© 2026 Sanné Skincare. All rights reserved.</p>
     </div>
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="orders-service.js"></script>
-  <script src="app.js"></script>
-  <script src="donation-helpers.js"></script>
   <script src="reviews-service.js"></script>
   <script src="reviews-ui.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>

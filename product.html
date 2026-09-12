@@ -10,10 +10,11 @@
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500&family=Playfair+Display:wght@400;500&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/lucide@latest"></script>
   <link rel="stylesheet" href="styles.css">
+  <script src="pricing-engine.js"></script>
 
   <style>
     .product-page {
-      padding: 8rem 0 4rem;
+      padding: var(--header-height, 100px) 0 4rem;
     }
     .product-grid {
       display: grid;
@@ -59,27 +60,18 @@
       margin-bottom: 2rem;
     }
     
-    .price-wrap .price-original {
-      font-size: 1.2rem;
-    }
-    
-    .price-wrap .price-discount {
-      font-size: 1.5rem;
-    }
-    
     .actions {
       display: flex;
       gap: 1rem;
-      margin-bottom: 3rem;
+      margin-bottom: 2.5rem;
     }
     
-    /* Accordions */
     .accordion {
-      border-top: 1px solid var(--border-light);
+      border-top: 1px solid var(--color-border);
     }
     
     .accordion-item {
-      border-bottom: 1px solid var(--border-light);
+      border-bottom: 1px solid var(--color-border);
     }
     
     .accordion-header {
@@ -87,10 +79,10 @@
       text-align: left;
       background: none;
       border: none;
-      padding: 1.5rem 0;
+      padding: 1.2rem 0;
       font-family: var(--font-body);
-      font-size: 1.1rem;
-      color: var(--text-main);
+      font-size: 1.05rem;
+      color: var(--color-dark-brown);
       cursor: pointer;
       display: flex;
       justify-content: space-between;
@@ -102,41 +94,42 @@
       max-height: 0;
       overflow: hidden;
       transition: max-height 0.3s ease;
-      color: var(--text-muted);
+      color: var(--color-text-light);
       font-weight: 300;
       line-height: 1.6;
     }
     
     .accordion-content-inner {
-      padding-bottom: 1.5rem;
+      padding-bottom: 1.2rem;
     }
     
     .accordion-item.active .accordion-content {
       max-height: 500px;
     }
-    
-    .accordion-item.active .icon-plus {
-      display: none;
-    }
-    
-    .accordion-item:not(.active) .icon-minus {
-      display: none;
+
+    .cross-sell-box {
+      background: var(--color-cream);
+      border: 1px solid var(--color-soft-gold);
+      border-radius: 8px;
+      padding: 1.4rem;
+      margin-bottom: 2rem;
     }
   </style>
 </head>
 <body>
 
-  <!-- Header -->
+  <!-- Header (Global Transparent Layout) -->
   <header class="header">
     <nav class="nav-left">
       <a href="shop.html" class="nav-link">SHOP</a>
       <a href="about.html" class="nav-link">ABOUT</a>
       <a href="futures.html" class="nav-link">FUTURES</a>
+      <a href="ask-sanne.html" class="nav-link">ASK SANNÉ</a>
     </nav>
     <a href="index.html" class="logo">Sanné</a>
     <nav class="nav-right">
       <a href="#" class="nav-link" id="nav-search">SEARCH</a>
-      <a href="#" class="nav-link" id="nav-cart">CART <span id="cart-count-badge">(0)</span></a>
+      <a href="#" class="nav-link" id="nav-cart">CART <span id="cart-badge">(0)</span></a>
     </nav>
     <div class="hamburger">
       <span></span>
@@ -150,6 +143,7 @@
     <a href="shop.html">SHOP</a>
     <a href="about.html">ABOUT</a>
     <a href="futures.html">FUTURES</a>
+    <a href="ask-sanne.html">ASK SANNÉ</a>
     <a href="#" id="mobile-search">SEARCH</a>
     <a href="#" id="mobile-cart">CART</a>
   </div>
@@ -164,75 +158,6 @@
     </div>
   </div>
 
-  <!-- Product Details -->
-  <section class="section product-page">
-    <div class="container product-grid">
-      
-      <div class="product-gallery fade-in" id="product-image-container">
-        <!-- Injected via JS -->
-      </div>
-      
-      <div class="product-info fade-in" style="transition-delay: 0.1s;">
-        <h1 id="product-title">Loading...</h1>
-        <div class="subtitle" id="product-subtitle"></div>
-        <div class="price-wrap" id="product-price-container">
-           <!-- Injected via JS -->
-        </div>
-        
-        <div class="actions">
-          <div class="qty-selector">
-            <button onclick="changeQuantityInput(-1)">-</button>
-            <input type="number" id="qty" value="1" min="1" readonly>
-            <button onclick="changeQuantityInput(1)">+</button>
-          </div>
-          <button class="btn btn-primary" style="flex: 1;" onclick="handleAddToCart()">
-            Add to cart
-          </button>
-        </div>
-        
-        <div class="accordion">
-          <div class="accordion-item">
-            <button class="accordion-header" onclick="toggleAccordion(this)">
-              What it does
-              <i data-lucide="plus" class="icon-plus"></i><i data-lucide="minus" class="icon-minus"></i>
-            </button>
-            <div class="accordion-content">
-              <div class="accordion-content-inner" id="desc-what">Deeply nourishes and locks in moisture for long-lasting hydration and a radiant glow.</div>
-            </div>
-          </div>
-          
-          <div class="accordion-item">
-            <button class="accordion-header" onclick="toggleAccordion(this)">
-              How to use
-              <i data-lucide="plus" class="icon-plus"></i><i data-lucide="minus" class="icon-minus"></i>
-            </button>
-            <div class="accordion-content">
-              <div class="accordion-content-inner" id="desc-how">Apply a generous amount to clean skin. Massage gently until fully absorbed. Use daily for best results.</div>
-            </div>
-          </div>
-          
-          <div class="accordion-item">
-            <button class="accordion-header" onclick="toggleAccordion(this)">
-              Shipping & payment
-              <i data-lucide="plus" class="icon-plus"></i><i data-lucide="minus" class="icon-minus"></i>
-            </button>
-            <div class="accordion-content">
-              <div class="accordion-content-inner">Currently shipping across Egypt. We offer Cash or Instapay as our primary payment methods. Our team will contact you to confirm delivery details after your order is placed.</div>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-    </div>
-  </section>
-
-  <!-- Footer -->
-  <footer class="footer">
-    <div class="container text-center">
-      <p style="color: rgba(253, 252, 249, 0.5); font-size: 0.9rem;">© Sanné 2026. Made for soft, lasting care.</p>
-    </div>
-  </footer>
-
   <!-- Cart Overlay -->
   <div class="cart-overlay" id="cart-overlay">
     <div class="cart-content">
@@ -244,6 +169,19 @@
       </div>
       
       <div class="cart-footer mt-md" id="cart-footer" style="display: none;">
+        <!-- Donation field -->
+        <div style="background:var(--color-cream);border-radius:8px;padding:1rem 1.2rem;margin-bottom:1rem;border:1px solid var(--color-border);">
+          <p style="font-family:var(--font-serif);font-size:1rem;color:var(--color-dark-brown);margin:0 0 0.2rem;">A little kindness goes a long way.</p>
+          <p style="font-size:0.78rem;color:var(--color-text-light);margin:0 0 0.8rem;line-height:1.5;">Add something small to your order and become part of what we are building together.</p>
+          <div style="display:flex;align-items:center;gap:0.5rem;">
+            <label style="font-size:0.75rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--color-dark-brown);font-weight:600;white-space:nowrap;">Donation amount</label>
+          </div>
+          <div style="display:flex;align-items:center;gap:0.5rem;margin-top:0.5rem;">
+            <input type="number" id="sidebar-donation-amount" min="0" step="1" placeholder="0" oninput="updateCartUI()" style="width:80px;padding:0.4rem 0.6rem;border:1px solid var(--color-border);border-radius:4px;font-family:var(--font-sans);font-size:0.95rem;background:#fff;">
+            <span style="font-size:0.9rem;color:var(--color-text-light);">EGP</span>
+          </div>
+        </div>
+        <div id="cart-breakdown"></div>
         <div class="cart-total-row">
           <span>Total:</span>
           <span id="cart-total-price">0 EGP</span>
@@ -267,7 +205,7 @@
               <option value="" disabled selected>City in Egypt</option>
               <option value="Cairo">Cairo</option>
               <option value="Giza">Giza</option>
-              <option value="Alex">Alexandria</option>
+              <option value="Alexandria">Alexandria</option>
               <option value="Belbeis">Belbeis</option>
               <option value="Zagazig">Zagazig</option>
               <option value="10th of Ramadan">10th of Ramadan</option>
@@ -293,125 +231,150 @@
               <option value="Qena">Qena</option>
               <option value="Kafr El Sheikh">Kafr El Sheikh</option>
               <option value="Matrouh">Matrouh</option>
-              <option value="Sharqiyah">Sharqiyah</option>
+              <option value="Other">Other</option>
             </select>
           </div>
           <div class="form-group">
             <textarea id="checkout-address" class="form-control" rows="2" placeholder="Full Address" required></textarea>
           </div>
-          <div class="form-group">
-            <textarea id="checkout-notes" class="form-control" rows="2" placeholder="Notes (Optional)"></textarea>
-          </div>
           <button type="submit" class="btn btn-primary" style="width: 100%;">Complete Order</button>
-          <p id="checkout-success-msg" class="success-msg mt-sm" style="display: none; color: green; font-size: 0.9rem; text-align: center;">Your order is ready. Please complete it through WhatsApp.</p>
+          <p id="checkout-success-msg" class="success-msg mt-sm" style="display: none; color: green; font-size: 0.9rem; text-align: center;"></p>
         </form>
       </div>
     </div>
   </div>
 
+  <main class="product-page">
+    <div class="container">
+      <div class="product-grid">
+        <div class="product-gallery" id="product-image-container"></div>
+        
+        <div class="product-info">
+          <h1 id="product-title" style="font-family: var(--font-serif); color: var(--color-dark-brown);"></h1>
+          <div class="subtitle" id="product-subtitle"></div>
+          
+          <div class="price-wrap" id="product-price-container"></div>
+          
+          <!-- Cross-Selling Block for Bundle -->
+          <div id="bundle-cross-sell-container"></div>
+
+          <div class="actions">
+            <button class="btn btn-primary btn-order" id="add-to-cart-btn" style="flex: 1;">Add to cart</button>
+            <button class="btn" id="wishlist-btn" style="width: 50px; padding: 0; display: flex; align-items: center; justify-content: center;">
+              ♡
+            </button>
+          </div>
+          
+          <div class="accordion">
+            <div class="accordion-item active">
+              <button class="accordion-header">
+                Details
+                <i data-lucide="minus" class="icon-minus"></i>
+                <i data-lucide="plus" class="icon-plus"></i>
+              </button>
+              <div class="accordion-content">
+                <div class="accordion-content-inner" id="product-desc"></div>
+              </div>
+            </div>
+            
+            <div class="accordion-item">
+              <button class="accordion-header">
+                How to Use
+                <i data-lucide="minus" class="icon-minus"></i>
+                <i data-lucide="plus" class="icon-plus"></i>
+              </button>
+              <div class="accordion-content">
+                <div class="accordion-content-inner" id="product-usage"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="orders-service.js"></script>
   <script src="app.js"></script>
   <script>
-    const PRODUCTS = {
-      p1: {
-        id: 'p1',
-        name: 'Moisturizing Cream',
-        variant: 'For Dry Skin',
-        price: 229,
-        originalPrice: 279,
-        image: 'images/dry_skin.jpg',
-        fallbackImg: 'images/dry_skin.jpg',
-        title: 'Moisturizing Cream',
-        subtitle: 'For Dry Skin'
-      },
-      p2: {
-        id: 'p2',
-        name: 'Moisturizing Cream',
-        variant: 'For Oily and Combination Skin',
-        price: 229,
-        originalPrice: 279,
-        image: 'images/oily_skin.jpg',
-        fallbackImg: 'images/oily_skin.jpg',
-        title: 'Moisturizing Cream',
-        subtitle: 'For Oily and Combination Skin'
-      },
-      p3: {
-        id: 'p3',
-        name: 'Bosbos Body Fragrance',
-        variant: 'Makhmarya',
-        price: 79,
-        originalPrice: 105,
-        image: 'images/bosbos.jpg',
-        fallbackImg: 'images/bosbos.jpg',
-        title: 'Bosbos Body Fragrance',
-        subtitle: 'Makhmarya'
-      },
-      p4: {
-        id: 'p4',
-        name: 'Rose Vanille Body Splash',
-        variant: '220 ml',
-        price: 229,
-        originalPrice: 279,
-        image: 'images/rose_vanille.jpg',
-        fallbackImg: 'images/rose_vanille.jpg',
-        title: 'Rose Vanille Body Splash',
-        subtitle: '220 ml'
-      }
-    };
-
     let currentProduct = null;
 
     document.addEventListener('DOMContentLoaded', () => {
-      lucide.createIcons();
+      if (window.lucide) lucide.createIcons();
       
       const urlParams = new URLSearchParams(window.location.search);
-      const id = urlParams.get('id');
+      const id = urlParams.get('id') || 'p3';
       
-      if (id && PRODUCTS[id]) {
-        currentProduct = PRODUCTS[id];
-        document.title = `${currentProduct.title} | Sanné`;
-        document.getElementById('product-title').textContent = currentProduct.title;
-        document.getElementById('product-subtitle').textContent = currentProduct.subtitle;
+      currentProduct = window.products.find(p => p.id === id) || window.products.find(p => p.id === 'p3');
+      
+      if (currentProduct) {
+        document.title = `${currentProduct.fullName || currentProduct.name} | Sanné`;
+        document.getElementById('product-title').textContent = currentProduct.name;
+        document.getElementById('product-subtitle').textContent = currentProduct.variant;
         
-        document.getElementById('product-price-container').innerHTML = `
-          <span class="price-original">${currentProduct.originalPrice} EGP</span>
-          <span class="price-discount">Launch Offer: ${currentProduct.price} EGP</span>
-        `;
+        const priceContainer = document.getElementById('product-price-container');
+        if (priceContainer) {
+          priceContainer.setAttribute('data-product-id', currentProduct.id);
+          if (window.PricingEngine) window.PricingEngine.renderDynamicPrices();
+        }
         
         document.getElementById('product-image-container').innerHTML = `
-          <span class="launch-badge">Launch Offer</span>
-          <img src="${currentProduct.image}" alt="${currentProduct.title}" onerror="this.src='${currentProduct.fallbackImg}'">
+          <img src="${currentProduct.image}" alt="${currentProduct.name}">
         `;
-      } else {
-        document.getElementById('product-title').textContent = 'Product Not Found';
+        
+        document.getElementById('product-desc').textContent = currentProduct.desc || 'Soft care, made to stay.';
+        document.getElementById('product-usage').textContent = currentProduct.category === 'body fragrance'
+          ? 'Apply gently to pulse points or mist all over your body for a soft, layered fragrance ritual.'
+          : 'Apply a small amount to clean skin morning and evening. Gently press into face and neck.';
+
+        // Render Cross-Selling Box
+        const crossSellEl = document.getElementById('bundle-cross-sell-container');
+        if (crossSellEl) {
+          if (currentProduct.id === 'p4') {
+            // Body Splash Page Cross-Sell
+            crossSellEl.innerHTML = `
+              <div class="cross-sell-box">
+                <p style="font-family: var(--font-serif); font-size: 1.1rem; color: var(--color-dark-brown); margin: 0 0 0.3rem; font-weight: 600;">Complete your Sanné Ritual</p>
+                <p style="font-size: 0.88rem; color: var(--color-text-light); margin: 0 0 0.8rem; line-height: 1.5;">You already have Rose Vanille. Add Makhmarya and get both together for <strong style="color:var(--color-dark-brown);">299 EGP</strong> — Only 70 EGP more than the Body Splash alone!</p>
+                <button class="btn btn-primary" onclick="addToCart(window.products.find(p=>p.id==='bundle_ritual'));" style="padding:0.5rem 1rem; font-size:0.85rem;">Get The Ritual</button>
+              </div>
+            `;
+          } else if (currentProduct.id === 'p3') {
+            // Makhmarya Page Cross-Sell
+            crossSellEl.innerHTML = `
+              <div class="cross-sell-box">
+                <p style="font-family: var(--font-serif); font-size: 1.1rem; color: var(--color-dark-brown); margin: 0 0 0.3rem; font-weight: 600;">Complete the scent</p>
+                <p style="font-size: 0.88rem; color: var(--color-text-light); margin: 0 0 0.8rem; line-height: 1.5;">Pair your Makhmarya with Rose Vanille Body Splash for a layered, soft scent that stays all day. Get both for <strong style="color:var(--color-dark-brown);">299 EGP</strong>.</p>
+                <button class="btn btn-primary" onclick="addToCart(window.products.find(p=>p.id==='bundle_ritual'));" style="padding:0.5rem 1rem; font-size:0.85rem;">Get The Ritual</button>
+              </div>
+            `;
+          }
+        }
+
+        document.getElementById('add-to-cart-btn')?.addEventListener('click', () => {
+          if (currentProduct) addToCart(currentProduct);
+        });
+
+        const wishBtn = document.getElementById('wishlist-btn');
+        if (wishBtn) {
+          if (window.wishlist && window.wishlist.includes(currentProduct.id)) wishBtn.textContent = '♥';
+          wishBtn.addEventListener('click', () => {
+            toggleWishlist(currentProduct.id);
+            wishBtn.textContent = window.wishlist.includes(currentProduct.id) ? '♥' : '♡';
+          });
+        }
       }
-    });
 
-    function changeQuantityInput(change) {
-      const input = document.getElementById('qty');
-      const newVal = Math.max(1, (parseInt(input.value) || 1) + change);
-      input.value = newVal;
-    }
-
-    function handleAddToCart() {
-      if (!currentProduct) return;
-      const qtyVal = parseInt(document.getElementById('qty').value) || 1;
-      
-      // Add product to the cart with user's selected quantity
-      addToCart(currentProduct, qtyVal);
-    }
-
-    function toggleAccordion(btn) {
-      const item = btn.parentElement;
-      const wasActive = item.classList.contains('active');
-      
-      document.querySelectorAll('.accordion-item').forEach(el => {
-        el.classList.remove('active');
+      // Accordion Toggle
+      const items = document.querySelectorAll('.accordion-item');
+      items.forEach(item => {
+        const header = item.querySelector('.accordion-header');
+        header.addEventListener('click', () => {
+          items.forEach(i => { if (i !== item) i.classList.remove('active'); });
+          item.classList.toggle('active');
+        });
       });
-      
-      if (!wasActive) {
-        item.classList.add('active');
-      }
-    }
+    });
   </script>
 </body>
 </html>

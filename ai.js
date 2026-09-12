@@ -232,7 +232,7 @@
     if (/(what products do you have|what do you have|show me all|show all products|all products|full catalogue|everything you have|all collection)/i.test(q)) {
       newState.lastIntent = 'catalogue';
       return {
-        reply: "Here is our complete Sanné collection — two targeted facial moisturizers (229 EGP each), our signature Bosbos Makhmarya body fragrance (79 EGP), and our Rose Vanille Body Splash (229 EGP, 220 ml).",
+        reply: "Here is our complete Sanné collection — two targeted facial moisturizers (229 EGP each), our signature Bosbos Makhmarya body fragrance (89 EGP), and our Rose Vanille Body Splash (229 EGP, 220 ml).",
         intent: "catalogue",
         productIds: ['p1', 'p2', 'p3', 'p4'],
         state: newState
@@ -244,7 +244,7 @@
       newState.candidateProductIds = ['p3', 'p4'];
       newState.lastIntent = 'discovery';
       return {
-        reply: "We offer two body fragrances: Bosbos Body Fragrance (Makhmarya) at 79 EGP (gel format) and Rose Vanille Body Splash at 229 EGP (220 ml mist).",
+        reply: "We offer two body fragrances: Bosbos Body Fragrance (Makhmarya) at 89 EGP (gel format) and Rose Vanille Body Splash at 229 EGP (220 ml mist).",
         intent: "discovery",
         productIds: ['p3', 'p4'],
         state: newState
@@ -320,7 +320,7 @@
     // 8. PRICE & SIZE QUESTIONS
     if (/(how much|price|cost|kam|بكام|سعره كام)/i.test(q)) {
       newState.lastIntent = 'price_question';
-      if (newState.currentProductId === 'p3') return { reply: "Bosbos Body Fragrance (Makhmarya) is 79 EGP.", intent: "price_question", productIds: [], state: newState };
+      if (newState.currentProductId === 'p3') return { reply: "Bosbos Body Fragrance (Makhmarya) is 89 EGP.", intent: "price_question", productIds: [], state: newState };
       if (newState.currentProductId === 'p4') return { reply: "Rose Vanille Body Splash is 229 EGP (220 ml).", intent: "price_question", productIds: [], state: newState };
       if (newState.currentProductId === 'p1' || newState.currentProductId === 'p2') return { reply: "Sanné Moisturizing Creams are 229 EGP each.", intent: "price_question", productIds: [], state: newState };
     }
@@ -366,7 +366,7 @@
         newState.candidateProductIds = ['p3'];
         newState.lastIntent = 'recommendation';
         return {
-          reply: `Under ${budget} EGP, we have our Bosbos Body Fragrance (Makhmarya) at 79 EGP.`,
+          reply: `Under ${budget} EGP, we have our Bosbos Body Fragrance (Makhmarya) at 89 EGP.`,
           intent: "recommendation",
           productIds: ['p3'],
           state: newState
@@ -378,7 +378,7 @@
     if (/(what is it|tell me more|why that one|why did you recommend)/i.test(q)) {
       newState.lastIntent = 'follow_up';
       if (newState.currentProductId === 'p3') {
-        return { reply: "Bosbos Body Fragrance (Makhmarya) is 79 EGP. It is our scented body gel format for pulse points.", intent: "follow_up", productIds: [], state: newState };
+        return { reply: "Bosbos Body Fragrance (Makhmarya) is 89 EGP. It is our scented body gel format for pulse points.", intent: "follow_up", productIds: [], state: newState };
       }
       if (newState.currentProductId === 'p4') {
         return { reply: "Rose Vanille Body Splash is 229 EGP (220 ml). It is a body fragrance mist with rose and vanilla notes.", intent: "follow_up", productIds: [], state: newState };
@@ -414,7 +414,7 @@
     if ((q.includes('difference') || q.includes('compare') || q.includes('versus') || q.includes('vs')) &&
         (q.includes('makhmarya') || q.includes('bosbos')) && (q.includes('splash') || q.includes('mist'))) {
       newState.lastIntent = 'comparison';
-      return { reply: "Bosbos Body Fragrance (Makhmarya) is 79 EGP in a gel format. Rose Vanille Body Splash is 229 EGP (220 ml) as a fragrance mist.", intent: "comparison", productIds: ['p3', 'p4'], state: newState };
+      return { reply: "Bosbos Body Fragrance (Makhmarya) is 89 EGP in a gel format. Rose Vanille Body Splash is 229 EGP (220 ml) as a fragrance mist.", intent: "comparison", productIds: ['p3', 'p4'], state: newState };
     }
 
     // Default Fallback

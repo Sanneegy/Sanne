@@ -6,20 +6,22 @@
   <title>Sanné | Premium Skincare and Body Care</title>
   <meta name="description" content="Sanné is a premium Egyptian skincare brand focused on natural inspired, intentional care. We are here for 20 years of glowing you.">
   <link rel="stylesheet" href="styles.css">
+  <script src="pricing-engine.js"></script>
 </head>
 <body>
 
-  <!-- Header -->
+  <!-- Header (Global Transparent Layout) -->
   <header class="header">
     <nav class="nav-left">
       <a href="shop.html" class="nav-link">SHOP</a>
       <a href="about.html" class="nav-link">ABOUT</a>
       <a href="futures.html" class="nav-link">FUTURES</a>
+      <a href="ask-sanne.html" class="nav-link">ASK SANNÉ</a>
     </nav>
     <a href="index.html" class="logo">Sanné</a>
     <nav class="nav-right">
       <a href="#" class="nav-link" id="nav-search">SEARCH</a>
-      <a href="#" class="nav-link" id="nav-cart">CART <span id="cart-count-badge">(0)</span></a>
+      <a href="#" class="nav-link" id="nav-cart">CART <span id="cart-badge">(0)</span></a>
     </nav>
     <div class="hamburger">
       <span></span>
@@ -33,6 +35,7 @@
     <a href="shop.html">SHOP</a>
     <a href="about.html">ABOUT</a>
     <a href="futures.html">FUTURES</a>
+    <a href="ask-sanne.html">ASK SANNÉ</a>
     <a href="#" id="mobile-search">SEARCH</a>
     <a href="#" id="mobile-cart">CART</a>
   </div>
@@ -54,7 +57,6 @@
       <h2 class="section-title mb-md">Your Cart</h2>
       
       <div id="cart-items-container" class="cart-items-container">
-        <!-- Cart items will be injected here -->
         <p class="empty-cart-msg text-center mt-md">Your cart is empty.</p>
       </div>
       
@@ -95,7 +97,7 @@
               <option value="" disabled selected>City in Egypt</option>
               <option value="Cairo">Cairo</option>
               <option value="Giza">Giza</option>
-              <option value="Alex">Alexandria</option>
+              <option value="Alexandria">Alexandria</option>
               <option value="Belbeis">Belbeis</option>
               <option value="Zagazig">Zagazig</option>
               <option value="10th of Ramadan">10th of Ramadan</option>
@@ -121,23 +123,20 @@
               <option value="Qena">Qena</option>
               <option value="Kafr El Sheikh">Kafr El Sheikh</option>
               <option value="Matrouh">Matrouh</option>
-              <option value="Sharqiyah">Sharqiyah</option>
+              <option value="Other">Other</option>
             </select>
           </div>
           <div class="form-group">
             <textarea id="checkout-address" class="form-control" rows="2" placeholder="Full Address" required></textarea>
           </div>
-          <div class="form-group">
-            <textarea id="checkout-notes" class="form-control" rows="2" placeholder="Notes (Optional)"></textarea>
-          </div>
           <button type="submit" class="btn btn-primary" style="width: 100%;">Complete Order</button>
-          <p id="checkout-success-msg" class="success-msg mt-sm" style="display: none; color: green; font-size: 0.9rem; text-align: center;">Your order is ready. Please complete it through WhatsApp.</p>
+          <p id="checkout-success-msg" class="success-msg mt-sm" style="display: none; color: green; font-size: 0.9rem; text-align: center;"></p>
         </form>
       </div>
     </div>
   </div>
 
-  <!-- Hero Section -->
+  <!-- Hero Section (Seamless Transparent Header Overlay) -->
   <section class="hero hero-clean">
     <img src="images/hero.jpg" alt="Sanné Brand Experience" class="hero-img">
     <div class="hero-overlay"></div>
@@ -145,7 +144,7 @@
 
   <!-- Mission Statement Section -->
   <section class="mission-section text-center">
-    <div class="container" style="max-width: 800px; padding: 4rem 5% 6rem;">
+    <div class="container" style="max-width: 800px; padding: 4rem 5% 4rem;">
       <h2 class="philosophy-text" style="font-size: clamp(2rem, 4vw, 3rem); font-style: normal; line-height: 1.4;">We're not here for a few moments of you glowing.<br>We're here for 20 years of glowing YOU.</h2>
       <div class="hero-actions mt-md" style="justify-content: center; gap: 1.5rem;">
         <a href="shop.html" class="btn btn-primary">Shop Sanné</a>
@@ -158,7 +157,7 @@
   <section class="section container pt-0">
     <div class="products-grid">
       <!-- Product 1 -->
-      <div class="product-card" data-id="p1" data-name="Moisturizing Cream" data-variant="For Dry Skin" data-price="229">
+      <div class="product-card" data-id="p1">
         <div class="product-image-container">
           <img src="images/dry_skin.jpg" alt="Moisturizing Cream For Dry Skin" class="product-image default-img">
           <img src="images/hover_dry_skin_1778922108728.png" alt="Applying Moisturizing Cream For Dry Skin" class="product-image hover-img">
@@ -167,16 +166,13 @@
           <h3 class="product-title">Moisturizing Cream</h3>
           <p class="product-variant" style="font-size: 0.9rem; margin-bottom: 0.5rem; font-weight: 500;">For Dry Skin</p>
           <p class="product-desc">Rich moisture for healthy looking skin, with jojoba oil, sweet almond oil, ceramide NP, and hyaluronic acid.</p>
-          <div class="product-price-row">
-            <span class="price-old">279 EGP</span>
-            <span class="price-new">229 EGP</span>
-          </div>
+          <div class="product-price-row" data-product-id="p1"></div>
           <button class="btn btn-primary btn-order add-to-cart-btn">Add to cart</button>
         </div>
       </div>
 
       <!-- Product 2 -->
-      <div class="product-card" data-id="p2" data-name="Moisturizing Cream" data-variant="For Oily and Combination Skin" data-price="229">
+      <div class="product-card" data-id="p2">
         <div class="product-image-container">
           <img src="images/oily_skin.jpg" alt="Moisturizing Cream For Oily and Combination Skin" class="product-image default-img">
           <img src="images/hover_oily_skin_1778922300593.png" alt="Applying Moisturizing Cream For Oily and Combination Skin" class="product-image hover-img">
@@ -185,16 +181,13 @@
           <h3 class="product-title">Moisturizing Cream</h3>
           <p class="product-variant" style="font-size: 0.9rem; margin-bottom: 0.5rem; font-weight: 500;">For Oily and Combination Skin</p>
           <p class="product-desc">Lightweight daily moisture that supports skin barrier comfort, with naturally derived lipids and soothing extracts.</p>
-          <div class="product-price-row">
-            <span class="price-old">279 EGP</span>
-            <span class="price-new">229 EGP</span>
-          </div>
+          <div class="product-price-row" data-product-id="p2"></div>
           <button class="btn btn-primary btn-order add-to-cart-btn">Add to cart</button>
         </div>
       </div>
 
       <!-- Product 3 -->
-      <div class="product-card" data-id="p3" data-name="Bosbos Body Fragrance" data-variant="Makhmarya" data-price="79">
+      <div class="product-card" data-id="p3">
         <div class="product-image-container">
           <img src="images/bosbos.jpg" alt="Bosbos Body Fragrance" class="product-image default-img">
           <img src="images/bosbos_hover.png" alt="Bosbos Body Fragrance Usage" class="product-image hover-img">
@@ -203,16 +196,13 @@
           <h3 class="product-title">Bosbos Body Fragrance</h3>
           <p class="product-variant" style="font-size: 0.9rem; margin-bottom: 0.5rem; font-weight: 500;">Makhmarya</p>
           <p class="product-desc">A warm body fragrance made to leave the skin softly scented and beautifully cared for.</p>
-          <div class="product-price-row">
-            <span class="price-old">105 EGP</span>
-            <span class="price-new">79 EGP</span>
-          </div>
+          <div class="product-price-row" data-product-id="p3"></div>
           <button class="btn btn-primary btn-order add-to-cart-btn">Add to cart</button>
         </div>
       </div>
 
       <!-- Product 4 -->
-      <div class="product-card" data-id="p4" data-name="Rose Vanille Body Splash" data-variant="220 ml" data-price="229">
+      <div class="product-card" data-id="p4">
         <div class="product-image-container">
           <img src="images/rose_vanille.jpg" alt="Rose Vanille Body Splash" class="product-image default-img">
           <img src="images/hover_rose_vanille.jpg" alt="Applying Rose Vanille Body Splash" class="product-image hover-img">
@@ -221,12 +211,32 @@
           <h3 class="product-title">Rose Vanille Body Splash</h3>
           <p class="product-variant" style="font-size: 0.9rem; margin-bottom: 0.5rem; font-weight: 500;">220 ml</p>
           <p class="product-desc">A refreshing and long-lasting body fragrance mist with delicate rose and warm vanilla notes for your daily scent ritual.</p>
-          <div class="product-price-row">
-            <span class="price-old">279 EGP</span>
-            <span class="price-new">229 EGP</span>
-          </div>
+          <div class="product-price-row" data-product-id="p4"></div>
           <button class="btn btn-primary btn-order add-to-cart-btn">Add to cart</button>
         </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- The Sanné Ritual Curated Bundle Section -->
+  <section class="sanne-ritual-section">
+    <div class="bundle-card-premium">
+      <div class="bundle-visual-side">
+        <div class="bundle-images-combo">
+          <img src="images/bosbos.jpg" alt="Makhmarya" class="bundle-img-makh">
+          <img src="images/rose_vanille.jpg" alt="Rose Vanille Body Splash" class="bundle-img-splash">
+        </div>
+      </div>
+      <div class="bundle-info-side">
+        <span class="bundle-tagline">Curated Scent Ritual</span>
+        <h2 class="bundle-title">The Sanné Ritual</h2>
+        <div class="bundle-pricing-row">
+          <span class="bundle-old-price">318 EGP</span>
+          <span class="bundle-main-price">299 EGP</span>
+        </div>
+        <p class="bundle-selling-point">Complete the ritual for only 70 EGP more.</p>
+        <p class="bundle-desc">Pair Rose Vanille Body Splash with our Makhmarya and turn your scent into a full Sanné ritual — layered, softer, and made to stay with you throughout your day.</p>
+        <button class="btn-get-ritual" onclick="addToCart(window.products.find(p=>p.id==='bundle_ritual'));">Get The Ritual</button>
       </div>
     </div>
   </section>
@@ -243,64 +253,27 @@
     </div>
   </section>
 
-  <!-- Sanné on you Section -->
-  <section class="section container text-center">
-    <h2 class="section-title">Sanné on you</h2>
-    <p class="section-subtitle mb-sm">Real skin. Real softness. Real rituals.</p>
-    <p class="mb-lg" style="max-width: 600px; margin: 0 auto; color: var(--color-text-light);">Not perfect skin. Not a perfect day. Just real care, real softness, and the small rituals that bring you back to yourself.</p>
-    
-    <div class="social-grid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 2rem;">
-      <img src="images/sanne_on_you_selfie.jpg" alt="Sanné selfie" class="social-img" style="width: 100%; aspect-ratio: 4/5; object-fit: cover;">
-      <img src="images/sanne_on_you_texture.jpg" alt="Sanné texture" class="social-img" style="width: 100%; aspect-ratio: 4/5; object-fit: cover;">
-      <img src="images/sanne_on_you_bosbos.jpg" alt="Sanné bosbos" class="social-img" style="width: 100%; aspect-ratio: 4/5; object-fit: cover;">
-      <img src="images/sanne_on_you_vanity.jpg" alt="Sanné vanity" class="social-img" style="width: 100%; aspect-ratio: 4/5; object-fit: cover;">
-    </div>
-    <div>
-      <a href="https://www.instagram.com/sanne.egy/" target="_blank" class="btn">Find us on social</a>
-    </div>
-  </section>
-
-  <!-- Coming Soon -->
-  <section class="section container text-center">
-    <div class="section-header">
-      <h2 class="section-title">More Sanné essentials are coming.</h2>
-      <p class="section-subtitle">Our care story is just beginning.</p>
-    </div>
-    
-    <div class="coming-soon-banner" style="margin-top: 2rem;">
-      <img src="images/Our care story is just beginning.png" alt="Our care story is just beginning" style="width: 100%; height: auto; border-radius: 8px;">
-    </div>
+  <!-- Sana's Light Donation Section (Homepage Location) -->
+  <section class="section container text-center" id="sanas-light" style="background: var(--color-cream); border-radius: 12px; padding: 4rem 2rem; margin: 4rem auto; max-width: 960px;">
+    <span style="font-size:0.8rem;text-transform:uppercase;letter-spacing:0.12em;color:var(--color-soft-gold);font-weight:600;display:block;margin-bottom:0.4rem;">Sana's Light</span>
+    <h2 class="section-title" style="font-family:var(--font-serif);font-size:2.2rem;color:var(--color-dark-brown);margin:0 0 1rem;">A little kindness goes a long way.</h2>
+    <p style="max-width:640px;margin:0 auto 1.5rem;color:var(--color-text-light);line-height:1.6;">Every purchase and contribution helps us build a kinder, brighter future together. Together we have raised:</p>
+    <div style="font-size:2.8rem;font-weight:700;color:var(--color-dark-brown);font-family:var(--font-serif);margin-bottom:1.5rem;" id="homepage-donation-total" data-donation-total>— EGP</div>
+    <button class="btn btn-primary" onclick="openCart();">Contribute with Order</button>
   </section>
 
   <!-- Footer -->
-  <footer class="footer mt-xl">
-    <div class="footer-top">
-      <div>
-        <h2 class="footer-brand">Sanné</h2>
-        <p>Soft care, made to stay.</p>
-      </div>
-      <div>
-        <h3 class="footer-title">Explore</h3>
-        <div class="footer-links">
-          <a href="shop.html">Shop All</a>
-          <a href="about.html">About Sanné</a>
-          <a href="futures.html">Sana's Light</a>
-        </div>
-      </div>
-      <div>
-        <h3 class="footer-title">Connect</h3>
-        <div class="footer-links">
-          <a href="mailto:Sanne.egy@gmail.com">Sanne.egy@gmail.com</a>
-          <a href="https://www.instagram.com/sanne.egy/" target="_blank">Instagram</a>
-          <a href="https://www.facebook.com/share/1Dsn9ZZotF/" target="_blank">Facebook</a>
-          <a href="https://www.tiktok.com/@sanne.eg?_r=1&_t=ZS-96NpIO4bs0N" target="_blank">TikTok</a>
-          <a href="https://wa.me/201032138278" target="_blank">WhatsApp: 01032138278</a>
-        </div>
-      </div>
+  <footer class="footer mt-lg">
+    <div class="container text-center">
+      <a href="index.html" class="logo mb-sm" style="display: block;">Sanné</a>
+      <p style="font-size: 0.85rem; color: var(--color-text-light);">© 2026 Sanné Skincare. All rights reserved.</p>
     </div>
   </footer>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="orders-service.js"></script>
+  <script src="reviews-service.js"></script>
+  <script src="reviews-ui.js"></script>
   <script src="app.js"></script>
   <script src="donation-helpers.js"></script>
 </body>

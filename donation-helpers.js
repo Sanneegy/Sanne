@@ -1,20 +1,22 @@
 /**
  * donation-helpers.js — Authoritative Sanné Donation Renderer
- * Base: 1,000 EGP + SUM(submitted customer donations in database)
+ *
+ * Single source of truth: Supabase RPC get_public_donation_total()
+ *
+ * NO localStorage fallback.
+ * NO counterapi.dev / third-party sync.
+ * NO hardcoded donation values displayed to the user.
+ *
+ * If the RPC is unavailable, show nothing (empty string) rather than a stale/wrong value.
  */
 
-const INITIAL_DONATION_TOTAL = 1000;
-
 async function getDonationTotal() {
+  // Only authoritative source: Supabase RPC via OrdersService
   if (window.OrdersService && typeof window.OrdersService.getPublicDonationTotal === 'function') {
     return await window.OrdersService.getPublicDonationTotal();
   }
-  if (window.DonationService && typeof window.DonationService.getPublicTotal === 'function') {
-    return await window.DonationService.getPublicTotal();
-  }
-  const stored = localStorage.getItem('sanneDonationTotal');
-  const val = stored ? Number(stored) : INITIAL_DONATION_TOTAL;
-  return Number.isFinite(val) ? val : INITIAL_DONATION_TOTAL;
+  // No fallback — return null so the caller can decide whether to render
+  return null;
 }
 
 async function renderDonationTotal() {
@@ -24,7 +26,10 @@ async function renderDonationTotal() {
   try {
     const total = await getDonationTotal();
     donationTotalElements.forEach(el => {
-      el.textContent = Number(total).toLocaleString('en-US') + ' EGP';
+      if (total !== null && typeof total === 'number' && isFinite(total)) {
+        el.textContent = Number(total).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) + ' EGP';
+      }
+      // If total is null, leave the element empty / loading — never show a stale hardcoded value
     });
   } catch (e) {
     console.warn('Error rendering donation total:', e);
@@ -33,4 +38,3 @@ async function renderDonationTotal() {
 
 document.addEventListener('DOMContentLoaded', renderDonationTotal);
 window.renderDonationTotal = renderDonationTotal;
-
