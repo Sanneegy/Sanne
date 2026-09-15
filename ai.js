@@ -263,8 +263,8 @@
       if (/(10%|discount|apply to it|269|\u062e\u0635\u0645)/i.test(q)) {
         return {
           reply: isArabic
-            ? "مجموعة The Sann\u00e9 Ritual سعرها ثابت 299 جنيه (توفر 19 جنيه مقارنة بشرائهما منفصلين بسعر 318 جنيه). عرض الخصم 10% ينطبق فقط على المنتجات المنفردة، ولا ينطبق على المجموعات \u2661"
-            : "The Sann\u00e9 Ritual includes one Bosbos Makhmarya and one Rose Vanille Body Splash for 299 EGP instead of 318 EGP separately. The bundle already has its own price, so the standalone 10% offer doesn\u2019t apply to it \u2661",
+            ? "مجموعة The Sann\u00e9 Ritual سعرها ثابت 280 جنيه (توفر 38 جنيه مقارنة بشرائهما منفصلين بسعر 318 جنيه). عرض الخصم 10% ينطبق فقط على المنتجات المنفردة، ولا ينطبق على المجموعات \u2661"
+            : "The Sann\u00e9 Ritual includes one Bosbos Makhmarya and one Rose Vanille Body Splash for 280 EGP instead of 318 EGP separately. The bundle already has its own price, so the standalone 10% offer doesn\u2019t apply to it \u2661",
           intent: "bundle_question",
           productIds: ['bundle_ritual'],
           state: newState
@@ -273,8 +273,8 @@
 
       return {
         reply: isArabic
-          ? "نعم! تتضمن مجموعة The Sann\u00e9 Ritual عبوة واحدة من Bosbos Makhmarya وعبوة واحدة من Rose Vanille Body Splash بسعر 299 جنيه بدلاً من 318 جنيه منفصلين. الباندل له سعره الخاص بالفعل، لذلك لا ينطبق عليه عرض الـ 10% المنفرد \u2661"
-          : "Yes. The Sann\u00e9 Ritual includes one Bosbos Makhmarya and one Rose Vanille Body Splash for 299 EGP instead of 318 EGP separately. The bundle already has its own price, so the standalone 10% offer doesn\u2019t apply to it \u2661",
+          ? "نعم! تتضمن مجموعة The Sann\u00e9 Ritual عبوة واحدة من Bosbos Makhmarya وعبوة واحدة من Rose Vanille Body Splash بسعر 280 جنيه بدلاً من 318 جنيه منفصلين. الباندل له سعره الخاص بالفعل، لذلك لا ينطبق عليه عرض الـ 10% المنفرد \u2661"
+          : "Yes. The Sann\u00e9 Ritual includes one Bosbos Makhmarya and one Rose Vanille Body Splash for 280 EGP instead of 318 EGP separately. The bundle already has its own price, so the standalone 10% offer doesn\u2019t apply to it \u2661",
         intent: "bundle_question",
         productIds: ['bundle_ritual'],
         state: newState
@@ -290,8 +290,8 @@
       if (newState.currentProductId === 'bundle_ritual' || /(it|bundle|ritual|\u0627\u0644\u0628\u0627\u0646\u062f\u0644)/i.test(q)) {
         return {
           reply: isArabic
-            ? "مجموعة The Sann\u00e9 Ritual سعرها 299 جنيه (توفر 19 جنيه عن الشراء المنفصل). خصم الـ 10% ينطبق فقط عند شراء قطعة واحدة منفردة من المخمرية (80.10 جنيه) أو البودي سبلاش (206.10 جنيه)، ولا ينطبق على الباندل \u2661"
-            : "The Sann\u00e9 Ritual is 299 EGP (saving 19 EGP vs 318 EGP separately). The standalone 10% launch offer applies only to single standalone items (1 \u00d7 Makhmarya at 80.10 EGP or 1 \u00d7 Body Splash at 206.10 EGP), so it does not apply to the bundle \u2661",
+            ? "مجموعة The Sann\u00e9 Ritual سعرها 280 جنيه (توفر 38 جنيه عن الشراء المنفصل). خصم الـ 10% ينطبق فقط عند شراء قطعة واحدة منفردة من المخمرية (80.10 جنيه) أو البودي سبلاش (206.10 جنيه)، ولا ينطبق على الباندل \u2661"
+            : "The Sann\u00e9 Ritual is 280 EGP (saving 19 EGP vs 318 EGP separately). The standalone 10% launch offer applies only to single standalone items (1 \u00d7 Makhmarya at 80.10 EGP or 1 \u00d7 Body Splash at 206.10 EGP), so it does not apply to the bundle \u2661",
           intent: "offers_question",
           productIds: ['bundle_ritual', 'p3', 'p4'],
           state: newState
@@ -300,8 +300,8 @@
 
       return {
         reply: isArabic
-          ? "لدينا حالياً عرضان مميزان \u2661\n\n1. **مجموعة The Sann\u00e9 Ritual**: احصلي على المخمرية والبودي سبلاش معاً بسعر 299 جنيه بدلاً من 318 جنيه.\n2. **عرض الإطلاق 10%**: خصم 10% عند شراء قطعة واحدة منفردة من المخمرية (80.10 جنيه بدلاً من 89) أو قطعة واحدة من البودي سبلاش (206.10 جنيه بدلاً من 229)."
-          : "We currently have two active offers \u2661\n\n1. **The Sann\u00e9 Ritual Bundle**: Get both Bosbos Makhmarya and Rose Vanille Body Splash together for 299 EGP (saves 19 EGP vs 318 EGP separately).\n2. **10% Launch Offer**: Get 10% off when ordering exactly ONE standalone Makhmarya (80.10 EGP instead of 89 EGP) or ONE standalone Body Splash (206.10 EGP instead of 229 EGP).",
+          ? "لدينا حالياً عرضان مميزان \u2661\n\n1. **مجموعة The Sann\u00e9 Ritual**: احصلي على المخمرية والبودي سبلاش معاً بسعر 280 جنيه بدلاً من 318 جنيه.\n2. **عرض الإطلاق 10%**: خصم 10% عند شراء قطعة واحدة منفردة من المخمرية (80.10 جنيه بدلاً من 89) أو قطعة واحدة من البودي سبلاش (206.10 جنيه بدلاً من 229)."
+          : "We currently have two active offers \u2661\n\n1. **The Sann\u00e9 Ritual Bundle**: Get both Bosbos Makhmarya and Rose Vanille Body Splash together for 280 EGP (saves 38 EGP vs 318 EGP separately).\n2. **10% Launch Offer**: Get 10% off when ordering exactly ONE standalone Makhmarya (80.10 EGP instead of 89 EGP) or ONE standalone Body Splash (206.10 EGP instead of 229 EGP).",
         intent: "offers_question",
         productIds: ['bundle_ritual', 'p3', 'p4'],
         state: newState
@@ -314,8 +314,8 @@
       if (newState.currentProductId === 'bundle_ritual') {
         return {
           reply: isArabic
-            ? "مجموعة The Sann\u00e9 Ritual سعرها 299 جنيه (توفر 19 جنيه مقارنة بالشراء المنفصل). خصم الـ 10% المنفرد ينطبق فقط على المنتجات المنفردة، ولا ينطبق على المجموعات \u2661"
-            : "The Sann\u00e9 Ritual is 299 EGP (saving 19 EGP vs 318 EGP separately). The standalone 10% launch offer applies only to single standalone items (1 \u00d7 Makhmarya or 1 \u00d7 Body Splash), so it does not apply to the bundle \u2661",
+            ? "مجموعة The Sann\u00e9 Ritual سعرها 280 جنيه (توفر 38 جنيه مقارنة بالشراء المنفصل). خصم الـ 10% المنفرد ينطبق فقط على المنتجات المنفردة، ولا ينطبق على المجموعات \u2661"
+            : "The Sann\u00e9 Ritual is 280 EGP (saving 19 EGP vs 318 EGP separately). The standalone 10% launch offer applies only to single standalone items (1 \u00d7 Makhmarya or 1 \u00d7 Body Splash), so it does not apply to the bundle \u2661",
           intent: "offers_question",
           productIds: ['bundle_ritual'],
           state: newState
@@ -421,21 +421,21 @@
     if (/gift|\u0647\u062f\u064a\u0629|present|for (?:someone|a friend|my mom|my sister|my wife|her)/i.test(q)) {
       newState.lastIntent = 'gift_recommendation';
       const gm = q.match(/(\d+)/); const gb = gm ? parseInt(gm[1]) : null;
-      if (gb !== null && gb >= 299) return { reply: "The Sann\u00e9 Ritual gift set (299 EGP) is perfect \u2014 both the Makhmarya gel and Rose Vanille Body Splash together, beautifully packaged \u2661", intent: "gift_recommendation", productIds: ['bundle_ritual'], state: newState };
+      if (gb !== null && gb >= 280) return { reply: "The Sann\u00e9 Ritual gift set (280 EGP) is perfect \u2014 both the Makhmarya gel and Rose Vanille Body Splash together, beautifully packaged \u2661", intent: "gift_recommendation", productIds: ['bundle_ritual'], state: newState };
       if (gb !== null && gb >= 89 && gb < 229) return { reply: "Bosbos Makhmarya (89 EGP) makes a gorgeous, unique gift \u2014 an intimate fragrance gel she\u2019ll love \u2661", intent: "gift_recommendation", productIds: ['p3'], state: newState };
-      return { reply: "The Sann\u00e9 Ritual gift set (299 EGP) is our most gifted choice \u2014 both fragrances in one set \u2661 For a smaller budget, Bosbos Makhmarya (89 EGP) is a standout gift on its own.", intent: "gift_recommendation", productIds: ['bundle_ritual','p3'], state: newState };
+      return { reply: "The Sann\u00e9 Ritual gift set (280 EGP) is our most gifted choice \u2014 both fragrances in one set \u2661 For a smaller budget, Bosbos Makhmarya (89 EGP) is a standout gift on its own.", intent: "gift_recommendation", productIds: ['bundle_ritual','p3'], state: newState };
     }
 
     // 22. FULL CATALOGUE
     if (/what products do you have|show me all|all products|full catalogue|everything you have|\u0643\u0644 \u0627\u0644\u0645\u0646\u062a\u062c\u0627\u062a/i.test(q)) {
       newState.lastIntent = 'catalogue';
-      return { reply: "Here\u2019s our full Sann\u00e9 collection: two facial moisturizers (229 EGP each \u00b7 200ml), Bosbos Makhmarya body fragrance gel (89 EGP \u00b7 50ml), Rose Vanille Body Splash (229 EGP \u00b7 220ml), and The Sann\u00e9 Ritual gift set (299 EGP) \u2661", intent: "catalogue", productIds: ['p1','p2','p3','p4','bundle_ritual'], state: newState };
+      return { reply: "Here\u2019s our full Sann\u00e9 collection: two facial moisturizers (229 EGP each \u00b7 200ml), Bosbos Makhmarya body fragrance gel (89 EGP \u00b7 50ml), Rose Vanille Body Splash (229 EGP \u00b7 220ml), and The Sann\u00e9 Ritual gift set (280 EGP) \u2661", intent: "catalogue", productIds: ['p1','p2','p3','p4','bundle_ritual'], state: newState };
     }
 
     // 23. CATEGORY DISCOVERY
     if (/body fragrance|body fragrances|body scent|\u0628\u0631\u0641\u0627\u0646 \u062c\u0633\u0645|\u0645\u0639\u0637\u0631 \u062c\u0633\u0645/i.test(q) && !/what is|ingredient/.test(q)) {
       newState.candidateProductIds = ['p3','p4','bundle_ritual']; newState.lastIntent = 'discovery';
-      return { reply: "We have two body fragrances in the Rose Vanille family: Makhmarya (89 EGP, 50ml gel) and Rose Vanille Splash (229 EGP, 220ml mist). The Sann\u00e9 Ritual (299 EGP) bundles both \u2661", intent: "discovery", productIds: ['p3','p4','bundle_ritual'], state: newState };
+      return { reply: "We have two body fragrances in the Rose Vanille family: Makhmarya (89 EGP, 50ml gel) and Rose Vanille Splash (229 EGP, 220ml mist). The Sann\u00e9 Ritual (280 EGP) bundles both \u2661", intent: "discovery", productIds: ['p3','p4','bundle_ritual'], state: newState };
     }
 
     // 24. PURPOSE
@@ -452,9 +452,9 @@
       newState.lastIntent = 'price_question';
       if (newState.currentProductId === 'p3') return { reply: "Bosbos Makhmarya is 89 EGP \u2014 and 80.10 EGP with the current launch offer when ordered on its own \u2661", intent: "price_question", productIds: [], state: newState };
       if (newState.currentProductId === 'p4') return { reply: "Rose Vanille Body Splash is 229 EGP (220ml) \u2014 and 206.10 EGP with the current launch offer when ordered on its own \u2661", intent: "price_question", productIds: [], state: newState };
-      if (newState.currentProductId === 'bundle_ritual') return { reply: "The Sann\u00e9 Ritual is 299 EGP \u2014 both fragrances together, saving you 19 EGP vs buying separately \u2661", intent: "price_question", productIds: [], state: newState };
+      if (newState.currentProductId === 'bundle_ritual') return { reply: "The Sann\u00e9 Ritual is 280 EGP \u2014 both fragrances together, saving you 19 EGP vs buying separately \u2661", intent: "price_question", productIds: [], state: newState };
       if (newState.currentProductId === 'p1' || newState.currentProductId === 'p2') return { reply: "Our Moisturizing Creams are 229 EGP each (200ml) \u2661", intent: "price_question", productIds: [], state: newState };
-      return { reply: "Quick price guide: Makhmarya 89 EGP \u00b7 Body Splash 229 EGP \u00b7 Moisturizers 229 EGP each \u00b7 The Ritual set 299 EGP \u2661", intent: "price_question", productIds: [], state: newState };
+      return { reply: "Quick price guide: Makhmarya 89 EGP \u00b7 Body Splash 229 EGP \u00b7 Moisturizers 229 EGP each \u00b7 The Ritual set 280 EGP \u2661", intent: "price_question", productIds: [], state: newState };
     }
 
     // 26. SIZE
@@ -476,7 +476,7 @@
     if (budget !== null) {
       if (wantsDry  && budget < 229) return { reply: "The Dry Skin Moisturizer is 229 EGP \u2014 just over a " + budget + " EGP budget. For a fragrance treat in range, Makhmarya is 89 EGP \u2661", intent: "recommendation", productIds: ['p3'], state: newState };
       if (wantsOily && budget < 229) return { reply: "The Oily & Combination Moisturizer is 229 EGP \u2014 just over a " + budget + " EGP budget. For something in range, Makhmarya is 89 EGP \u2661", intent: "recommendation", productIds: ['p3'], state: newState };
-      if (budget >= 299) return { reply: "With " + budget + " EGP, The Sann\u00e9 Ritual (299 EGP) is a wonderful choice \u2014 both fragrances in one beautiful set \u2661", intent: "recommendation", productIds: ['bundle_ritual'], state: newState };
+      if (budget >= 280) return { reply: "With " + budget + " EGP, The Sann\u00e9 Ritual (280 EGP) is a wonderful choice \u2014 both fragrances in one beautiful set \u2661", intent: "recommendation", productIds: ['bundle_ritual'], state: newState };
       if (budget >= 229) return { reply: "Within " + budget + " EGP, Rose Vanille Body Splash (229 EGP, 220ml) is a beautiful pick \u2661", intent: "recommendation", productIds: ['p4'], state: newState };
       if (budget >= 89)  return { reply: "Within " + budget + " EGP, Bosbos Makhmarya (89 EGP) is our standout pick \u2014 a warm fragrance gel for pulse points \u2661", intent: "recommendation", productIds: ['p3'], state: newState };
       return { reply: "Our most affordable product is Makhmarya at 89 EGP (80.10 EGP with the current launch offer). Delivery is added at checkout \u2661", intent: "recommendation", productIds: [], state: newState };
@@ -489,7 +489,7 @@
       if (newState.currentProductId === 'p4') return { reply: "Rose Vanille Body Splash is 229 EGP (220ml) \u2014 a fresh mist to spray all over for everyday fragrance \u2661", intent: "follow_up", productIds: [], state: newState };
       if (newState.currentProductId === 'p1') return { reply: "The Dry Skin Moisturizer is 229 EGP. Recommended because you described dry, tight, or flaky skin \u2661", intent: "follow_up", productIds: [], state: newState };
       if (newState.currentProductId === 'p2') return { reply: "The Oily & Combination Moisturizer is 229 EGP. Recommended because your skin tends to get oily or shiny during the day \u2661", intent: "follow_up", productIds: [], state: newState };
-      if (newState.currentProductId === 'bundle_ritual') return { reply: "The Sann\u00e9 Ritual is 299 EGP \u2014 Makhmarya (50ml gel) + Rose Vanille Body Splash (220ml) for the complete rose-vanilla routine \u2661", intent: "follow_up", productIds: [], state: newState };
+      if (newState.currentProductId === 'bundle_ritual') return { reply: "The Sann\u00e9 Ritual is 280 EGP \u2014 Makhmarya (50ml gel) + Rose Vanille Body Splash (220ml) for the complete rose-vanilla routine \u2661", intent: "follow_up", productIds: [], state: newState };
     }
 
     // 29. COMPARISON

@@ -1,4 +1,4 @@
-const fs = require('fs');
+﻿const fs = require('fs');
 
 // Mock browser environment
 const localStorageStore = {};
@@ -71,18 +71,18 @@ console.log('Final Total:', resE.finalTotalEgp, '| Should Recommend Ritual:', re
 if (resE.finalTotalEgp !== '318.00 EGP' || !resE.shouldRecommendRitualBundle) throw new Error('TEST E failed');
 console.log('✓ TEST E PASSED (Anti-286.20 Bug Prevented & Ritual Recommendation Triggered)');
 
-// TEST F: The Sanné Ritual -> 299 EGP (no launch discount stacking)
+// TEST F: The Sanné Ritual -> 280 EGP (no launch discount stacking)
 console.log('\n--- TEST F: The Sanné Ritual ---');
 let resF = engine.calculateCartTotals([{ id: 'bundle_ritual', quantity: 1, isBundle: true }], 0, 0, launchActiveDate);
 console.log('Final Total:', resF.finalTotalEgp, '| Discount:', resF.discountEgp);
-if (resF.finalTotalEgp !== '299.00 EGP' || resF.discountEgp !== '0.00 EGP') throw new Error('TEST F failed');
+if (resF.finalTotalEgp !== '280.00 EGP' || resF.discountEgp !== '0.00 EGP') throw new Error('TEST F failed');
 console.log('✓ TEST F PASSED');
 
 // TEST G: Ritual + standalone product -> No discount stacking
 console.log('\n--- TEST G: Ritual + standalone product ---');
 let resG = engine.calculateCartTotals([{ id: 'bundle_ritual', quantity: 1, isBundle: true }, { id: 'p1', quantity: 1 }], 0, 0, launchActiveDate);
 console.log('Final Total:', resG.finalTotalEgp, '| Discount:', resG.discountEgp);
-if (resG.finalTotalEgp !== '528.00 EGP' || resG.discountEgp !== '0.00 EGP') throw new Error('TEST G failed');
+if (resG.finalTotalEgp !== '509.00 EGP' || resG.discountEgp !== '0.00 EGP') throw new Error('TEST G failed');
 console.log('✓ TEST G PASSED');
 
 // TEST H: Standalone discounted product + donation -> Discount calculated first, donation added separately
@@ -96,7 +96,7 @@ console.log('✓ TEST H PASSED');
 console.log('\n--- TEST I: Bundle + 50 EGP donation + 50 EGP delivery ---');
 let resI = engine.calculateCartTotals([{ id: 'bundle_ritual', quantity: 1, isBundle: true }], 50, 50, launchActiveDate);
 console.log('Final Total:', resI.finalTotalEgp);
-if (resI.finalTotalEgp !== '399.00 EGP') throw new Error('TEST I failed');
+if (resI.finalTotalEgp !== '380.00 EGP') throw new Error('TEST I failed');
 console.log('✓ TEST I PASSED');
 
 // TEST J & K: Launch window boundaries
@@ -114,11 +114,11 @@ console.log('Post-launch Final Total:', resL.finalTotalEgp);
 if (resL.finalTotalEgp !== '89.00 EGP') throw new Error('TEST L failed');
 console.log('✓ TEST L PASSED');
 
-// TEST W: 2 x Sanné Ritual -> 598 EGP
+// TEST W: 2 x Sanné Ritual -> 560 EGP
 console.log('\n--- TEST W: 2 x Sanné Ritual ---');
 let resW = engine.calculateCartTotals([{ id: 'bundle_ritual', quantity: 2, isBundle: true }], 0, 0, launchActiveDate);
 console.log('Final Total:', resW.finalTotalEgp);
-if (resW.finalTotalEgp !== '598.00 EGP') throw new Error('TEST W failed');
+if (resW.finalTotalEgp !== '560.00 EGP') throw new Error('TEST W failed');
 console.log('✓ TEST W PASSED');
 
 // TEST AH: Non-launch standalone item (1 x Moisturizer p1) during LAUNCH10 -> Ineligible
@@ -277,7 +277,7 @@ function createFreshDbState() {
       p4: { name: 'Body Splash', base_price: 229, stock: 100 }
     },
     bundles: {
-      bundle_ritual: { name: 'The Sanné Ritual', bundle_price: 299 }
+      bundle_ritual: { name: 'The Sanné Ritual', bundle_price: 280 }
     },
     bundle_components: {
       bundle_ritual: [
@@ -370,7 +370,7 @@ if (dtoBG.base_subtotal !== 318.00 || dtoBG.discount_amount !== 0.00) throw new 
 
 let dbBH = createFreshDbState();
 let dtoBH = mockCreateOrderRPC({ idempotency_key: 'k_BH', items: [{ id: 'bundle_ritual', quantity: 1 }], customer_name: 'Test', customer_phone: '123', city: 'Cairo', address: 'X', payment_method: 'cash' }, dbBH);
-if (dtoBH.base_subtotal !== 299.00 || dtoBH.final_total !== 349.00) throw new Error('TEST BH failed');
+if (dtoBH.base_subtotal !== 280.00 || dtoBH.final_total !== 330.00) throw new Error('TEST BH failed');
 console.log('✓ TEST BG & BH PASSED');
 
 // TEST BL: Manipulated frontend price (ignored)

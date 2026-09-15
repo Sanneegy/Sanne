@@ -1,4 +1,4 @@
-﻿[
+[
   {
     "id": "p1",
     "name": "Moisturizing Cream for Dry Skin",
@@ -77,15 +77,15 @@
   {
     "id": "bundle_ritual",
     "name": "The Sanné Ritual",
-    "price": 299,
+    "price": 280,
     "originalValue": 318,
     "size": "Gift Set (Bosbos Makhmarya 50ml + Rose Vanille Body Splash 220ml)",
     "category": "bundle",
     "variant": "Rose Vanille Body Splash + Bosbos Makhmarya",
     "image": "images/bundle_ritual_default.jpg",
     "aliases": ["ritual", "bundle", "set", "gift set", "sanne ritual", "sanné ritual", "the ritual", "both products", "كومبو", "مجموعة", "باندل"],
-    "description": "Both rose-vanilla body fragrances together at a bundled price. 299 EGP instead of 318 EGP when bought separately.",
+    "description": "Both rose-vanilla body fragrances together at a bundled price. 280 EGP instead of 318 EGP when bought separately.",
     "launchDiscount": false,
-    "note": "Bundle does NOT receive the 10% standalone launch discount. Fixed price 299 EGP."
+    "note": "Bundle does NOT receive the 10% standalone launch discount. Fixed price 280 EGP."
   }
 ]

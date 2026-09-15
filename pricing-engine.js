@@ -2,7 +2,7 @@
  * pricing-engine.js — Sanné Commercial Pricing Engine & Template Renderer
  *
  * Responsibilities:
- * - Authoritative base prices: Makhmarya (89 EGP), Body Splash (229 EGP), Sanné Ritual (299 EGP).
+ * - Authoritative base prices: Makhmarya (89 EGP), Body Splash (229 EGP), Sanné Ritual (280 EGP).
  * - Integer minor unit financial arithmetic (piastres / cents) to eliminate floating-point artifacts.
  * - Dynamic UI price rendering (HTML data-product-id elements).
  * - Client-side launch eligibility checks for anti-286.20 bug warnings & bundle switch recommendations.
@@ -28,7 +28,7 @@
     'p2': { id: 'p2', name: 'Moisturizing Cream for Oily and Combination Skin', basePricePiastres: 22900, isBundle: false },
     'p3': { id: 'p3', name: 'Bosbos Body Fragrance — Makhmarya', basePricePiastres: 8900, isBundle: false },
     'p4': { id: 'p4', name: 'Rose Vanille Body Splash', basePricePiastres: 22900, isBundle: false },
-    'bundle_ritual': { id: 'bundle_ritual', name: 'The Sanné Ritual', basePricePiastres: 29900, isBundle: true }
+    'bundle_ritual': { id: 'bundle_ritual', name: 'The Sanné Ritual', basePricePiastres: 28000, isBundle: true }
   };
 
   function isLaunchActive(nowDate) {
@@ -144,11 +144,11 @@
       const isEligibleProd = PROMO_CONFIG.eligibleProductIds.includes(id);
 
       if (item.isBundle || id === 'bundle_ritual') {
-        // The Sanné Ritual (299 EGP vs 318 EGP value) — BUNDLE & SAVE badge
+        // The Sanné Ritual (280 EGP vs 318 EGP value) — BUNDLE & SAVE badge
         el.innerHTML = `
           <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.2rem;">
             <span style="text-decoration: line-through; color: var(--color-text-light); font-size: 0.9em; white-space: nowrap;">318 EGP</span>
-            <span style="font-weight: 700; color: var(--color-dark-brown); font-size: 1.15em; white-space: nowrap;">299 EGP</span>
+            <span style="font-weight: 700; color: var(--color-dark-brown); font-size: 1.15em; white-space: nowrap;">280 EGP</span>
             <span style="display: inline-block; background: #EADDCB; color: #4A3C2B; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; padding: 0.2rem 0.5rem; border-radius: 3px; white-space: nowrap;">BUNDLE & SAVE</span>
           </div>
         `;
