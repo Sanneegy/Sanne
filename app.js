@@ -515,7 +515,7 @@ ${notes ? `Notes: ${notes}` : ''}`;
           successEl.textContent = `Order ${orderId} submitted (pending confirmation)! Opening WhatsApp...`;
         }
 
-        checkoutForm.reset();
+        if (checkoutFormEl) checkoutFormEl.reset();
         cart = [];
         saveCart();
 
