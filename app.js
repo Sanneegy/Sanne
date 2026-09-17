@@ -522,7 +522,12 @@ ${notes ? `Notes: ${notes}` : ''}`;
         // Open WhatsApp ONLY after database insert succeeds
         setTimeout(() => {
           console.log("BEFORE WHATSAPP REDIRECT", whatsappUrl);
-          window.open(whatsappUrl, '_blank');
+          const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 768;
+          if (isMobile) {
+            window.location.assign(whatsappUrl);
+          } else {
+            window.open(whatsappUrl, '_blank');
+          }
           if (submitBtn) {
             submitBtn.disabled = false;
             submitBtn.textContent = 'Complete Order';
@@ -568,19 +573,31 @@ let wishlist = JSON.parse(localStorage.getItem('sanne_wishlist')) || [];
 
 window.initWishlistLogic = function() {
   const wishlistNav = document.getElementById('nav-wishlist');
+  const mobileWishlistNav = document.getElementById('mobile-wishlist');
   const wishlistOverlay = document.getElementById('wishlist-overlay');
   const closeWishlistBtn = document.getElementById('close-wishlist');
 
+  const openWishlist = (e) => {
+    e.preventDefault();
+    if (wishlistOverlay) wishlistOverlay.classList.add('active');
+    const mobileMenu = document.querySelector('.mobile-menu');
+    const hamburger = document.querySelector('.hamburger');
+    if (mobileMenu && mobileMenu.classList.contains('active')) {
+      mobileMenu.classList.remove('active');
+      if (hamburger) hamburger.classList.remove('active');
+    }
+  };
+
   if (wishlistNav) {
-    wishlistNav.addEventListener('click', (e) => {
-      e.preventDefault();
-      wishlistOverlay.classList.add('active');
-    });
+    wishlistNav.addEventListener('click', openWishlist);
+  }
+  if (mobileWishlistNav) {
+    mobileWishlistNav.addEventListener('click', openWishlist);
   }
 
   if (closeWishlistBtn) {
     closeWishlistBtn.addEventListener('click', () => {
-      wishlistOverlay.classList.remove('active');
+      if (wishlistOverlay) wishlistOverlay.classList.remove('active');
     });
   }
 
