@@ -179,9 +179,9 @@ INSERT INTO bundle_components (bundle_id, product_id, quantity) VALUES
 ON CONFLICT (bundle_id, product_id) DO UPDATE SET
   quantity = EXCLUDED.quantity;
 
--- Launch window: Sept 14 11:00 AM Cairo to Thursday Sept 17 11:59:59 PM Cairo (UTC+3) -> 2026-09-17 21:00:00+00
+-- Launch window: Sept 14 11:00 AM Cairo to Wednesday Sept 23 11:59:59 PM Cairo (UTC+3) -> 2026-09-23 20:59:59+00
 INSERT INTO promotions (promo_code, starts_at, ends_at, discount_percent, eligible_product_ids, max_line_items, max_quantity, allow_bundles, is_active) VALUES
-  ('LAUNCH10', '2026-09-14 08:00:00+00', '2026-09-17 21:00:00+00', 10.00, '["p3", "p4"]'::jsonb, 1, 1, false, true)
+  ('LAUNCH10', '2026-09-14 08:00:00+00', '2026-09-23 20:59:59+00', 10.00, '["p3", "p4"]'::jsonb, 1, 1, false, true)
 ON CONFLICT (promo_code) DO UPDATE SET
   starts_at = EXCLUDED.starts_at,
   ends_at = EXCLUDED.ends_at,

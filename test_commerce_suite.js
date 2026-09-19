@@ -1,4 +1,4 @@
-﻿const fs = require('fs');
+const fs = require('fs');
 
 // Mock browser environment
 const localStorageStore = {};
@@ -33,8 +33,8 @@ console.log('================================================================\n'
 
 // During Active Launch Window: Sept 15, 2026 (Active)
 const launchActiveDate = new Date('2026-09-15T12:00:00Z');
-// Post Launch Window: Sept 20, 2026 (Expired)
-const launchExpiredDate = new Date('2026-09-20T12:00:00Z');
+// Post Launch Window: Sept 25, 2026 (Expired)
+const launchExpiredDate = new Date('2026-09-25T12:00:00Z');
 
 // TEST A: 1 x Makhmarya during launch -> 80.10 EGP
 console.log('--- TEST A: 1 x Makhmarya during launch ---');
@@ -101,8 +101,8 @@ console.log('✓ TEST I PASSED');
 
 // TEST J & K: Launch window boundaries
 console.log('\n--- TEST J & K: Launch expiry boundaries ---');
-let activeJustBefore = engine.isLaunchActive(new Date('2026-09-17T20:59:59Z'));
-let activeJustAfter = engine.isLaunchActive(new Date('2026-09-17T21:00:01Z'));
+let activeJustBefore = engine.isLaunchActive(new Date('2026-09-23T20:59:59Z'));
+let activeJustAfter = engine.isLaunchActive(new Date('2026-09-23T21:00:01Z'));
 console.log('Active before expiry:', activeJustBefore, '| Active after expiry:', activeJustAfter);
 if (!activeJustBefore || activeJustAfter) throw new Error('TEST J/K failed');
 console.log('✓ TEST J & K PASSED');
@@ -288,7 +288,7 @@ function createFreshDbState() {
     promotions: {
       LAUNCH10: {
         starts_at: new Date('2026-09-14T08:00:00Z'),
-        ends_at: new Date('2026-09-17T21:00:00Z'),
+        ends_at: new Date('2026-09-23T21:00:00Z'),
         eligible: ['p3', 'p4']
       }
     },

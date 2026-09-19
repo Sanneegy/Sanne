@@ -12,12 +12,12 @@
 (function(window) {
   'use strict';
 
-  // Configured Launch Window: Sept 14, 2026 11:00 AM to Sept 17, 2026 11:59:59 PM Cairo Time (UTC+3)
-  // Exclusive End: 2026-09-17T21:00:00Z
+  // Configured Launch Window: Sept 14, 2026 11:00 AM to Sept 23, 2026 11:59:59 PM Cairo Time (UTC+3)
+  // Exclusive End: 2026-09-23T21:00:00Z
   const PROMO_CONFIG = {
     code: 'LAUNCH10',
     startsAt: '2026-09-01T08:00:00Z',
-    endsAt:   '2026-09-17T21:00:00Z',
+    endsAt:   '2026-09-23T21:00:00Z',
     discountPercent: 10,
     eligibleProductIds: ['p3', 'p4']
   };
