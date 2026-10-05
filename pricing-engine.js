@@ -12,12 +12,11 @@
 (function(window) {
   'use strict';
 
-  // Configured Launch Window: Sept 14, 2026 11:00 AM to Sept 23, 2026 11:59:59 PM Cairo Time (UTC+3)
-  // Exclusive End: 2026-09-23T21:00:00Z
+  // Configured RANA10 Promotion: 10% OFF eligible individual products (p3 Bosbos Makhmarya, p4 Rose Vanille Body Splash)
   const PROMO_CONFIG = {
-    code: 'LAUNCH10',
+    code: 'RANA10',
     startsAt: '2026-09-01T08:00:00Z',
-    endsAt:   '2026-09-23T21:00:00Z',
+    endsAt:   '2026-12-31T23:59:59Z',
     discountPercent: 10,
     eligibleProductIds: ['p3', 'p4']
   };
@@ -53,42 +52,31 @@
   }
 
   /**
-   * Client-side LAUNCH10 Eligibility Evaluation
-   * Strict Rule: Exactly 1 line item, qty 1, product ID in eligibleProductIds (p3, p4), active launch window.
+   * Client-side RANA10 Eligibility Evaluation
    */
   function checkLaunchEligibility(cart, nowDate) {
-    if (!isLaunchActive(nowDate)) return { eligible: false, discountPiastres: 0 };
-    if (!cart || cart.length !== 1) return { eligible: false, discountPiastres: 0 };
-    
-    const line = cart[0];
-    const qty = parseInt(line.quantity || line.qty, 10) || 1;
-    if (qty !== 1 || line.isBundle || line.id === 'bundle_ritual') return { eligible: false, discountPiastres: 0 };
-
-    if (!PROMO_CONFIG.eligibleProductIds.includes(line.id)) {
+    if (!isLaunchActive(nowDate) || !cart || cart.length === 0) {
       return { eligible: false, discountPiastres: 0 };
     }
 
-    const basePiastres = getBasePricePiastres(line.id);
-    const discountPiastres = Math.round(basePiastres * (PROMO_CONFIG.discountPercent / 100));
+    let discountPiastres = 0;
+    let eligible = false;
 
-    return {
-      eligible: true,
-      productId: line.id,
-      basePiastres: basePiastres,
-      discountPiastres: discountPiastres,
-      finalPiastres: basePiastres - discountPiastres
-    };
+    (cart || []).forEach(line => {
+      const qty = parseInt(line.quantity || line.qty, 10) || 1;
+      if (!line.isBundle && line.id !== 'bundle_ritual' && PROMO_CONFIG.eligibleProductIds.includes(line.id)) {
+        const baseP = getBasePricePiastres(line.id);
+        const discP = Math.round(baseP * (PROMO_CONFIG.discountPercent / 100));
+        discountPiastres += discP * qty;
+        eligible = true;
+      }
+    });
+
+    return { eligible, discountPiastres };
   }
 
-  /**
-   * Anti-286.20 Bug Detection
-   * Triggers if both p3 (Makhmarya) and p4 (Body Splash) are present in cart separately.
-   */
   function checkSeparateBundleRecommendation(cart) {
-    if (!cart || cart.length < 2) return false;
-    const hasMakh = cart.some(item => item.id === 'p3' && !item.isBundle);
-    const hasSplash = cart.some(item => item.id === 'p4' && !item.isBundle);
-    return hasMakh && hasSplash;
+    return false;
   }
 
   /**
@@ -96,20 +84,25 @@
    */
   function calculateCartTotals(cart, donationEgp, deliveryEgp, nowDate) {
     let subtotalPiastres = 0;
+    let discountPiastres = 0;
+    const active = isLaunchActive(nowDate);
 
     (cart || []).forEach(item => {
       const baseUnit = getBasePricePiastres(item.id);
       const qty = parseInt(item.quantity || item.qty, 10) || 1;
       subtotalPiastres += baseUnit * qty;
-    });
 
-    const launchResult = checkLaunchEligibility(cart, nowDate);
-    const discountPiastres = launchResult.eligible ? launchResult.discountPiastres : 0;
+      if (active && PROMO_CONFIG.eligibleProductIds.includes(item.id) && !item.isBundle && item.id !== 'bundle_ritual') {
+        const unitDisc = Math.round(baseUnit * (PROMO_CONFIG.discountPercent / 100));
+        discountPiastres += unitDisc * qty;
+      }
+    });
 
     const donationPiastres = Math.max(0, Math.round((parseFloat(donationEgp) || 0) * 100));
     const deliveryPiastres = Math.max(0, Math.round((parseFloat(deliveryEgp) || 0) * 100));
 
     const finalTotalPiastres = (subtotalPiastres - discountPiastres) + donationPiastres + deliveryPiastres;
+    const isEligible = discountPiastres > 0;
 
     return {
       subtotalPiastres,
@@ -122,9 +115,9 @@
       deliveryEgp: formatMoney(deliveryPiastres),
       finalTotalPiastres,
       finalTotalEgp: formatMoney(finalTotalPiastres),
-      isLaunchEligible: launchResult.eligible,
-      offerType: launchResult.eligible ? 'launch_10' : (cart && cart.length === 1 && cart[0].id === 'bundle_ritual' ? 'sanne_ritual_bundle' : 'none'),
-      shouldRecommendRitualBundle: checkSeparateBundleRecommendation(cart)
+      isLaunchEligible: isEligible,
+      offerType: isEligible ? 'rana_10' : (cart && cart.length === 1 && cart[0].id === 'bundle_ritual' ? 'sanne_ritual_bundle' : 'none'),
+      shouldRecommendRitualBundle: false
     };
   }
 
@@ -160,14 +153,13 @@
             <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.2rem;">
               <span style="text-decoration: line-through; color: var(--color-text-light); font-size: 0.9em; white-space: nowrap;">${formatMoneyWhole(baseP)}</span>
               <span style="font-weight: 700; color: var(--color-dark-brown); font-size: 1.15em; white-space: nowrap;">${formatMoney(finalP)}</span>
-              <span style="display: inline-block; background: #8A333C; color: #FFFFFF; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; padding: 0.2rem 0.5rem; border-radius: 3px; white-space: nowrap;">10% LAUNCH OFFER</span>
+              <span style="display: inline-block; background: #8A333C; color: #FFFFFF; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; padding: 0.2rem 0.5rem; border-radius: 3px; white-space: nowrap;">10% OFF — RANA10</span>
             </div>
           `;
         } else {
           el.innerHTML = `
             <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.2rem;">
               <span style="font-weight: 700; color: var(--color-dark-brown); font-size: 1.1em; white-space: nowrap;">${formatMoneyWhole(baseP)}</span>
-              <span style="display: inline-block; background: #F8F6F0; border: 1px solid #CBAA77; color: #8C7355; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; padding: 0.2rem 0.5rem; border-radius: 3px; white-space: nowrap;">10% LAUNCH OFFER FROM MONDAY</span>
             </div>
           `;
         }

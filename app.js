@@ -353,7 +353,7 @@ function updateCartUI() {
     if (breakdownEl) {
       breakdownEl.innerHTML = `
         <div style="display:flex;justify-content:space-between;font-size:0.85rem;color:var(--color-text-light);margin-bottom:0.3rem;"><span>Subtotal</span><span>${origSubtotal} EGP</span></div>
-        ${discountAmt > 0 ? `<div style="display:flex;justify-content:space-between;font-size:0.85rem;color:#8A333C;font-weight:600;margin-bottom:0.3rem;"><span>10% Launch Discount</span><span>-${discountAmt.toFixed(2)} EGP</span></div>` : ''}
+        ${discountAmt > 0 ? `<div style="display:flex;justify-content:space-between;font-size:0.85rem;color:#8A333C;font-weight:600;margin-bottom:0.3rem;"><span>10% Discount (Rana10)</span><span>-${discountAmt.toFixed(2)} EGP</span></div>` : ''}
         ${donation > 0 ? `<div style="display:flex;justify-content:space-between;font-size:0.85rem;color:var(--color-soft-gold);margin-bottom:0.3rem;"><span>Donation</span><span>${donation} EGP</span></div>` : ''}
       `;
     }
@@ -436,17 +436,19 @@ document.addEventListener('submit', (e) => {
 
     let orderLines = '';
     cart.forEach(item => {
-      if (isEligible && (item.id === 'p3' || item.id === 'p4')) {
-        const discUnit = item.id === 'p3' ? 80.10 : 206.10;
-        const discVal = item.id === 'p3' ? 8.90 : 22.90;
-        orderLines += `• ${item.name} (${item.variant}) × ${item.qty}\n  Regular Price: ${item.price.toFixed(2)} EGP\n  Launch Discount: -${discVal.toFixed(2)} EGP\n  Final Product Price: ${discUnit.toFixed(2)} EGP\n`;
+      const isItemEligible = isEligible && (item.id === 'p3' || item.id === 'p4') && !item.isBundle && item.id !== 'bundle_ritual';
+      if (isItemEligible) {
+        const discVal = Number((item.price * 0.10).toFixed(2));
+        const discUnit = Number((item.price - discVal).toFixed(2));
+        orderLines += `• ${item.name} (${item.variant}) × ${item.qty}\n  Regular Price: ${item.price.toFixed(2)} EGP\n  Discount (Rana10): -${discVal.toFixed(2)} EGP\n  Final Product Price: ${discUnit.toFixed(2)} EGP\n`;
       } else {
         orderLines += `• ${item.name} (${item.variant}) × ${item.qty} (${item.price.toFixed(2)} EGP)\n`;
       }
     });
 
     const orderItemsPayload = cart.map(item => {
-      const discVal = (isEligible && (item.id === 'p3' || item.id === 'p4')) ? (item.id === 'p3' ? 8.90 : 22.90) : 0;
+      const isItemEligible = isEligible && (item.id === 'p3' || item.id === 'p4') && !item.isBundle && item.id !== 'bundle_ritual';
+      const discVal = isItemEligible ? Number((item.price * 0.10).toFixed(2)) : 0;
       return {
         product_id: item.id,
         product_name: `${item.name} (${item.variant || ''})`.trim(),

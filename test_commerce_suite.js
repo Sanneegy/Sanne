@@ -33,8 +33,8 @@ console.log('================================================================\n'
 
 // During Active Launch Window: Sept 15, 2026 (Active)
 const launchActiveDate = new Date('2026-09-15T12:00:00Z');
-// Post Launch Window: Sept 25, 2026 (Expired)
-const launchExpiredDate = new Date('2026-09-25T12:00:00Z');
+// Post Launch Window: Jan 2, 2027 (Expired)
+const launchExpiredDate = new Date('2027-01-02T12:00:00Z');
 
 // TEST A: 1 x Makhmarya during launch -> 80.10 EGP
 console.log('--- TEST A: 1 x Makhmarya during launch ---');
@@ -50,26 +50,26 @@ console.log('Final Total:', resB.finalTotalEgp, '| Discount:', resB.discountEgp)
 if (resB.finalTotalEgp !== '206.10 EGP' || resB.discountEgp !== '22.90 EGP') throw new Error('TEST B failed');
 console.log('✓ TEST B PASSED');
 
-// TEST C: 2 x Makhmarya -> NO launch discount (178.00 EGP)
+// TEST C: 2 x Makhmarya -> 10% discount (160.20 EGP)
 console.log('\n--- TEST C: 2 x Makhmarya ---');
 let resC = engine.calculateCartTotals([{ id: 'p3', quantity: 2 }], 0, 0, launchActiveDate);
 console.log('Final Total:', resC.finalTotalEgp, '| Discount:', resC.discountEgp);
-if (resC.finalTotalEgp !== '178.00 EGP' || resC.discountEgp !== '0.00 EGP') throw new Error('TEST C failed');
+if (resC.finalTotalEgp !== '160.20 EGP' || resC.discountEgp !== '17.80 EGP') throw new Error('TEST C failed');
 console.log('✓ TEST C PASSED');
 
-// TEST D: 2 x Body Splash -> NO launch discount (458.00 EGP)
+// TEST D: 2 x Body Splash -> 10% discount (412.20 EGP)
 console.log('\n--- TEST D: 2 x Body Splash ---');
 let resD = engine.calculateCartTotals([{ id: 'p4', quantity: 2 }], 0, 0, launchActiveDate);
 console.log('Final Total:', resD.finalTotalEgp, '| Discount:', resD.discountEgp);
-if (resD.finalTotalEgp !== '458.00 EGP' || resD.discountEgp !== '0.00 EGP') throw new Error('TEST D failed');
+if (resD.finalTotalEgp !== '412.20 EGP' || resD.discountEgp !== '45.80 EGP') throw new Error('TEST D failed');
 console.log('✓ TEST D PASSED');
 
-// TEST E: 1 x Makhmarya + 1 x Body Splash separately -> NO launch discount (318 EGP) & triggers ritual recommendation
+// TEST E: 1 x Makhmarya + 1 x Body Splash separately -> 10% discount applies (286.20 EGP)
 console.log('\n--- TEST E: 1 x Makhmarya + 1 x Body Splash separately ---');
 let resE = engine.calculateCartTotals([{ id: 'p3', quantity: 1 }, { id: 'p4', quantity: 1 }], 0, 0, launchActiveDate);
-console.log('Final Total:', resE.finalTotalEgp, '| Should Recommend Ritual:', resE.shouldRecommendRitualBundle);
-if (resE.finalTotalEgp !== '318.00 EGP' || !resE.shouldRecommendRitualBundle) throw new Error('TEST E failed');
-console.log('✓ TEST E PASSED (Anti-286.20 Bug Prevented & Ritual Recommendation Triggered)');
+console.log('Final Total:', resE.finalTotalEgp, '| Discount:', resE.discountEgp);
+if (resE.finalTotalEgp !== '286.20 EGP' || resE.discountEgp !== '31.80 EGP') throw new Error('TEST E failed');
+console.log('✓ TEST E PASSED (Rana10 10% applied to both products purchased separately)');
 
 // TEST F: The Sanné Ritual -> 280 EGP (no launch discount stacking)
 console.log('\n--- TEST F: The Sanné Ritual ---');
@@ -101,8 +101,8 @@ console.log('✓ TEST I PASSED');
 
 // TEST J & K: Launch window boundaries
 console.log('\n--- TEST J & K: Launch expiry boundaries ---');
-let activeJustBefore = engine.isLaunchActive(new Date('2026-09-23T20:59:59Z'));
-let activeJustAfter = engine.isLaunchActive(new Date('2026-09-23T21:00:01Z'));
+let activeJustBefore = engine.isLaunchActive(new Date('2026-12-31T23:59:58Z'));
+let activeJustAfter = engine.isLaunchActive(new Date('2027-01-01T00:00:01Z'));
 console.log('Active before expiry:', activeJustBefore, '| Active after expiry:', activeJustAfter);
 if (!activeJustBefore || activeJustAfter) throw new Error('TEST J/K failed');
 console.log('✓ TEST J & K PASSED');
@@ -178,17 +178,12 @@ function mockCreateOrderRPC(params, dbState, serverTime = launchActiveDate) {
     }
   }
 
-  // Automatic Promotion
+  // Automatic Promotion (RANA10)
   let isLaunchEligible = false;
   let offerType = 'none';
-  if (serverTime >= dbState.promotions.LAUNCH10.starts_at && serverTime < dbState.promotions.LAUNCH10.ends_at) {
-    if (items.length === 1 && items[0].quantity === 1 && dbState.promotions.LAUNCH10.eligible.includes(items[0].id)) {
-      isLaunchEligible = true;
-      offerType = 'launch_10';
-    }
-  }
-  if (!isLaunchEligible && items.length === 1 && dbState.bundles[items[0].id]) {
-    offerType = 'sanne_ritual_bundle';
+  const promo = dbState.promotions.RANA10 || dbState.promotions.LAUNCH10;
+  if (promo && serverTime >= promo.starts_at && serverTime < promo.ends_at) {
+    isLaunchEligible = true;
   }
 
   // Deduct stock
@@ -204,7 +199,8 @@ function mockCreateOrderRPC(params, dbState, serverTime = launchActiveDate) {
     const bundle = dbState.bundles[item.id];
     if (prod) {
       const lineBase = prod.base_price * item.quantity;
-      const lineDisc = isLaunchEligible ? (prod.base_price * 0.10) * item.quantity : 0;
+      const isElig = isLaunchEligible && promo.eligible.includes(item.id);
+      const lineDisc = isElig ? (prod.base_price * 0.10) * item.quantity : 0;
       baseSubtotal += lineBase;
       discountAmount += lineDisc;
     } else if (bundle) {
@@ -212,15 +208,23 @@ function mockCreateOrderRPC(params, dbState, serverTime = launchActiveDate) {
     }
   }
 
-  const finalTotal = (baseSubtotal - discountAmount) + donation + deliveryFee;
+  discountAmount = Number(discountAmount.toFixed(2));
+  const finalTotal = Number(((baseSubtotal - discountAmount) + donation + deliveryFee).toFixed(2));
   const orderId = 'order_' + Math.random().toString(36).substring(7);
+
+  if (discountAmount > 0) {
+    offerType = 'rana_10';
+  } else if (items.length === 1 && dbState.bundles[items[0].id]) {
+    offerType = 'sanne_ritual_bundle';
+  }
 
   let itemsDTO = [];
   for (const item of items) {
     const prod = dbState.products[item.id];
     const bundle = dbState.bundles[item.id];
     if (prod) {
-      const lineDisc = isLaunchEligible ? prod.base_price * 0.10 : 0;
+      const isElig = isLaunchEligible && promo.eligible.includes(item.id);
+      const lineDisc = isElig ? prod.base_price * 0.10 : 0;
       itemsDTO.push({
         product_id: item.id,
         product_name: prod.name,
@@ -286,9 +290,9 @@ function createFreshDbState() {
       ]
     },
     promotions: {
-      LAUNCH10: {
-        starts_at: new Date('2026-09-14T08:00:00Z'),
-        ends_at: new Date('2026-09-23T21:00:00Z'),
+      RANA10: {
+        starts_at: new Date('2026-09-01T08:00:00Z'),
+        ends_at: new Date('2026-12-31T23:59:59Z'),
         eligible: ['p3', 'p4']
       }
     },
@@ -348,12 +352,12 @@ let dtoBD = mockCreateOrderRPC({ idempotency_key: 'k_BD', items: [{ id: 'bundle_
 if (dtoBD.offer_type !== 'sanne_ritual_bundle') throw new Error('TEST BD failed: offer_type is not sanne_ritual_bundle');
 console.log('✓ TEST BD PASSED (Offer type: sanne_ritual_bundle)');
 
-// TEST BE: Automatic LAUNCH10
-console.log('\n--- TEST BE: Automatic LAUNCH10 ---');
+// TEST BE: Automatic RANA10
+console.log('\n--- TEST BE: Automatic RANA10 ---');
 let dbBE = createFreshDbState();
 let dtoBE = mockCreateOrderRPC({ idempotency_key: 'k_BE', items: [{ id: 'p3', quantity: 1 }], customer_name: 'Test', customer_phone: '123', city: 'Cairo', address: 'X', payment_method: 'cash' }, dbBE);
-if (dtoBE.offer_type !== 'launch_10' || dtoBE.final_total !== 130.10) throw new Error('TEST BE failed');
-console.log('✓ TEST BE PASSED (Backend automatically applied LAUNCH10)');
+if (dtoBE.offer_type !== 'rana_10' || dtoBE.final_total !== 130.10) throw new Error('TEST BE failed');
+console.log('✓ TEST BE PASSED (Backend automatically applied RANA10)');
 
 // TEST BF: Moisturizer during launch (no launch discount)
 console.log('\n--- TEST BF: Moisturizer during launch ---');
@@ -366,7 +370,7 @@ console.log('✓ TEST BF PASSED (Moisturizer received no launch discount)');
 console.log('\n--- TEST BG & BH: Standalone together vs Bundle during launch ---');
 let dbBG = createFreshDbState();
 let dtoBG = mockCreateOrderRPC({ idempotency_key: 'k_BG', items: [{ id: 'p3', quantity: 1 }, { id: 'p4', quantity: 1 }], customer_name: 'Test', customer_phone: '123', city: 'Cairo', address: 'X', payment_method: 'cash' }, dbBG);
-if (dtoBG.base_subtotal !== 318.00 || dtoBG.discount_amount !== 0.00) throw new Error('TEST BG failed');
+if (dtoBG.base_subtotal !== 318.00 || dtoBG.discount_amount !== 31.80 || dtoBG.final_total !== 336.20) throw new Error('TEST BG failed');
 
 let dbBH = createFreshDbState();
 let dtoBH = mockCreateOrderRPC({ idempotency_key: 'k_BH', items: [{ id: 'bundle_ritual', quantity: 1 }], customer_name: 'Test', customer_phone: '123', city: 'Cairo', address: 'X', payment_method: 'cash' }, dbBH);

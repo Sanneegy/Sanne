@@ -179,9 +179,9 @@ INSERT INTO bundle_components (bundle_id, product_id, quantity) VALUES
 ON CONFLICT (bundle_id, product_id) DO UPDATE SET
   quantity = EXCLUDED.quantity;
 
--- Launch window: Sept 14 11:00 AM Cairo to Wednesday Sept 23 11:59:59 PM Cairo (UTC+3) -> 2026-09-23 20:59:59+00
+-- RANA10 Promotion: 10% OFF eligible individual products (p3 Bosbos Makhmarya, p4 Rose Vanille Body Splash)
 INSERT INTO promotions (promo_code, starts_at, ends_at, discount_percent, eligible_product_ids, max_line_items, max_quantity, allow_bundles, is_active) VALUES
-  ('LAUNCH10', '2026-09-14 08:00:00+00', '2026-09-23 20:59:59+00', 10.00, '["p3", "p4"]'::jsonb, 1, 1, false, true)
+  ('RANA10', '2026-09-01 08:00:00+00', '2026-12-31 23:59:59+00', 10.00, '["p3", "p4"]'::jsonb, 99, 99, false, true)
 ON CONFLICT (promo_code) DO UPDATE SET
   starts_at = EXCLUDED.starts_at,
   ends_at = EXCLUDED.ends_at,
@@ -367,16 +367,18 @@ BEGIN
     END IF;
   END LOOP;
 
-  -- 6. Evaluate Promotion (LAUNCH10)
-  SELECT * INTO v_promo FROM promotions WHERE promo_code = 'LAUNCH10' AND is_active = true;
+  -- 6. Evaluate Promotion (RANA10)
+  SELECT * INTO v_promo FROM promotions WHERE (promo_code = 'RANA10' OR promo_code = 'LAUNCH10') AND is_active = true LIMIT 1;
   IF v_promo.promo_code IS NOT NULL AND NOW() >= v_promo.starts_at AND NOW() < v_promo.ends_at THEN
-    IF v_total_line_count = 1 AND v_total_item_qty = 1 THEN
-      IF v_promo.eligible_product_ids ? v_single_prod_id THEN
+    FOR v_item IN SELECT * FROM jsonb_to_recordset(p_items) AS x(id TEXT, quantity INT) LOOP
+      SELECT * INTO v_prod FROM products WHERE id = v_item.id;
+      IF v_prod.id IS NOT NULL AND v_promo.eligible_product_ids ? v_prod.id THEN
         v_is_launch_eligible := true;
-        SELECT base_price INTO v_unit_base FROM products WHERE id = v_single_prod_id;
-        v_discount_amount := ROUND((v_unit_base * (v_promo.discount_percent / 100.00)), 2);
-        v_offer_type := 'launch_10';
+        v_discount_amount := v_discount_amount + ROUND((v_prod.base_price * (v_promo.discount_percent / 100.00) * v_item.quantity), 2);
       END IF;
+    END LOOP;
+    IF v_is_launch_eligible THEN
+      v_offer_type := 'rana_10';
     END IF;
   END IF;
 
@@ -390,7 +392,7 @@ BEGIN
   ) VALUES (
     p_idempotency_key, p_customer_name, p_customer_phone, COALESCE(p_customer_whatsapp, p_customer_phone), p_city, p_address, v_norm_payment,
     v_base_subtotal, v_discount_amount, v_donation, v_delivery_fee, v_final_total,
-    CASE WHEN v_is_launch_eligible THEN 'LAUNCH10' ELSE NULL END, v_offer_type, 'placed'
+    CASE WHEN v_is_launch_eligible THEN 'RANA10' ELSE NULL END, v_offer_type, 'placed'
   ) RETURNING id INTO v_order_id;
 
   -- 8. Insert Order Items & Historical Component Snapshots
@@ -398,7 +400,7 @@ BEGIN
     SELECT * INTO v_prod FROM products WHERE id = v_item.id;
     IF v_prod.id IS NOT NULL THEN
       v_unit_base := v_prod.base_price;
-      v_line_discount := CASE WHEN v_is_launch_eligible THEN ROUND((v_unit_base * (v_promo.discount_percent / 100.00)), 2) ELSE 0.00 END;
+      v_line_discount := CASE WHEN v_is_launch_eligible AND v_promo.eligible_product_ids ? v_prod.id THEN ROUND((v_unit_base * (v_promo.discount_percent / 100.00)), 2) ELSE 0.00 END;
       v_unit_final := v_unit_base - v_line_discount;
       INSERT INTO order_items (order_id, product_id, product_name_snapshot, quantity, is_bundle, base_unit_price, final_unit_price, discount_amount)
       VALUES (v_order_id, v_prod.id, v_prod.name, v_item.quantity, false, v_unit_base, v_unit_final, v_line_discount * v_item.quantity);
