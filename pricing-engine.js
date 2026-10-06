@@ -52,10 +52,12 @@
   }
 
   /**
-   * Client-side RANA10 Eligibility Evaluation
+   * Client-side RANA10 Eligibility Evaluation (Requires explicit promo code 'RANA10')
    */
-  function checkLaunchEligibility(cart, nowDate) {
-    if (!isLaunchActive(nowDate) || !cart || cart.length === 0) {
+  function checkLaunchEligibility(cart, promoCode, nowDate) {
+    if (promoCode instanceof Date) { nowDate = promoCode; promoCode = ''; }
+    const isValidPromo = promoCode && typeof promoCode === 'string' && promoCode.trim().toUpperCase() === 'RANA10';
+    if (!isLaunchActive(nowDate) || !isValidPromo || !cart || cart.length === 0) {
       return { eligible: false, discountPiastres: 0 };
     }
 
@@ -82,17 +84,19 @@
   /**
    * Calculate Complete Cart Preview Totals in Integer Minor Units
    */
-  function calculateCartTotals(cart, donationEgp, deliveryEgp, nowDate) {
+  function calculateCartTotals(cart, donationEgp, deliveryEgp, promoCode, nowDate) {
+    if (promoCode instanceof Date) { nowDate = promoCode; promoCode = ''; }
     let subtotalPiastres = 0;
     let discountPiastres = 0;
     const active = isLaunchActive(nowDate);
+    const isValidPromo = promoCode && typeof promoCode === 'string' && promoCode.trim().toUpperCase() === 'RANA10';
 
     (cart || []).forEach(item => {
       const baseUnit = getBasePricePiastres(item.id);
       const qty = parseInt(item.quantity || item.qty, 10) || 1;
       subtotalPiastres += baseUnit * qty;
 
-      if (active && PROMO_CONFIG.eligibleProductIds.includes(item.id) && !item.isBundle && item.id !== 'bundle_ritual') {
+      if (active && isValidPromo && PROMO_CONFIG.eligibleProductIds.includes(item.id) && !item.isBundle && item.id !== 'bundle_ritual') {
         const unitDisc = Math.round(baseUnit * (PROMO_CONFIG.discountPercent / 100));
         discountPiastres += unitDisc * qty;
       }
@@ -122,11 +126,11 @@
   }
 
   /**
-   * Dynamic Price Badge Renderer for HTML Elements with data-product-id
+   * Dynamic Price Renderer for HTML Elements with data-product-id
+   * Displays ONLY normal base prices on product cards/pages (no promo badges/text before checkout)
    */
   function renderDynamicPrices(nowDate) {
     const priceElements = document.querySelectorAll('[data-product-id]');
-    const active = isLaunchActive(nowDate);
 
     priceElements.forEach(el => {
       const id = el.getAttribute('data-product-id');
@@ -134,7 +138,6 @@
       if (!item) return;
 
       const baseP = item.basePricePiastres;
-      const isEligibleProd = PROMO_CONFIG.eligibleProductIds.includes(id);
 
       if (item.isBundle || id === 'bundle_ritual') {
         // The Sanné Ritual (280 EGP vs 318 EGP value) — BUNDLE & SAVE badge
@@ -145,27 +148,9 @@
             <span style="display: inline-block; background: #EADDCB; color: #4A3C2B; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; padding: 0.2rem 0.5rem; border-radius: 3px; white-space: nowrap;">BUNDLE & SAVE</span>
           </div>
         `;
-      } else if (isEligibleProd) {
-        if (active) {
-          const discP = Math.round(baseP * (PROMO_CONFIG.discountPercent / 100));
-          const finalP = baseP - discP;
-          el.innerHTML = `
-            <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.2rem;">
-              <span style="text-decoration: line-through; color: var(--color-text-light); font-size: 0.9em; white-space: nowrap;">${formatMoneyWhole(baseP)}</span>
-              <span style="font-weight: 700; color: var(--color-dark-brown); font-size: 1.15em; white-space: nowrap;">${formatMoney(finalP)}</span>
-              <span style="display: inline-block; background: #8A333C; color: #FFFFFF; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; padding: 0.2rem 0.5rem; border-radius: 3px; white-space: nowrap;">10% OFF — RANA10</span>
-            </div>
-          `;
-        } else {
-          el.innerHTML = `
-            <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.2rem;">
-              <span style="font-weight: 700; color: var(--color-dark-brown); font-size: 1.1em; white-space: nowrap;">${formatMoneyWhole(baseP)}</span>
-            </div>
-          `;
-        }
       } else {
-        // Base Price (Moisturizers, etc.)
-        el.innerHTML = `<span style="font-weight: 600; color: var(--color-dark-brown); white-space: nowrap;">${formatMoneyWhole(baseP)}</span>`;
+        // Product Page / Card: Display ONLY normal base price
+        el.innerHTML = `<span style="font-weight: 700; color: var(--color-dark-brown); font-size: 1.1em; white-space: nowrap;">${formatMoneyWhole(baseP)}</span>`;
       }
     });
   }

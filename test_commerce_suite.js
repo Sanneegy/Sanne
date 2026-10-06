@@ -36,65 +36,71 @@ const launchActiveDate = new Date('2026-09-15T12:00:00Z');
 // Post Launch Window: Jan 2, 2027 (Expired)
 const launchExpiredDate = new Date('2027-01-02T12:00:00Z');
 
-// TEST A: 1 x Makhmarya during launch -> 80.10 EGP
-console.log('--- TEST A: 1 x Makhmarya during launch ---');
-let resA = engine.calculateCartTotals([{ id: 'p3', quantity: 1 }], 0, 0, launchActiveDate);
+// TEST A: 1 x Makhmarya with promo code Rana10 -> 80.10 EGP
+console.log('--- TEST A: 1 x Makhmarya with promo code Rana10 ---');
+let resA = engine.calculateCartTotals([{ id: 'p3', quantity: 1 }], 0, 0, 'Rana10', launchActiveDate);
 console.log('Final Total:', resA.finalTotalEgp, '| Discount:', resA.discountEgp, '| Eligible:', resA.isLaunchEligible);
 if (resA.finalTotalEgp !== '80.10 EGP' || resA.discountEgp !== '8.90 EGP') throw new Error('TEST A failed');
-console.log('✓ TEST A PASSED');
 
-// TEST B: 1 x Body Splash during launch -> 206.10 EGP
-console.log('\n--- TEST B: 1 x Body Splash during launch ---');
-let resB = engine.calculateCartTotals([{ id: 'p4', quantity: 1 }], 0, 0, launchActiveDate);
+let resANoPromo = engine.calculateCartTotals([{ id: 'p3', quantity: 1 }], 0, 0, '', launchActiveDate);
+if (resANoPromo.finalTotalEgp !== '89.00 EGP' || resANoPromo.discountEgp !== '0.00 EGP') throw new Error('TEST A no-promo failed');
+console.log('✓ TEST A PASSED (Rana10 = 80.10 EGP, No promo = 89 EGP)');
+
+// TEST B: 1 x Body Splash with promo code Rana10 -> 206.10 EGP
+console.log('\n--- TEST B: 1 x Body Splash with promo code Rana10 ---');
+let resB = engine.calculateCartTotals([{ id: 'p4', quantity: 1 }], 0, 0, 'Rana10', launchActiveDate);
 console.log('Final Total:', resB.finalTotalEgp, '| Discount:', resB.discountEgp);
 if (resB.finalTotalEgp !== '206.10 EGP' || resB.discountEgp !== '22.90 EGP') throw new Error('TEST B failed');
-console.log('✓ TEST B PASSED');
 
-// TEST C: 2 x Makhmarya -> 10% discount (160.20 EGP)
+let resBNoPromo = engine.calculateCartTotals([{ id: 'p4', quantity: 1 }], 0, 0, '', launchActiveDate);
+if (resBNoPromo.finalTotalEgp !== '229.00 EGP' || resBNoPromo.discountEgp !== '0.00 EGP') throw new Error('TEST B no-promo failed');
+console.log('✓ TEST B PASSED (Rana10 = 206.10 EGP, No promo = 229 EGP)');
+
+// TEST C: 2 x Makhmarya with promo code Rana10 -> 10% discount (160.20 EGP)
 console.log('\n--- TEST C: 2 x Makhmarya ---');
-let resC = engine.calculateCartTotals([{ id: 'p3', quantity: 2 }], 0, 0, launchActiveDate);
+let resC = engine.calculateCartTotals([{ id: 'p3', quantity: 2 }], 0, 0, 'Rana10', launchActiveDate);
 console.log('Final Total:', resC.finalTotalEgp, '| Discount:', resC.discountEgp);
 if (resC.finalTotalEgp !== '160.20 EGP' || resC.discountEgp !== '17.80 EGP') throw new Error('TEST C failed');
 console.log('✓ TEST C PASSED');
 
-// TEST D: 2 x Body Splash -> 10% discount (412.20 EGP)
+// TEST D: 2 x Body Splash with promo code Rana10 -> 10% discount (412.20 EGP)
 console.log('\n--- TEST D: 2 x Body Splash ---');
-let resD = engine.calculateCartTotals([{ id: 'p4', quantity: 2 }], 0, 0, launchActiveDate);
+let resD = engine.calculateCartTotals([{ id: 'p4', quantity: 2 }], 0, 0, 'Rana10', launchActiveDate);
 console.log('Final Total:', resD.finalTotalEgp, '| Discount:', resD.discountEgp);
 if (resD.finalTotalEgp !== '412.20 EGP' || resD.discountEgp !== '45.80 EGP') throw new Error('TEST D failed');
 console.log('✓ TEST D PASSED');
 
-// TEST E: 1 x Makhmarya + 1 x Body Splash separately -> 10% discount applies (286.20 EGP)
+// TEST E: 1 x Makhmarya + 1 x Body Splash separately with promo code Rana10 -> 10% discount applies (286.20 EGP)
 console.log('\n--- TEST E: 1 x Makhmarya + 1 x Body Splash separately ---');
-let resE = engine.calculateCartTotals([{ id: 'p3', quantity: 1 }, { id: 'p4', quantity: 1 }], 0, 0, launchActiveDate);
+let resE = engine.calculateCartTotals([{ id: 'p3', quantity: 1 }, { id: 'p4', quantity: 1 }], 0, 0, 'Rana10', launchActiveDate);
 console.log('Final Total:', resE.finalTotalEgp, '| Discount:', resE.discountEgp);
 if (resE.finalTotalEgp !== '286.20 EGP' || resE.discountEgp !== '31.80 EGP') throw new Error('TEST E failed');
 console.log('✓ TEST E PASSED (Rana10 10% applied to both products purchased separately)');
 
-// TEST F: The Sanné Ritual -> 280 EGP (no launch discount stacking)
+// TEST F: The Sanné Ritual -> 280 EGP (no discount stacking even with promo code)
 console.log('\n--- TEST F: The Sanné Ritual ---');
-let resF = engine.calculateCartTotals([{ id: 'bundle_ritual', quantity: 1, isBundle: true }], 0, 0, launchActiveDate);
+let resF = engine.calculateCartTotals([{ id: 'bundle_ritual', quantity: 1, isBundle: true }], 0, 0, 'Rana10', launchActiveDate);
 console.log('Final Total:', resF.finalTotalEgp, '| Discount:', resF.discountEgp);
 if (resF.finalTotalEgp !== '280.00 EGP' || resF.discountEgp !== '0.00 EGP') throw new Error('TEST F failed');
 console.log('✓ TEST F PASSED');
 
-// TEST G: Ritual + standalone product -> No discount stacking
+// TEST G: Ritual + standalone product -> No discount on bundle, discount on standalone if eligible
 console.log('\n--- TEST G: Ritual + standalone product ---');
-let resG = engine.calculateCartTotals([{ id: 'bundle_ritual', quantity: 1, isBundle: true }, { id: 'p1', quantity: 1 }], 0, 0, launchActiveDate);
+let resG = engine.calculateCartTotals([{ id: 'bundle_ritual', quantity: 1, isBundle: true }, { id: 'p1', quantity: 1 }], 0, 0, 'Rana10', launchActiveDate);
 console.log('Final Total:', resG.finalTotalEgp, '| Discount:', resG.discountEgp);
 if (resG.finalTotalEgp !== '509.00 EGP' || resG.discountEgp !== '0.00 EGP') throw new Error('TEST G failed');
 console.log('✓ TEST G PASSED');
 
 // TEST H: Standalone discounted product + donation -> Discount calculated first, donation added separately
 console.log('\n--- TEST H: Standalone product + 50 EGP donation ---');
-let resH = engine.calculateCartTotals([{ id: 'p3', quantity: 1 }], 50, 0, launchActiveDate);
+let resH = engine.calculateCartTotals([{ id: 'p3', quantity: 1 }], 50, 0, 'Rana10', launchActiveDate);
 console.log('Subtotal:', resH.subtotalEgp, '| Discount:', resH.discountEgp, '| Final Total:', resH.finalTotalEgp);
 if (resH.finalTotalEgp !== '130.10 EGP' || resH.discountEgp !== '8.90 EGP') throw new Error('TEST H failed');
 console.log('✓ TEST H PASSED');
 
 // TEST I: Bundle + donation + delivery
 console.log('\n--- TEST I: Bundle + 50 EGP donation + 50 EGP delivery ---');
-let resI = engine.calculateCartTotals([{ id: 'bundle_ritual', quantity: 1, isBundle: true }], 50, 50, launchActiveDate);
+let resI = engine.calculateCartTotals([{ id: 'bundle_ritual', quantity: 1, isBundle: true }], 50, 50, 'Rana10', launchActiveDate);
 console.log('Final Total:', resI.finalTotalEgp);
 if (resI.finalTotalEgp !== '380.00 EGP') throw new Error('TEST I failed');
 console.log('✓ TEST I PASSED');

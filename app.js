@@ -295,6 +295,48 @@ function updateQty(id, change) {
   }
 }
 
+let appliedPromoCode = ''; // Starts EMPTY until customer manually enters code
+
+function applyPromoCode(code) {
+  const cleanCode = (code || '').trim().toUpperCase();
+  const msgEl = document.getElementById('sidebar-promo-msg') || document.getElementById('checkout-promo-msg');
+  if (!cleanCode) {
+    appliedPromoCode = '';
+    localStorage.removeItem('sanne_promo');
+    if (msgEl) { msgEl.textContent = ''; }
+    updateCartUI();
+    return;
+  }
+  if (cleanCode === 'RANA10') {
+    appliedPromoCode = 'RANA10';
+    localStorage.setItem('sanne_promo', 'RANA10');
+    if (msgEl) { msgEl.textContent = '✓ Promo code applied — 10% off'; msgEl.style.color = '#2e7d32'; msgEl.style.fontWeight = '600'; }
+  } else {
+    appliedPromoCode = '';
+    localStorage.removeItem('sanne_promo');
+    if (msgEl) { msgEl.textContent = 'Invalid promo code'; msgEl.style.color = '#d32f2f'; msgEl.style.fontWeight = '500'; }
+  }
+  updateCartUI();
+}
+
+window.applyPromoCodeFromInput = function() {
+  const inp = document.getElementById('sidebar-promo-code') || document.getElementById('checkout-promo-code');
+  if (inp) applyPromoCode(inp.value);
+};
+
+document.addEventListener('click', (e) => {
+  if (e.target && (e.target.id === 'apply-promo-btn' || e.target.id === 'apply-sidebar-promo')) {
+    window.applyPromoCodeFromInput();
+  }
+});
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && e.target && (e.target.id === 'checkout-promo-code' || e.target.id === 'sidebar-promo-code')) {
+    e.preventDefault();
+    window.applyPromoCodeFromInput();
+  }
+});
+
 function updateCartUI() {
   const totalItems = cart.reduce((sum, item) => sum + item.qty, 0);
   if (cartBadge) cartBadge.textContent = `(${totalItems})`;
@@ -306,20 +348,13 @@ function updateCartUI() {
     if (cartFooter) cartFooter.style.display = 'none';
   } else {
     const donation = parseInt(document.getElementById('sidebar-donation-amount')?.value, 10) || 0;
-    const totals = window.PricingEngine ? window.PricingEngine.calculateCartTotals(cart, donation, 0) : null;
+    const totals = window.PricingEngine ? window.PricingEngine.calculateCartTotals(cart, donation, 0, appliedPromoCode) : null;
     const isLaunchEligible = totals ? totals.isLaunchEligible : false;
 
     let subtotal = 0;
     cartItemsContainer.innerHTML = cart.map(item => {
-      let unitPriceDisplay = `${item.price} EGP`;
-      let lineTotal = item.price * item.qty;
-
-      if (isLaunchEligible && cart.length === 1 && (item.id === 'p3' || item.id === 'p4')) {
-        const discUnit = item.id === 'p3' ? '80.10 EGP' : '206.10 EGP';
-        lineTotal = item.id === 'p3' ? 80.10 : 206.10;
-        unitPriceDisplay = `<span style="text-decoration:line-through;color:var(--color-text-light);margin-right:0.3rem;font-size:0.85em;">${item.price} EGP</span><span style="font-weight:600;color:var(--color-dark-brown);">${discUnit}</span>`;
-      }
-      subtotal += lineTotal;
+      const unitPriceDisplay = `${item.price} EGP`;
+      subtotal += item.price * item.qty;
 
       return `
         <div class="cart-item" style="display: flex; gap: 1rem; margin-bottom: 1.5rem; align-items: center;">
@@ -427,7 +462,7 @@ document.addEventListener('submit', (e) => {
     const deliveryFee = deliveryFees[city] || 0;
     
     const donationAmt = Math.max(0, parseInt(document.getElementById('sidebar-donation-amount')?.value || document.getElementById('checkout-donation-amount')?.value, 10) || 0);
-    const totals = window.PricingEngine ? window.PricingEngine.calculateCartTotals(cart, donationAmt, deliveryFee) : null;
+    const totals = window.PricingEngine ? window.PricingEngine.calculateCartTotals(cart, donationAmt, deliveryFee, appliedPromoCode) : null;
     const isEligible = totals ? totals.isLaunchEligible : false;
     const discountAmt = totals ? totals.discountPiastres / 100 : 0;
     const baseSubtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);

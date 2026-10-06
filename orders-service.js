@@ -59,6 +59,7 @@
         p_discount_egp: Number(orderPayload.discount_egp) || 0,
         p_final_total_egp: Number(orderPayload.final_total_egp) || 0,
         p_donation_egp: Number(orderPayload.donation_egp) || 0,
+        p_promo_code: String(orderPayload.promo_code || orderPayload.discount_code || orderPayload.applied_promo_code || '').trim(),
         p_idempotency_key: idempotencyKey,
         p_items: (orderPayload.items || []).map(item => ({
           product_id: item.product_id,

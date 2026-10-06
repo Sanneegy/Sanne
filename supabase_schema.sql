@@ -264,7 +264,8 @@ CREATE OR REPLACE FUNCTION create_order(
   p_city TEXT,
   p_address TEXT,
   p_payment_method TEXT,
-  p_donation_amount NUMERIC DEFAULT 0.00
+  p_donation_amount NUMERIC DEFAULT 0.00,
+  p_promo_code TEXT DEFAULT NULL
 )
 RETURNS JSONB
 SECURITY DEFINER
@@ -367,18 +368,20 @@ BEGIN
     END IF;
   END LOOP;
 
-  -- 6. Evaluate Promotion (RANA10)
-  SELECT * INTO v_promo FROM promotions WHERE (promo_code = 'RANA10' OR promo_code = 'LAUNCH10') AND is_active = true LIMIT 1;
-  IF v_promo.promo_code IS NOT NULL AND NOW() >= v_promo.starts_at AND NOW() < v_promo.ends_at THEN
-    FOR v_item IN SELECT * FROM jsonb_to_recordset(p_items) AS x(id TEXT, quantity INT) LOOP
-      SELECT * INTO v_prod FROM products WHERE id = v_item.id;
-      IF v_prod.id IS NOT NULL AND v_promo.eligible_product_ids ? v_prod.id THEN
-        v_is_launch_eligible := true;
-        v_discount_amount := v_discount_amount + ROUND((v_prod.base_price * (v_promo.discount_percent / 100.00) * v_item.quantity), 2);
+  -- 6. Evaluate Promotion (Requires explicit customer promo code 'RANA10')
+  IF UPPER(TRIM(COALESCE(p_promo_code, ''))) = 'RANA10' THEN
+    SELECT * INTO v_promo FROM promotions WHERE promo_code = 'RANA10' AND is_active = true LIMIT 1;
+    IF v_promo.promo_code IS NOT NULL AND NOW() >= v_promo.starts_at AND NOW() < v_promo.ends_at THEN
+      FOR v_item IN SELECT * FROM jsonb_to_recordset(p_items) AS x(id TEXT, quantity INT) LOOP
+        SELECT * INTO v_prod FROM products WHERE id = v_item.id;
+        IF v_prod.id IS NOT NULL AND v_promo.eligible_product_ids ? v_prod.id THEN
+          v_is_launch_eligible := true;
+          v_discount_amount := v_discount_amount + ROUND((v_prod.base_price * (v_promo.discount_percent / 100.00) * v_item.quantity), 2);
+        END IF;
+      END LOOP;
+      IF v_is_launch_eligible THEN
+        v_offer_type := 'rana_10';
       END IF;
-    END LOOP;
-    IF v_is_launch_eligible THEN
-      v_offer_type := 'rana_10';
     END IF;
   END IF;
 
@@ -526,7 +529,7 @@ $$ LANGUAGE plpgsql;
 REVOKE EXECUTE ON FUNCTION confirm_order(UUID) FROM PUBLIC, anon, authenticated;
 REVOKE EXECUTE ON FUNCTION cancel_order(UUID) FROM PUBLIC, anon, authenticated;
 
-GRANT EXECUTE ON FUNCTION create_order(TEXT, JSONB, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT, NUMERIC) TO anon, authenticated, service_role;
+GRANT EXECUTE ON FUNCTION create_order(TEXT, JSONB, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT, NUMERIC, TEXT) TO anon, authenticated, service_role;
 GRANT EXECUTE ON FUNCTION get_full_order_breakdown(UUID) TO anon, authenticated, service_role;
 GRANT EXECUTE ON FUNCTION get_public_donation_total() TO anon, authenticated, service_role;
 

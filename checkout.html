@@ -267,7 +267,7 @@
   <script src="app.js"></script>
   <script>
     let formData = {};
-    let appliedDiscount = JSON.parse(localStorage.getItem('sanne_discount')) || null;
+    let appliedDiscount = null;
     let cartNotes = localStorage.getItem('sanne_notes') || '';
     let currentDonation = 0;
     
@@ -294,13 +294,18 @@
     }
 
     function getDiscountAmount() {
-      if (!appliedDiscount) return 0;
-      const subtotal = getSubtotal();
-      if (appliedDiscount.type === 'percent') {
-        return Math.round(subtotal * (appliedDiscount.value / 100));
-      } else {
-        return appliedDiscount.value;
+      if (!appliedDiscount || appliedDiscount.code !== 'RANA10') return 0;
+      if (window.PricingEngine) {
+        const totals = window.PricingEngine.calculateCartTotals(cart, currentDonation, currentDeliveryFee, appliedDiscount.code);
+        return totals.discountPiastres / 100;
       }
+      let disc = 0;
+      cart.forEach(item => {
+        if (!item.isBundle && item.id !== 'bundle_ritual' && (item.id === 'p3' || item.id === 'p4')) {
+          disc += Math.round(item.price * 0.10) * item.qty;
+        }
+      });
+      return disc;
     }
 
     function getTotal() {
@@ -393,41 +398,27 @@
       const input = document.getElementById('checkout-discount-input');
       const msgEl = document.getElementById('checkout-discount-msg');
       const code = input.value.trim().toUpperCase();
-      if (!code) return;
-      msgEl.textContent = 'Checking...'; msgEl.className = 'discount-msg';
-      try {
-        const url = `https://firestore.googleapis.com/v1/projects/sanne-egy/databases/(default)/documents/discountCodes/${code}`;
-        const res = await fetch(url);
-        if (!res.ok) { 
-          msgEl.textContent = "This code isn't valid."; 
-          msgEl.className = 'discount-msg invalid'; 
-          appliedDiscount = null; 
-          localStorage.removeItem('sanne_discount'); 
-          saveCart(); 
-          renderCheckoutCart(); 
-          return; 
-        }
-        const doc = await res.json();
-        const f = doc.fields;
-        if (!f.active?.booleanValue) { 
-          msgEl.textContent = "This code isn't valid."; 
-          msgEl.className = 'discount-msg invalid'; 
-          appliedDiscount = null; 
-          localStorage.removeItem('sanne_discount');
-        } else {
-          const type = f.type?.stringValue; const value = parseInt(f.value?.integerValue || '0');
-          const label = type === 'percent' ? `${value}%` : `${value} EGP`;
-          msgEl.textContent = `✓ Code applied, ${label} off`; msgEl.className = 'discount-msg valid';
-          appliedDiscount = { code, type, value };
-          localStorage.setItem('sanne_discount', JSON.stringify(appliedDiscount));
-        }
-      } catch(e) { 
-        msgEl.textContent = "This code isn't valid."; 
-        msgEl.className = 'discount-msg invalid'; 
-        appliedDiscount = null; 
+      if (!code) {
+        msgEl.textContent = '';
+        appliedDiscount = null;
+        localStorage.removeItem('sanne_discount');
+        saveCart();
+        renderCheckoutCart();
+        return;
+      }
+      if (code === 'RANA10') {
+        msgEl.textContent = '✓ Code applied, 10% off';
+        msgEl.className = 'discount-msg valid';
+        appliedDiscount = { code: 'RANA10', type: 'percent', value: 10 };
+        localStorage.setItem('sanne_discount', JSON.stringify(appliedDiscount));
+      } else {
+        msgEl.textContent = "This code isn't valid.";
+        msgEl.className = 'discount-msg invalid';
+        appliedDiscount = null;
         localStorage.removeItem('sanne_discount');
       }
-      saveCart(); renderCheckoutCart();
+      saveCart();
+      renderCheckoutCart();
     }
 
     function buildReview() {
@@ -565,16 +556,9 @@ ${currentDonation > 0 ? `✨ Donation: ${currentDonation} EGP\n` : ''}💰 Total
 
       const notesEl = document.getElementById('checkout-notes');
       if (cartNotes && notesEl) notesEl.value = cartNotes;
-      if (appliedDiscount) {
-        const inp = document.getElementById('checkout-discount-input');
-        const msg = document.getElementById('checkout-discount-msg');
-        if (inp) inp.value = appliedDiscount.code;
-        if (msg) {
-          const label = appliedDiscount.type === 'percent' ? `${appliedDiscount.value}%` : `${appliedDiscount.value} EGP`;
-          msg.textContent = `✓ Code applied, ${label} off`;
-          msg.className = 'discount-msg valid';
-        }
-      }
+      localStorage.removeItem('sanne_discount');
+      localStorage.removeItem('sanne_promo');
+      appliedDiscount = null;
 
       document.getElementById('to-step-2').addEventListener('click', () => {
         if (cart.length === 0) return;
