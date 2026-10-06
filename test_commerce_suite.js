@@ -44,7 +44,17 @@ if (resA.finalTotalEgp !== '80.10 EGP' || resA.discountEgp !== '8.90 EGP') throw
 
 let resANoPromo = engine.calculateCartTotals([{ id: 'p3', quantity: 1 }], 0, 0, '', launchActiveDate);
 if (resANoPromo.finalTotalEgp !== '89.00 EGP' || resANoPromo.discountEgp !== '0.00 EGP') throw new Error('TEST A no-promo failed');
-console.log('✓ TEST A PASSED (Rana10 = 80.10 EGP, No promo = 89 EGP)');
+
+let resALower = engine.calculateCartTotals([{ id: 'p3', quantity: 1 }], 0, 0, 'rana10', launchActiveDate);
+if (resALower.finalTotalEgp !== '89.00 EGP' || resALower.discountEgp !== '0.00 EGP') throw new Error('TEST A lower case failed');
+
+let resAUpper = engine.calculateCartTotals([{ id: 'p3', quantity: 1 }], 0, 0, 'RANA10', launchActiveDate);
+if (resAUpper.finalTotalEgp !== '89.00 EGP' || resAUpper.discountEgp !== '0.00 EGP') throw new Error('TEST A upper case failed');
+
+let resALaunch = engine.calculateCartTotals([{ id: 'p3', quantity: 1 }], 0, 0, 'LAUNCH10', launchActiveDate);
+if (resALaunch.finalTotalEgp !== '89.00 EGP' || resALaunch.discountEgp !== '0.00 EGP') throw new Error('TEST A LAUNCH10 failed');
+
+console.log('✓ TEST A PASSED (Exact Rana10 = 80.10 EGP, All invalid/other cases = 89 EGP)');
 
 // TEST B: 1 x Body Splash with promo code Rana10 -> 206.10 EGP
 console.log('\n--- TEST B: 1 x Body Splash with promo code Rana10 ---');

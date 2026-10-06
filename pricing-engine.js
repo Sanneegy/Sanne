@@ -52,11 +52,11 @@
   }
 
   /**
-   * Client-side RANA10 Eligibility Evaluation (Requires explicit promo code 'RANA10')
+   * Client-side RANA10 Eligibility Evaluation (Requires exact promo code 'Rana10')
    */
   function checkLaunchEligibility(cart, promoCode, nowDate) {
     if (promoCode instanceof Date) { nowDate = promoCode; promoCode = ''; }
-    const isValidPromo = promoCode && typeof promoCode === 'string' && promoCode.trim().toUpperCase() === 'RANA10';
+    const isValidPromo = promoCode && typeof promoCode === 'string' && promoCode.trim() === 'Rana10';
     if (!isLaunchActive(nowDate) || !isValidPromo || !cart || cart.length === 0) {
       return { eligible: false, discountPiastres: 0 };
     }
@@ -89,7 +89,7 @@
     let subtotalPiastres = 0;
     let discountPiastres = 0;
     const active = isLaunchActive(nowDate);
-    const isValidPromo = promoCode && typeof promoCode === 'string' && promoCode.trim().toUpperCase() === 'RANA10';
+    const isValidPromo = promoCode && typeof promoCode === 'string' && promoCode.trim() === 'Rana10';
 
     (cart || []).forEach(item => {
       const baseUnit = getBasePricePiastres(item.id);

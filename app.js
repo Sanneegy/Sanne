@@ -298,8 +298,8 @@ function updateQty(id, change) {
 let appliedPromoCode = ''; // Starts EMPTY until customer manually enters code
 
 function applyPromoCode(code) {
-  const cleanCode = (code || '').trim().toUpperCase();
-  const msgEl = document.getElementById('sidebar-promo-msg') || document.getElementById('checkout-promo-msg');
+  const cleanCode = (code || '').trim();
+  const msgEl = document.getElementById('sidebar-promo-msg') || document.getElementById('checkout-promo-msg') || document.getElementById('checkout-discount-msg');
   if (!cleanCode) {
     appliedPromoCode = '';
     localStorage.removeItem('sanne_promo');
@@ -307,33 +307,46 @@ function applyPromoCode(code) {
     updateCartUI();
     return;
   }
-  if (cleanCode === 'RANA10') {
-    appliedPromoCode = 'RANA10';
-    localStorage.setItem('sanne_promo', 'RANA10');
-    if (msgEl) { msgEl.textContent = '✓ Promo code applied — 10% off'; msgEl.style.color = '#2e7d32'; msgEl.style.fontWeight = '600'; }
+  if (cleanCode === 'Rana10') {
+    appliedPromoCode = 'Rana10';
+    localStorage.setItem('sanne_promo', 'Rana10');
+    if (msgEl) { msgEl.textContent = 'Promo code applied ✓'; msgEl.style.color = '#2e7d32'; msgEl.style.fontWeight = '600'; }
   } else {
     appliedPromoCode = '';
     localStorage.removeItem('sanne_promo');
-    if (msgEl) { msgEl.textContent = 'Invalid promo code'; msgEl.style.color = '#d32f2f'; msgEl.style.fontWeight = '500'; }
+    if (msgEl) { msgEl.textContent = 'Promo code is not valid.'; msgEl.style.color = '#d32f2f'; msgEl.style.fontWeight = '500'; }
   }
   updateCartUI();
 }
 
 window.applyPromoCodeFromInput = function() {
-  const inp = document.getElementById('sidebar-promo-code') || document.getElementById('checkout-promo-code');
+  const inp = document.getElementById('sidebar-promo-code') || document.getElementById('checkout-promo-code') || document.getElementById('checkout-discount-input');
   if (inp) applyPromoCode(inp.value);
 };
 
 document.addEventListener('click', (e) => {
-  if (e.target && (e.target.id === 'apply-promo-btn' || e.target.id === 'apply-sidebar-promo')) {
+  if (e.target && (e.target.id === 'apply-promo-btn' || e.target.id === 'apply-sidebar-promo' || e.target.id === 'checkout-discount-btn')) {
     window.applyPromoCodeFromInput();
   }
 });
 
 document.addEventListener('keydown', (e) => {
-  if (e.key === 'Enter' && e.target && (e.target.id === 'checkout-promo-code' || e.target.id === 'sidebar-promo-code')) {
+  if (e.key === 'Enter' && e.target && (e.target.id === 'checkout-promo-code' || e.target.id === 'sidebar-promo-code' || e.target.id === 'checkout-discount-input')) {
     e.preventDefault();
     window.applyPromoCodeFromInput();
+  }
+});
+
+document.addEventListener('input', (e) => {
+  if (e.target && (e.target.id === 'checkout-discount-input' || e.target.id === 'sidebar-promo-code' || e.target.id === 'checkout-promo-code')) {
+    const val = e.target.value.trim();
+    if (val !== 'Rana10' && appliedPromoCode) {
+      appliedPromoCode = '';
+      localStorage.removeItem('sanne_promo');
+      const msgEl = document.getElementById('sidebar-promo-msg') || document.getElementById('checkout-promo-msg') || document.getElementById('checkout-discount-msg');
+      if (msgEl && val === '') msgEl.textContent = '';
+      updateCartUI();
+    }
   }
 });
 

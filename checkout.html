@@ -110,8 +110,29 @@
 
       <!-- ═══ STEP 2: Checkout Form ═══ -->
       <div class="checkout-panel" id="step-2" style="display:none;">
-        <h2 class="section-heading" style="margin-bottom:2rem;">Shipping Details</h2>
+        <h2 class="section-heading" style="margin-bottom:2rem;">Checkout Details</h2>
         <form id="checkout-form">
+          <div class="payment-section" style="margin-bottom: 1.5rem;">
+            <label style="font-weight:600;margin-bottom:0.5rem;display:block;text-transform:uppercase;font-size:0.75rem;letter-spacing:0.08em;color:var(--color-dark-brown, #4A3C2B);">Payment Method</label>
+            <div class="payment-card" style="background:var(--color-cream, #F8F6F0);border:1px solid var(--color-border, #E0D7C8);border-radius:6px;padding:1rem;display:flex;align-items:center;gap:0.8rem;">
+              <div class="payment-radio" style="width:14px;height:14px;border-radius:50%;background:var(--color-dark-brown, #4A3C2B);border:2px solid var(--color-cream, #F8F6F0);box-shadow:0 0 0 2px var(--color-dark-brown, #4A3C2B);"></div>
+              <div>
+                <div class="payment-label" style="font-weight:600;font-size:0.9rem;color:var(--color-dark-brown, #4A3C2B);">Cash or Instapay</div>
+                <div class="payment-sub" style="font-size:0.8rem;color:var(--color-text-light, #5A544C);">Pay with cash upon delivery or Instapay.</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- PROMO CODE SECTION -->
+          <div class="form-group" style="margin-bottom: 1.5rem;">
+            <label for="checkout-discount-input" style="font-weight:600;margin-bottom:0.5rem;display:block;text-transform:uppercase;font-size:0.75rem;letter-spacing:0.08em;color:var(--color-dark-brown, #4A3C2B);">PROMO CODE</label>
+            <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+              <input type="text" id="checkout-discount-input" class="form-control" placeholder="Enter promo code" style="flex:1;min-width:180px;background:#fff;border:1px solid var(--color-border, #E0D7C8);border-radius:4px;padding:0.6rem 0.9rem;font-size:0.85rem;color:var(--color-text, #2C2A28);outline:none;">
+              <button type="button" id="checkout-discount-btn" style="background:var(--color-dark-brown, #4A3C2B);color:#fff;border:none;padding:0.6rem 1.2rem;border-radius:4px;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;font-size:0.75rem;cursor:pointer;">APPLY</button>
+            </div>
+            <div id="checkout-discount-msg" style="font-size:0.8rem;margin-top:0.4rem;font-weight:500;"></div>
+          </div>
+
           <div class="form-group">
             <label for="fullName">Full Name *</label>
             <input type="text" id="fullName" class="form-control" required placeholder="Your full name">
@@ -173,20 +194,6 @@
           <div class="form-group">
             <label for="formNotes">Notes <span class="optional">(pre-filled from cart)</span></label>
             <textarea id="formNotes" class="form-control" rows="2" placeholder="Any special instructions"></textarea>
-          </div>
-
-          <div class="form-group">
-            <label>Discount Code <span class="optional">(pre-filled from cart)</span></label>
-            <input type="text" id="formDiscount" class="form-control" readonly style="background:var(--cream-dark);cursor:default;">
-          </div>
-
-          <h3 style="font-family:var(--font-heading);margin:2rem 0 1rem;font-size:1.5rem;">Payment Method</h3>
-          <div class="payment-card">
-            <div class="payment-radio"></div>
-            <div>
-              <div class="payment-label">Cash or Instapay</div>
-              <div class="payment-sub">Pay with cash upon delivery or Instapay.</div>
-            </div>
           </div>
 
           <button type="submit" class="btn-primary">Review Order</button>
@@ -395,25 +402,31 @@
     }
 
     async function applyCheckoutDiscount() {
-      const input = document.getElementById('checkout-discount-input');
-      const msgEl = document.getElementById('checkout-discount-msg');
-      const code = input.value.trim().toUpperCase();
+      const input = document.getElementById('checkout-discount-input') || document.getElementById('checkout-promo-code');
+      const msgEl = document.getElementById('checkout-discount-msg') || document.getElementById('sidebar-promo-msg');
+      const code = input ? input.value.trim() : '';
       if (!code) {
-        msgEl.textContent = '';
+        if (msgEl) { msgEl.textContent = ''; msgEl.className = 'discount-msg'; }
         appliedDiscount = null;
         localStorage.removeItem('sanne_discount');
         saveCart();
         renderCheckoutCart();
         return;
       }
-      if (code === 'RANA10') {
-        msgEl.textContent = '✓ Code applied, 10% off';
-        msgEl.className = 'discount-msg valid';
-        appliedDiscount = { code: 'RANA10', type: 'percent', value: 10 };
+      if (code === 'Rana10') {
+        if (msgEl) {
+          msgEl.textContent = 'Promo code applied ✓';
+          msgEl.style.color = '#2e7d32';
+          msgEl.className = 'discount-msg valid';
+        }
+        appliedDiscount = { code: 'Rana10', type: 'percent', value: 10 };
         localStorage.setItem('sanne_discount', JSON.stringify(appliedDiscount));
       } else {
-        msgEl.textContent = "This code isn't valid.";
-        msgEl.className = 'discount-msg invalid';
+        if (msgEl) {
+          msgEl.textContent = 'Promo code is not valid.';
+          msgEl.style.color = '#d32f2f';
+          msgEl.className = 'discount-msg invalid';
+        }
         appliedDiscount = null;
         localStorage.removeItem('sanne_discount');
       }
