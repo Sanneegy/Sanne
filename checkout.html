@@ -520,7 +520,11 @@
       try {
         console.log("BEFORE SUPABASE INSERT", orderPayload);
         if (window.OrdersService && typeof window.OrdersService.submitOrder === 'function') {
-          await window.OrdersService.submitOrder(orderPayload);
+          try {
+            await window.OrdersService.submitOrder(orderPayload);
+          } catch (svcErr) {
+            console.warn('OrdersService non-blocking notice:', svcErr);
+          }
         }
 
         const msg = `Hello Sanné 🌿 I'd like to place an order.
@@ -546,21 +550,26 @@ ${currentDonation > 0 ? `✨ Donation: ${currentDonation} EGP\n` : ''}💰 Total
 
         const waUrl = `https://wa.me/201032138278?text=${encodeURIComponent(msg)}`;
         console.log("BEFORE WHATSAPP REDIRECT", waUrl);
-        window.open(waUrl, '_blank');
 
         cart = []; appliedDiscount = null; cartNotes = ''; currentDonation = 0;
         localStorage.removeItem('sanne_cart');
         localStorage.removeItem('sanne_discount');
         localStorage.removeItem('sanne_notes');
         updateAllBadges();
-        setTimeout(() => window.location.href = 'index.html', 1000);
+
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 768;
+        if (isMobile) {
+          window.location.href = waUrl;
+        } else {
+          const win = window.open(waUrl, '_blank');
+          if (!win || win.closed || typeof win.closed === 'undefined') {
+            window.location.href = waUrl;
+          }
+        }
       } catch (err) {
         console.error('Checkout error:', err);
-        alert(`Order Submission Error: ${err.message || 'Failed to submit order.'}`);
-        if (confirmBtn) {
-          confirmBtn.disabled = false;
-          confirmBtn.textContent = 'Confirm Order & Chat on WhatsApp';
-        }
+        const waUrl = `https://wa.me/201032138278?text=${encodeURIComponent(msg)}`;
+        window.location.href = waUrl;
       }
     }
 

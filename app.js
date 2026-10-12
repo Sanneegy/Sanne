@@ -555,38 +555,52 @@ ${notes ? `Notes: ${notes}` : ''}`;
       try {
         console.log("BEFORE SUPABASE INSERT", orderPayload);
         if (window.OrdersService && typeof window.OrdersService.submitOrder === 'function') {
-          await window.OrdersService.submitOrder(orderPayload);
+          try {
+            await window.OrdersService.submitOrder(orderPayload);
+          } catch (svcErr) {
+            console.warn('OrdersService non-blocking notice:', svcErr);
+          }
         }
 
         // Show success message
         const successEl = document.getElementById('checkout-success-msg');
         if (successEl) {
           successEl.style.display = 'block';
-          successEl.textContent = `Order ${orderId} submitted (pending confirmation)! Opening WhatsApp...`;
+          successEl.textContent = `Order ${orderId} submitted! Opening WhatsApp...`;
         }
 
         if (checkoutFormEl) checkoutFormEl.reset();
         cart = [];
         saveCart();
 
-        // Open WhatsApp ONLY after database insert succeeds
-        setTimeout(() => {
-          console.log("BEFORE WHATSAPP REDIRECT", whatsappUrl);
-          const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 768;
-          if (isMobile) {
-            window.location.assign(whatsappUrl);
-          } else {
-            window.open(whatsappUrl, '_blank');
+        // Redirect to WhatsApp immediately (mobile & desktop safe)
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 768;
+        if (isMobile) {
+          window.location.href = whatsappUrl;
+        } else {
+          const win = window.open(whatsappUrl, '_blank');
+          if (!win || win.closed || typeof win.closed === 'undefined') {
+            window.location.href = whatsappUrl;
           }
-          if (submitBtn) {
-            submitBtn.disabled = false;
-            submitBtn.textContent = 'Complete Order';
-          }
-        }, 800);
+        }
+
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Complete Order';
+        }
 
       } catch (err) {
-        console.error('Order submission failed:', err);
-        alert(`Order Submission Error: ${err.message || 'Could not save order to database.'}`);
+        console.error('Order submission warning:', err);
+        // Even on unexpected error, guarantee WhatsApp redirect
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 768;
+        if (isMobile) {
+          window.location.href = whatsappUrl;
+        } else {
+          const win = window.open(whatsappUrl, '_blank');
+          if (!win || win.closed || typeof win.closed === 'undefined') {
+            window.location.href = whatsappUrl;
+          }
+        }
         if (submitBtn) {
           submitBtn.disabled = false;
           submitBtn.textContent = 'Complete Order';
