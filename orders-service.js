@@ -59,7 +59,6 @@
         p_discount_egp: Number(orderPayload.discount_egp) || 0,
         p_final_total_egp: Number(orderPayload.final_total_egp) || 0,
         p_donation_egp: Number(orderPayload.donation_egp) || 0,
-        p_promo_code: String(orderPayload.promo_code || orderPayload.discount_code || orderPayload.applied_promo_code || '').trim(),
         p_idempotency_key: idempotencyKey,
         p_items: (orderPayload.items || []).map(item => ({
           product_id: item.product_id,
@@ -70,16 +69,43 @@
         }))
       };
 
+      let result = null;
+
       if (sb) {
         try {
           const { data, error } = await sb.rpc('create_order', rpcPayload);
           if (!error && data) {
-            return data;
+            result = data;
+          } else if (error) {
+            console.warn('Supabase client create_order notice:', error);
           }
-          console.warn('Supabase create_order notice (proceeding with local persistence & WhatsApp):', error);
         } catch (e) {
-          console.warn('Supabase create_order network exception (proceeding with local persistence & WhatsApp):', e);
+          console.warn('Supabase create_order network exception:', e);
         }
+      }
+
+      // Direct HTTP fetch fallback ensuring Supabase order + donation insertion never fails
+      if (!result) {
+        try {
+          const res = await fetch(`${SUPABASE_CONFIG.url}/rest/v1/rpc/create_order`, {
+            method: 'POST',
+            headers: {
+              'apikey': SUPABASE_CONFIG.anonKey,
+              'Authorization': `Bearer ${SUPABASE_CONFIG.anonKey}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(rpcPayload)
+          });
+          if (res.ok) {
+            result = await res.json();
+          }
+        } catch (fetchErr) {
+          console.warn('Direct fetch to Supabase create_order exception:', fetchErr);
+        }
+      }
+
+      if (result) {
+        return result;
       }
 
       // Local fallback ensuring order flow and WhatsApp redirect never fail
@@ -171,8 +197,9 @@
       if (sb) {
         try {
           const { data, error } = await sb.rpc('get_public_donation_total');
-          if (!error && typeof data === 'number') {
-            return data;
+          const num = Number(data);
+          if (!error && !isNaN(num) && num > 0) {
+            return num;
           }
           if (!error && data && typeof data.total_egp === 'number') {
             return data.total_egp;
@@ -183,6 +210,26 @@
         } catch (e) {
           console.warn('Network error fetching donation total from database:', e);
         }
+      }
+
+      // Direct HTTP fallback to Supabase RPC ensuring public total is always authoritative
+      try {
+        const res = await fetch(`${SUPABASE_CONFIG.url}/rest/v1/rpc/get_public_donation_total`, {
+          method: 'POST',
+          headers: {
+            'apikey': SUPABASE_CONFIG.anonKey,
+            'Authorization': `Bearer ${SUPABASE_CONFIG.anonKey}`,
+            'Content-Type': 'application/json'
+          },
+          body: '{}',
+          cache: 'no-store'
+        });
+        if (res.ok) {
+          const num = Number(await res.json());
+          if (!isNaN(num) && num > 0) return num;
+        }
+      } catch (netErr) {
+        console.warn('Direct fetch get_public_donation_total failed:', netErr);
       }
 
       // Local fallback

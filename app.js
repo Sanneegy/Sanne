@@ -580,6 +580,9 @@ ${notes ? `Notes: ${notes}` : ''}`;
         if (window.OrdersService && typeof window.OrdersService.submitOrder === 'function') {
           try {
             await window.OrdersService.submitOrder(orderPayload);
+            if (typeof window.renderDonationTotal === 'function') {
+              window.renderDonationTotal();
+            }
           } catch (svcErr) {
             console.warn('OrdersService non-blocking notice:', svcErr);
           }
