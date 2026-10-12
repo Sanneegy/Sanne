@@ -78,6 +78,16 @@
             <span style="font-size:0.9rem;color:var(--color-text-light);">EGP</span>
           </div>
         </div>
+        <!-- PROMO CODE -->
+        <div class="cart-promo-container" style="background:var(--color-cream);border-radius:8px;padding:1rem 1.2rem;margin-bottom:1rem;border:1px solid var(--color-border);">
+          <label for="sidebar-promo-code" style="display:block;font-size:0.75rem;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--color-dark-brown);margin-bottom:0.5rem;">PROMO CODE</label>
+          <div style="display:flex;gap:0.5rem;align-items:stretch;">
+            <input type="text" id="sidebar-promo-code" placeholder="Enter promo code" style="flex:1;min-width:0;padding:0.6rem 0.8rem;border:1px solid var(--color-border);border-radius:4px;font-family:var(--font-sans);font-size:0.85rem;background:#fff;color:var(--color-text);outline:none;">
+            <button type="button" id="sidebar-apply-promo-btn" style="background:var(--color-dark-brown);color:#fff;border:none;padding:0.6rem 1.1rem;border-radius:4px;font-weight:600;font-size:0.75rem;text-transform:uppercase;letter-spacing:0.08em;cursor:pointer;white-space:nowrap;">APPLY</button>
+          </div>
+          <div id="sidebar-promo-msg" style="font-size:0.78rem;margin-top:0.4rem;font-weight:500;"></div>
+        </div>
+
         <div id="cart-breakdown"></div>
         <div class="cart-total-row">
           <span>Total:</span>
@@ -86,16 +96,6 @@
         
         <h3 class="mt-md mb-sm" style="font-size: 1.2rem;">Checkout</h3>
         <p class="mb-sm" style="font-size: 0.9rem; color: var(--color-text-light);">Payment method: Cash or Instapay</p>
-        
-        <!-- PROMO CODE -->
-        <div class="form-group" style="margin-bottom: 1rem;">
-          <label style="display:block; font-size:0.75rem; font-weight:600; text-transform:uppercase; letter-spacing:0.08em; color:var(--color-dark-brown); margin-bottom:0.4rem;">PROMO CODE</label>
-          <div style="display:flex; gap:0.5rem; align-items:stretch;">
-            <input type="text" id="checkout-promo-code" class="form-control" placeholder="Enter promo code" style="flex:1; margin-bottom:0; background:#fff; border:1px solid var(--color-border); border-radius:4px; padding:0.6rem 0.8rem; font-size:0.85rem; color:var(--color-text); outline:none;">
-            <button type="button" id="apply-promo-btn" style="background:var(--color-dark-brown); color:#fff; border:none; padding:0.6rem 1.1rem; border-radius:4px; font-weight:600; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.08em; cursor:pointer; white-space:nowrap;">APPLY</button>
-          </div>
-          <div id="checkout-promo-msg" style="font-size:0.78rem; margin-top:0.35rem; font-weight:500;"></div>
-        </div>
 
         <form id="checkout-form">
           <div class="form-group">

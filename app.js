@@ -299,22 +299,30 @@ let appliedPromoCode = ''; // Starts EMPTY until customer manually enters code
 
 function applyPromoCode(code) {
   const cleanCode = (code || '').trim();
-  const msgEl = document.getElementById('sidebar-promo-msg') || document.getElementById('checkout-promo-msg') || document.getElementById('checkout-discount-msg');
+  const msgEls = document.querySelectorAll('#sidebar-promo-msg, #checkout-promo-msg, #checkout-discount-msg');
   if (!cleanCode) {
     appliedPromoCode = '';
     localStorage.removeItem('sanne_promo');
-    if (msgEl) { msgEl.textContent = ''; }
+    msgEls.forEach(el => { el.textContent = ''; });
     updateCartUI();
     return;
   }
   if (cleanCode === 'Rana10') {
     appliedPromoCode = 'Rana10';
     localStorage.setItem('sanne_promo', 'Rana10');
-    if (msgEl) { msgEl.textContent = 'Promo code applied ✓'; msgEl.style.color = '#2e7d32'; msgEl.style.fontWeight = '600'; }
+    msgEls.forEach(el => {
+      el.textContent = 'Promo code applied ✓';
+      el.style.color = '#2e7d32';
+      el.style.fontWeight = '600';
+    });
   } else {
     appliedPromoCode = '';
     localStorage.removeItem('sanne_promo');
-    if (msgEl) { msgEl.textContent = 'Promo code is not valid.'; msgEl.style.color = '#d32f2f'; msgEl.style.fontWeight = '500'; }
+    msgEls.forEach(el => {
+      el.textContent = 'Promo code is not valid.';
+      el.style.color = '#d32f2f';
+      el.style.fontWeight = '500';
+    });
   }
   updateCartUI();
 }
@@ -325,26 +333,26 @@ window.applyPromoCodeFromInput = function() {
 };
 
 document.addEventListener('click', (e) => {
-  if (e.target && (e.target.id === 'apply-promo-btn' || e.target.id === 'apply-sidebar-promo' || e.target.id === 'checkout-discount-btn')) {
+  if (e.target && (e.target.id === 'sidebar-apply-promo-btn' || e.target.id === 'apply-promo-btn' || e.target.id === 'apply-sidebar-promo' || e.target.id === 'checkout-discount-btn')) {
     window.applyPromoCodeFromInput();
   }
 });
 
 document.addEventListener('keydown', (e) => {
-  if (e.key === 'Enter' && e.target && (e.target.id === 'checkout-promo-code' || e.target.id === 'sidebar-promo-code' || e.target.id === 'checkout-discount-input')) {
+  if (e.key === 'Enter' && e.target && (e.target.id === 'sidebar-promo-code' || e.target.id === 'checkout-promo-code' || e.target.id === 'checkout-discount-input')) {
     e.preventDefault();
     window.applyPromoCodeFromInput();
   }
 });
 
 document.addEventListener('input', (e) => {
-  if (e.target && (e.target.id === 'checkout-discount-input' || e.target.id === 'sidebar-promo-code' || e.target.id === 'checkout-promo-code')) {
+  if (e.target && (e.target.id === 'sidebar-promo-code' || e.target.id === 'checkout-promo-code' || e.target.id === 'checkout-discount-input')) {
     const val = e.target.value.trim();
     if (val !== 'Rana10' && appliedPromoCode) {
       appliedPromoCode = '';
       localStorage.removeItem('sanne_promo');
-      const msgEl = document.getElementById('sidebar-promo-msg') || document.getElementById('checkout-promo-msg') || document.getElementById('checkout-discount-msg');
-      if (msgEl && val === '') msgEl.textContent = '';
+      const msgEls = document.querySelectorAll('#sidebar-promo-msg, #checkout-promo-msg, #checkout-discount-msg');
+      if (val === '') msgEls.forEach(el => { el.textContent = ''; });
       updateCartUI();
     }
   }
@@ -391,17 +399,32 @@ function updateCartUI() {
     
     if (cartFooter) cartFooter.style.display = 'block';
     
+    const breakdownEl = document.getElementById('cart-breakdown');
+    if (breakdownEl && !document.getElementById('sidebar-promo-code')) {
+      const promoBlock = document.createElement('div');
+      promoBlock.className = 'cart-promo-container';
+      promoBlock.style.cssText = 'background:var(--color-cream);border-radius:8px;padding:1rem 1.2rem;margin-bottom:1rem;border:1px solid var(--color-border);';
+      promoBlock.innerHTML = `
+        <label for="sidebar-promo-code" style="display:block;font-size:0.75rem;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--color-dark-brown);margin-bottom:0.5rem;">PROMO CODE</label>
+        <div style="display:flex;gap:0.5rem;align-items:stretch;">
+          <input type="text" id="sidebar-promo-code" placeholder="Enter promo code" style="flex:1;min-width:0;padding:0.6rem 0.8rem;border:1px solid var(--color-border);border-radius:4px;font-family:var(--font-sans);font-size:0.85rem;background:#fff;color:var(--color-text);outline:none;">
+          <button type="button" id="sidebar-apply-promo-btn" style="background:var(--color-dark-brown);color:#fff;border:none;padding:0.6rem 1.1rem;border-radius:4px;font-weight:600;font-size:0.75rem;text-transform:uppercase;letter-spacing:0.08em;cursor:pointer;white-space:nowrap;">APPLY</button>
+        </div>
+        <div id="sidebar-promo-msg" style="font-size:0.78rem;margin-top:0.4rem;font-weight:500;"></div>
+      `;
+      breakdownEl.parentNode.insertBefore(promoBlock, breakdownEl);
+    }
+
     const origSubtotal = cart.reduce((sum, i) => sum + (i.price * i.qty), 0);
     const discountAmt = totals ? totals.discountPiastres / 100 : 0;
     const grandTotal = (origSubtotal - discountAmt) + donation;
 
     if (cartTotalPrice) cartTotalPrice.textContent = `${grandTotal.toFixed(2).replace(/\.00$/, '')} EGP`;
     
-    const breakdownEl = document.getElementById('cart-breakdown');
     if (breakdownEl) {
       breakdownEl.innerHTML = `
         <div style="display:flex;justify-content:space-between;font-size:0.85rem;color:var(--color-text-light);margin-bottom:0.3rem;"><span>Subtotal</span><span>${origSubtotal} EGP</span></div>
-        ${discountAmt > 0 ? `<div style="display:flex;justify-content:space-between;font-size:0.85rem;color:#8A333C;font-weight:600;margin-bottom:0.3rem;"><span>10% Discount (Rana10)</span><span>-${discountAmt.toFixed(2)} EGP</span></div>` : ''}
+        ${discountAmt > 0 ? `<div style="display:flex;justify-content:space-between;font-size:0.85rem;color:#8A333C;font-weight:600;margin-bottom:0.3rem;"><span>Promo Discount (Rana10)</span><span>-${discountAmt.toFixed(2)} EGP</span></div>` : ''}
         ${donation > 0 ? `<div style="display:flex;justify-content:space-between;font-size:0.85rem;color:var(--color-soft-gold);margin-bottom:0.3rem;"><span>Donation</span><span>${donation} EGP</span></div>` : ''}
       `;
     }
@@ -536,7 +559,7 @@ Order ID: ${orderId}
 *Order Details:*
 ${orderLines}
 *Subtotal:* ${baseSubtotal.toFixed(2)} EGP
-${discountAmt > 0 ? `*Launch Discount:* -${discountAmt.toFixed(2)} EGP\n` : ''}*Delivery Fee:* ${deliveryFee.toFixed(2)} EGP
+${discountAmt > 0 ? `*Promo Discount (Rana10):* -${discountAmt.toFixed(2)} EGP\n` : ''}*Delivery Fee:* ${deliveryFee.toFixed(2)} EGP
 ${donationAmt > 0 ? `*Donation:* ${donationAmt.toFixed(2)} EGP\n` : ''}*Total:* ${grandTotal.toFixed(2)} EGP
 *Payment Method:* Cash or Instapay
 

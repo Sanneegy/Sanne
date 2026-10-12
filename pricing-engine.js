@@ -164,7 +164,7 @@
         itemLines += `• ${it.product_name || 'Item'} × ${it.quantity}\n  Bundle Price: ${fmt(it.final_unit_price)}\n`;
       } else {
         if (it.discount_amount > 0) {
-          itemLines += `• ${it.product_name || 'Item'} × ${it.quantity}\n  Regular Price: ${fmt(it.base_unit_price)}\n  Launch Discount: -${fmt(it.discount_amount)}\n  Final Product Price: ${fmt(it.final_unit_price)}\n`;
+          itemLines += `• ${it.product_name || 'Item'} × ${it.quantity}\n  Regular Price: ${fmt(it.base_unit_price)}\n  Promo Discount (Rana10): -${fmt(it.discount_amount)}\n  Final Product Price: ${fmt(it.final_unit_price)}\n`;
         } else {
           itemLines += `• ${it.product_name || 'Item'} × ${it.quantity} (${fmt(it.final_unit_price)})\n`;
         }
@@ -178,7 +178,7 @@ Order ID: ${orderDTO.order_id || 'N/A'}
 *Order Details:*
 ${itemLines}
 *Subtotal:* ${fmt(orderDTO.base_subtotal)}
-${orderDTO.discount_amount > 0 ? `*Launch Discount:* -${fmt(orderDTO.discount_amount)}\n` : ''}*Delivery Fee:* ${fmt(orderDTO.delivery_fee)}
+${orderDTO.discount_amount > 0 ? `*Promo Discount (Rana10):* -${fmt(orderDTO.discount_amount)}\n` : ''}*Delivery Fee:* ${fmt(orderDTO.delivery_fee)}
 ${orderDTO.donation_amount > 0 ? `*Donation:* ${fmt(orderDTO.donation_amount)}\n` : ''}*Total:* ${fmt(orderDTO.final_total)}
 *Payment Method:* ${orderDTO.payment_method || 'Cash'}
 
